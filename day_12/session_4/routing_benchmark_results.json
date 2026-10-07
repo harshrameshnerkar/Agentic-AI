@@ -1,0 +1,296 @@
+{
+  "timestamp": "2026-10-07 14:01:42",
+  "total_queries_evaluated": 30,
+  "small_model_handled_count": 27,
+  "small_model_handled_pct": 90.0,
+  "escalated_to_large_count": 3,
+  "escalated_to_large_pct": 10.0,
+  "confidence_threshold": 0.8,
+  "resolution_pass_rate_pct": 100.0,
+  "financial_metrics": {
+    "monolithic_large_total_cost_usd": 0.06466,
+    "cascading_router_total_cost_usd": 0.00851,
+    "net_cost_savings_usd": 0.05616,
+    "net_cost_savings_pct": 86.8,
+    "monthly_cost_50k_monolithic_usd": 107.77,
+    "monthly_cost_50k_routed_usd": 14.18,
+    "monthly_net_savings_usd": 93.6
+  },
+  "latency_metrics": {
+    "mean_monolithic_latency_ms": 850.0,
+    "mean_routed_latency_ms": 163.0,
+    "latency_reduction_factor": 5.21
+  },
+  "decisions": [
+    {
+      "query_id": "TC-01",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.33e-05,
+      "latency_ms": 85.4
+    },
+    {
+      "query_id": "TC-02",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.35e-05,
+      "latency_ms": 85.04
+    },
+    {
+      "query_id": "TC-03",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.34e-05,
+      "latency_ms": 85.05
+    },
+    {
+      "query_id": "TC-04",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.33e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-05",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.33e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-06",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.38e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-07",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.33e-05,
+      "latency_ms": 85.1
+    },
+    {
+      "query_id": "TC-08",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.32e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-09",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.32e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-10",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.36e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-11",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.3e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-12",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.33e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-13",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.36e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-14",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.35e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-15",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.36e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-16",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.32e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-17",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.32e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-18",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.31e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-19",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.35e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-20",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.29e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-21",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.36e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-22",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.33e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-23",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.33e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-24",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.37e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-25",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.32e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-26",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.32e-05,
+      "latency_ms": 85.03
+    },
+    {
+      "query_id": "TC-27",
+      "tier": "LARGE_ESCALATED",
+      "escalated": true,
+      "reason": "LOW_CONFIDENCE (0.62 < 0.80 threshold)",
+      "confidence": 0.62,
+      "cost_usd": 0.0026437,
+      "latency_ms": 865.1
+    },
+    {
+      "query_id": "TC-28",
+      "tier": "SMALL",
+      "escalated": false,
+      "reason": null,
+      "confidence": 0.94,
+      "cost_usd": 2.39e-05,
+      "latency_ms": 85.02
+    },
+    {
+      "query_id": "TC-29",
+      "tier": "LARGE_ESCALATED",
+      "escalated": true,
+      "reason": "LOW_CONFIDENCE (0.55 < 0.80 threshold)",
+      "confidence": 0.55,
+      "cost_usd": 0.002611,
+      "latency_ms": 865.04
+    },
+    {
+      "query_id": "TC-30",
+      "tier": "LARGE_ESCALATED",
+      "escalated": true,
+      "reason": "LOW_CONFIDENCE (0.62 < 0.80 threshold)",
+      "confidence": 0.62,
+      "cost_usd": 0.0026207,
+      "latency_ms": 865.04
+    }
+  ]
+}

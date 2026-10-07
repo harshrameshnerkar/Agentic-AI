@@ -1,0 +1,6 @@
+Classify this customer email into one of these categories: Billing, Technical Support, Feature Request, Sales.
+
+Email:
+{{ email_text }}
+
+Give the category and why.

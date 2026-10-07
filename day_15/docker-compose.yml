@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  agent-api:
+    build:
+      context: ..
+      dockerfile: day_15/Dockerfile
+    container_name: opssentinel-api-prod
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - LLM_PROVIDER=google-genai
+      - MODEL_NAME=gemini-2.5-flash
+    volumes:
+      - opssentinel-storage:/app/day_15/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - opssentinel-net
+
+  monitoring-dashboard:
+    build:
+      context: ..
+      dockerfile: day_15/Dockerfile
+    container_name: opssentinel-dashboard-prod
+    restart: unless-stopped
+    command: ["streamlit", "run", "day_15/session_1/dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    ports:
+      - "8501:8501"
+    environment:
+      - ENVIRONMENT=production
+      - API_HOST=agent-api
+      - API_PORT=8000
+    volumes:
+      - opssentinel-storage:/app/day_15/data
+    depends_on:
+      - agent-api
+    networks:
+      - opssentinel-net
+
+volumes:
+  opssentinel-storage:
+    name: opssentinel-data-volume
+
+networks:
+  opssentinel-net:
+    driver: bridge

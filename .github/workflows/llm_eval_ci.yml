@@ -1,0 +1,54 @@
+name: LLMOps CI Eval & Regression Gate
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  eval-regression-gate:
+    name: Prompt & Agent Regression Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pydantic pytest
+
+      - name: Run Baseline vs Candidate Regression Evaluation
+        id: run_eval
+        run: |
+          python day_14/session_1/ci_gate.py \
+            --baseline v1.0.0 \
+            --candidate v1.0.0 \
+            --report eval_report.md
+
+      - name: Publish Markdown Evaluation Report to Job Summary
+        if: always()
+        run: |
+          if [ -f eval_report.md ]; then
+            cat eval_report.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Archive Evaluation Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: llmops-eval-artifacts
+          path: |
+            eval_report.md
+            day_14/session_1/
+          retention-days: 14

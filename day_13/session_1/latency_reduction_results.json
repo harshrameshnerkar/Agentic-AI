@@ -1,0 +1,92 @@
+{
+  "timestamp": "2026-10-07 16:56:00",
+  "total_scenarios": 5,
+  "total_sequential_latency_ms": 2359.1,
+  "total_parallel_latency_ms": 896.99,
+  "average_sequential_ms": 471.82,
+  "average_parallel_ms": 179.4,
+  "net_latency_reduction_ms": 1462.11,
+  "net_latency_reduction_pct": 61.98,
+  "net_speedup_factor": 2.63,
+  "scenarios": [
+    {
+      "scenario_id": "SCEN-01",
+      "scenario_name": "Payment Gateway Timeout (3 Tools)",
+      "tools_count": 4,
+      "tools_called": [
+        "query_telemetry_db",
+        "read_system_logs",
+        "search_runbooks",
+        "calculate_metrics"
+      ],
+      "sequential_latency_ms": 476.99,
+      "parallel_latency_ms": 182.03,
+      "latency_reduction_ms": 294.96,
+      "latency_reduction_pct": 61.8,
+      "speedup_factor": 2.62
+    },
+    {
+      "scenario_id": "SCEN-02",
+      "scenario_name": "Postgres Connection Pool Saturation (3 Tools)",
+      "tools_count": 4,
+      "tools_called": [
+        "query_telemetry_db",
+        "read_system_logs",
+        "search_runbooks",
+        "calculate_metrics"
+      ],
+      "sequential_latency_ms": 477.0,
+      "parallel_latency_ms": 167.65,
+      "latency_reduction_ms": 309.35,
+      "latency_reduction_pct": 64.9,
+      "speedup_factor": 2.85
+    },
+    {
+      "scenario_id": "SCEN-03",
+      "scenario_name": "Nginx Ingress 504 Burst (3 Tools)",
+      "tools_count": 3,
+      "tools_called": [
+        "query_telemetry_db",
+        "read_system_logs",
+        "search_runbooks"
+      ],
+      "sequential_latency_ms": 451.46,
+      "parallel_latency_ms": 199.94,
+      "latency_reduction_ms": 251.52,
+      "latency_reduction_pct": 55.7,
+      "speedup_factor": 2.26
+    },
+    {
+      "scenario_id": "SCEN-04",
+      "scenario_name": "Payment SLA Error Rate Calculation (4 Tools)",
+      "tools_count": 4,
+      "tools_called": [
+        "query_telemetry_db",
+        "read_system_logs",
+        "search_runbooks",
+        "calculate_metrics"
+      ],
+      "sequential_latency_ms": 477.0,
+      "parallel_latency_ms": 186.66,
+      "latency_reduction_ms": 290.34,
+      "latency_reduction_pct": 60.9,
+      "speedup_factor": 2.56
+    },
+    {
+      "scenario_id": "SCEN-05",
+      "scenario_name": "General Cluster Health Sweep (4 Tools)",
+      "tools_count": 4,
+      "tools_called": [
+        "query_telemetry_db",
+        "read_system_logs",
+        "search_runbooks",
+        "calculate_metrics"
+      ],
+      "sequential_latency_ms": 476.65,
+      "parallel_latency_ms": 160.71,
+      "latency_reduction_ms": 315.94,
+      "latency_reduction_pct": 66.3,
+      "speedup_factor": 2.97
+    }
+  ]
+}

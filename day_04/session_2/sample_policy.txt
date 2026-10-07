@@ -1,0 +1,13 @@
+# Enterprise IT & Procurement Policy (Revision 2026.4)
+
+1. Hardware Requisition:
+   - All server and GPU requisitions (e.g. NVIDIA H100/A100 clusters) must be submitted via the internal Procurement Portal.
+   - Requisitions exceeding $25,000 USD require dual approval from the Department Head and the Director of Finance.
+
+2. Database Access Governance:
+   - Direct production database access is strictly restricted to read-only queries for authorized staff.
+   - Any modification to production data must go through automated CI/CD migration scripts with 48-hour prior staging verification.
+
+3. Communication Protocol:
+   - Official system notifications must be dispatched through the corporate mail gateway (sent_emails audit logging enabled).
+   - Sensitive infrastructure credentials or customer personally identifiable information (PII) must never be sent via unencrypted email.

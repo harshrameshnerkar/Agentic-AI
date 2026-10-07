@@ -1,0 +1,16 @@
+{
+  "base_model_name_or_path": "llama-scaled-open",
+  "peft_type": "LORA",
+  "task_type": "CAUSAL_LM",
+  "r": 16,
+  "lora_alpha": 32,
+  "lora_dropout": 0.05,
+  "target_modules": [
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj"
+  ],
+  "bias": "none",
+  "scaling_factor": 2.0
+}

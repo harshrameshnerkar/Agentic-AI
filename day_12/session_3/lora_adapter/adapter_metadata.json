@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-10-07 13:51:24",
+  "epochs_trained": 5,
+  "rank": 16,
+  "lora_alpha": 32,
+  "scaling_factor": 2.0,
+  "batch_size": 32,
+  "final_train_loss": 8.682,
+  "final_val_loss": 8.6866,
+  "final_perplexity": 5923.14,
+  "metrics_history": [
+    {
+      "epoch": 1,
+      "train_loss": 8.8768,
+      "val_loss": 8.7396,
+      "perplexity": 6245.25,
+      "learning_rate": 0.00018090169943749465,
+      "duration_sec": 185.73,
+      "trainable_params": 131072,
+      "total_params": 8521984,
+      "trainable_pct": 1.538
+    },
+    {
+      "epoch": 2,
+      "train_loss": 8.7121,
+      "val_loss": 8.705,
+      "perplexity": 6033.25,
+      "learning_rate": 0.00013090169943749468,
+      "duration_sec": 141.39,
+      "trainable_params": 131072,
+      "total_params": 8521984,
+      "trainable_pct": 1.538
+    },
+    {
+      "epoch": 3,
+      "train_loss": 8.6968,
+      "val_loss": 8.6957,
+      "perplexity": 5977.27,
+      "learning_rate": 6.909830056250522e-05,
+      "duration_sec": 86.82,
+      "trainable_params": 131072,
+      "total_params": 8521984,
+      "trainable_pct": 1.538
+    },
+    {
+      "epoch": 4,
+      "train_loss": 8.6872,
+      "val_loss": 8.6883,
+      "perplexity": 5933.38,
+      "learning_rate": 1.909830056250526e-05,
+      "duration_sec": 87.59,
+      "trainable_params": 131072,
+      "total_params": 8521984,
+      "trainable_pct": 1.538
+    },
+    {
+      "epoch": 5,
+      "train_loss": 8.682,
+      "val_loss": 8.6866,
+      "perplexity": 5923.14,
+      "learning_rate": 0.0,
+      "duration_sec": 56.2,
+      "trainable_params": 131072,
+      "total_params": 8521984,
+      "trainable_pct": 1.538
+    }
+  ]
+}

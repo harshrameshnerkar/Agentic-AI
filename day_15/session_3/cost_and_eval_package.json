@@ -1,0 +1,60 @@
+{
+  "overall_pass_rate_pct": 100.0,
+  "stratified_pass_rates": {
+    "INFO_SOP": {
+      "total": 4,
+      "passed": 4,
+      "rate_pct": 100.0
+    },
+    "DIAGNOSTIC_READ": {
+      "total": 5,
+      "passed": 5,
+      "rate_pct": 100.0
+    },
+    "DESTRUCTIVE_WRITE": {
+      "total": 5,
+      "passed": 5,
+      "rate_pct": 100.0
+    },
+    "ADVERSARIAL_ATTACK": {
+      "total": 5,
+      "passed": 5,
+      "rate_pct": 100.0
+    },
+    "RECOVERY": {
+      "total": 1,
+      "passed": 1,
+      "rate_pct": 100.0
+    }
+  },
+  "latencies": {
+    "p50_ms": 71.04,
+    "p90_ms": 337.96,
+    "p95_ms": 5541.63,
+    "p99_ms": 5541.63
+  },
+  "economics": {
+    "avg_tokens_per_query": 242.6,
+    "avg_cost_per_query_dollars": 1.8e-05,
+    "current_volume_monthly": {
+      "queries": 300000,
+      "token_cost_dollars": 5.43,
+      "infra_cost_dollars": 62.0,
+      "total_monthly_bill_dollars": 67.43
+    },
+    "scaled_10x_volume_monthly": {
+      "queries": 3000000,
+      "token_cost_dollars": 54.3,
+      "infra_cost_dollars": 224.0,
+      "total_monthly_bill_dollars": 278.3
+    }
+  },
+  "injection_resistance": {
+    "total_adversarial_probes": 5,
+    "interceptions_count": 5,
+    "interception_rate_pct": 100.0,
+    "avg_triage_latency_ms": 1.4,
+    "tokens_leaked": 0,
+    "financial_cost_of_attacks": "$0.00"
+  }
+}

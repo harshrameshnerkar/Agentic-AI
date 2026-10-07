@@ -1,0 +1,180 @@
+{
+  "pass_rate_pct": 100.0,
+  "citation_rate_pct": 100.0,
+  "total_questions": 12,
+  "passed_count": 12,
+  "p50_latency_ms": 0.04,
+  "mean_latency_ms": 0.03,
+  "category_breakdown": {
+    "Cell_Lookup": {
+      "total": 3,
+      "passed": 3
+    },
+    "ArgMax_Comparison": {
+      "total": 2,
+      "passed": 2
+    },
+    "Arithmetic_Delta": {
+      "total": 2,
+      "passed": 2
+    },
+    "Multi_Attribute": {
+      "total": 2,
+      "passed": 2
+    },
+    "Footnote_Reading": {
+      "total": 1,
+      "passed": 1
+    },
+    "Visual_Chart": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "detailed_results": [
+    {
+      "question_id": "Q-TBL-01",
+      "category": "Cell_Lookup",
+      "question": "What was the Gross Margin for AI & LLM Inference in Q3 2024?",
+      "answer": "The Gross Margin for **AI & LLM Inference** in Q3 2024 is **74.2%** [DOC-FIN-2024:TBL-FIN-01:R1:C5:Gross_Margin=74.2%].",
+      "exact_value": "74.2%",
+      "citation_info": "Table TBL-FIN-01 [R1:C5]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.05,
+      "reasoning_path": "Grid coordinate lookup: Row 'AI & LLM Inference' (idx 1) x Column 'Gross_Margin' (idx 5)"
+    },
+    {
+      "question_id": "Q-TBL-02",
+      "category": "ArgMax_Comparison",
+      "question": "Which GPU accelerator has the highest memory bandwidth and what is its value?",
+      "answer": "The accelerator with the highest memory bandwidth is **NVIDIA H100 SXM5** at **3350 GB/s** [DOC-HW-2024:TBL-HW-01:R0:C3:Memory_Bandwidth_GBs=3350].",
+      "exact_value": "3350 GB/s",
+      "citation_info": "Table TBL-HW-01 [R0:C3]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.02,
+      "reasoning_path": "Column scan on 'Memory_Bandwidth_GBs' followed by argmax selection"
+    },
+    {
+      "question_id": "Q-TBL-03",
+      "category": "Arithmetic_Delta",
+      "question": "What was the revenue increase for Cloud Compute between Q1 and Q3 2024?",
+      "answer": "Cloud Compute revenue increased from **$18.5M** [DOC-FIN-2024:TBL-FIN-01:R0:C1:Q1_2024=$18.5M] in Q1 2024 to **$24.8M** [DOC-FIN-2024:TBL-FIN-01:R0:C3:Q3_2024=$24.8M] in Q3 2024, representing an absolute gain of **+$6.3M**.",
+      "exact_value": "+$6.3M",
+      "citation_info": "Table TBL-FIN-01 [R0:C3]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.07,
+      "reasoning_path": "Multi-cell arithmetic: Q3_2024 ($24.8M) - Q1_2024 ($18.5M)"
+    },
+    {
+      "question_id": "Q-TBL-04",
+      "category": "Cell_Lookup",
+      "question": "What is the hourly rental cost of NVIDIA H100 SXM5?",
+      "answer": "The hourly rental cost for **NVIDIA H100 SXM5** is **$4.25** per hour [DOC-HW-2024:TBL-HW-01:R0:C6:Hourly_Cost_USD=$4.25].",
+      "exact_value": "$4.25",
+      "citation_info": "Table TBL-HW-01 [R0:C6]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.04,
+      "reasoning_path": "Grid coordinate lookup: Row 'NVIDIA H100 SXM5' x Column 'Hourly_Cost_USD'"
+    },
+    {
+      "question_id": "Q-TBL-05",
+      "category": "Multi_Attribute",
+      "question": "What was Research & Development operating expense in Q3 2024 and its budget variance?",
+      "answer": "In Q3 2024, Research & Development (R&D) spend reached **$14.2M** [DOC-FIN-2024:TBL-FIN-02:R0:C3:Q3_2024=$14.2M] with a budget variance of **+4.5%** [DOC-FIN-2024:TBL-FIN-02:R0:C4:Budget_Variance=+4.5%].",
+      "exact_value": "$14.2M",
+      "citation_info": "Table TBL-FIN-02 [R0:C3]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.07,
+      "reasoning_path": "Two-cell co-extraction across row 'Research & Development (R&D)'"
+    },
+    {
+      "question_id": "Q-TBL-06",
+      "category": "ArgMax_Comparison",
+      "question": "Which global freight transit lane has the lowest on-time delivery rate?",
+      "answer": "The lane with the lowest on-time delivery rate is route **RT-104** at **83.4%** [DOC-LOG-2024:TBL-LOG-01:R3:C5:On_Time_Rate=83.4%].",
+      "exact_value": "83.4%",
+      "citation_info": "Table TBL-LOG-01 [R3:C5]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.01,
+      "reasoning_path": "Column scan on 'On_Time_Rate' with argmin selection"
+    },
+    {
+      "question_id": "Q-TBL-07",
+      "category": "Multi_Attribute",
+      "question": "How many transit days does it take to ship from Singapore to Rotterdam and which carrier operates it?",
+      "answer": "The route from Singapore to Rotterdam is operated by **EuroGlobal** taking **22 days** [DOC-LOG-2024:TBL-LOG-01:R1:C4:Transit_Days=22].",
+      "exact_value": "22 days",
+      "citation_info": "Table TBL-LOG-01 [R1:C4]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.04,
+      "reasoning_path": "Multi-attribute filtering: Origin='Singapore' AND Destination='Rotterdam'"
+    },
+    {
+      "question_id": "Q-TBL-08",
+      "category": "Arithmetic_Delta",
+      "question": "What is the total combined power consumption (TDP Watts) of NVIDIA H100 and A100?",
+      "answer": "The combined power consumption for NVIDIA H100 (700W [DOC-HW-2024:TBL-HW-01:R0:C4:TDP_Watts=700]) and NVIDIA A100 (400W [DOC-HW-2024:TBL-HW-01:R1:C4:TDP_Watts=400]) is **1100 Watts**.",
+      "exact_value": "1100 Watts",
+      "citation_info": "Table TBL-HW-01 [R0:C4]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.07,
+      "reasoning_path": "Cross-row sum: H100 TDP (700W) + A100 TDP (400W)"
+    },
+    {
+      "question_id": "Q-TBL-09",
+      "category": "Footnote_Reading",
+      "question": "Do reported gross margin percentages include stock-based compensation amortization according to table footnotes?",
+      "answer": "According to the official accounting footnote on Table [TBL-FIN-01]: **\"Note: Revenue figures are GAAP compliant. Gross margins exclude stock-based compensation amortization.\"**",
+      "exact_value": "exclude stock-based compensation",
+      "citation_info": "Footnote on TBL-FIN-01",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.0,
+      "reasoning_path": "Table footnote extraction on TBL-FIN-01"
+    },
+    {
+      "question_id": "Q-TBL-10",
+      "category": "Cell_Lookup",
+      "question": "What was the YoY revenue growth rate of the AI & LLM Inference segment?",
+      "answer": "The YoY Growth rate for **AI & LLM Inference** is **+139.0%** [DOC-FIN-2024:TBL-FIN-01:R1:C4:YoY_Growth=+139.0%].",
+      "exact_value": "+139.0%",
+      "citation_info": "Table TBL-FIN-01 [R1:C4]",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.04,
+      "reasoning_path": "Grid coordinate lookup: Row 'AI & LLM Inference' x Column 'YoY_Growth'"
+    },
+    {
+      "question_id": "Q-CHART-01",
+      "category": "Visual_Chart",
+      "question": "What was the peak operating expense quarter and spend driver in the spend trend chart?",
+      "answer": "According to the Operating Expenses Trend stacked bar chart [CHART-FIN-01], Q3 2024 exhibited the peak total operating spend at **$29.6M** (up from $22.5M in Q1 and $25.6M in Q2). The primary spend driver was **Research & Development (R&D)**, which surged to **$14.2M** in Q3.",
+      "exact_value": "Q3_2024 Total = $29.6M (R&D = $14.2M)",
+      "citation_info": "Chart CHART-FIN-01",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.0,
+      "reasoning_path": "Visual Chart Decomposition via Vision Page Model"
+    },
+    {
+      "question_id": "Q-CHART-02",
+      "category": "Visual_Chart",
+      "question": "Which accelerator offers the highest throughput in the efficiency scatter plot?",
+      "answer": "Based on the Accelerator Throughput vs Hourly Cost Efficiency scatter plot [CHART-HW-01], **NVIDIA H100 SXM5** achieves the highest absolute throughput at **284.0 Tokens/Sec** (at $4.25/hr), while **Google TPU v5e** provides the highest cost efficiency at **73.3 Tokens per Dollar** (88.0 Tokens/Sec at $1.20/hr).",
+      "exact_value": "H100 = 284 Tokens/Sec ($4.25); TPU v5e = 88 Tokens/Sec ($1.20)",
+      "citation_info": "Chart CHART-HW-01",
+      "citation_verified": true,
+      "passed": true,
+      "latency_ms": 0.0,
+      "reasoning_path": "Visual Chart Decomposition via Vision Page Model"
+    }
+  ]
+}

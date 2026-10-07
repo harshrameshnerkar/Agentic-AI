@@ -1,0 +1,25 @@
+{
+  "datacenter": "us-east-cluster-primary",
+  "last_audit": "2026-10-05T12:00:00Z",
+  "services": {
+    "auth-gateway": {
+      "status": "HEALTHY",
+      "uptime_percentage": 99.98,
+      "latency_p99_ms": 14.2,
+      "active_replicas": 8
+    },
+    "payment-processor": {
+      "status": "HEALTHY",
+      "uptime_percentage": 99.99,
+      "latency_p99_ms": 42.8,
+      "active_replicas": 12
+    },
+    "vector-search-engine": {
+      "status": "DEGRADED",
+      "uptime_percentage": 98.45,
+      "latency_p99_ms": 185.0,
+      "active_replicas": 4,
+      "alert": "High memory consumption on Node 03 (91% VRAM)"
+    }
+  }
+}

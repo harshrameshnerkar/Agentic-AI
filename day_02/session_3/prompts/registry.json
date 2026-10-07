@@ -1,0 +1,21 @@
+{
+  "email_classifier": {
+    "name": "email_classifier",
+    "description": "Customer support incoming email classification and routing",
+    "active_version": "v2",
+    "versions": {
+      "v1": {
+        "file": "email_classifier_v1.txt",
+        "description": "Baseline naive prompt without delimiters, role setting, or few-shot examples",
+        "created_at": "2026-10-01",
+        "required_variables": ["email_text"]
+      },
+      "v2": {
+        "file": "email_classifier_v2.txt",
+        "description": "Engineered prompt with role persona, XML delimiters, few-shot demonstrations, and strict JSON output",
+        "created_at": "2026-10-05",
+        "required_variables": ["email_text"]
+      }
+    }
+  }
+}

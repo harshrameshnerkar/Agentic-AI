@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-10-06T11:11:22Z",
+  "summary": {
+    "total_queries": 20,
+    "pass_rate": {
+      "naive_pct": 30.0,
+      "adaptive_pct": 100.0,
+      "gain_pct": 70.0
+    },
+    "routing_accuracy_pct": 100.0,
+    "latency_ms": {
+      "naive_p50": 0.12,
+      "adapt_p50": 0.1,
+      "naive_p90": 0.18,
+      "adapt_p90": 0.55,
+      "naive_mean": 0.12,
+      "adapt_mean": 0.27
+    },
+    "token_economics": {
+      "naive_mean_tokens": 273.8,
+      "adapt_mean_tokens": 182.8,
+      "naive_cost_per_1k_usd": 0.039,
+      "adapt_cost_per_1k_usd": 0.026
+    },
+    "context_pollution_pct": {
+      "naive": 35.0,
+      "adaptive": 0.0
+    }
+  },
+  "category_breakdown": {
+    "Vector_Search": {
+      "count": 6,
+      "naive_pass_rate_pct": 100.0,
+      "adapt_pass_rate_pct": 100.0,
+      "naive_mean_lat_ms": 0.14,
+      "adapt_mean_lat_ms": 0.16
+    },
+    "SQL_Database": {
+      "count": 6,
+      "naive_pass_rate_pct": 0.0,
+      "adapt_pass_rate_pct": 100.0,
+      "naive_mean_lat_ms": 0.11,
+      "adapt_mean_lat_ms": 0.53
+    },
+    "No_Retrieval": {
+      "count": 5,
+      "naive_pass_rate_pct": 0.0,
+      "adapt_pass_rate_pct": 100.0,
+      "naive_mean_lat_ms": 0.09,
+      "adapt_mean_lat_ms": 0.07
+    },
+    "Multi_Hop": {
+      "count": 3,
+      "naive_pass_rate_pct": 0.0,
+      "adapt_pass_rate_pct": 100.0,
+      "naive_mean_lat_ms": 0.17,
+      "adapt_mean_lat_ms": 0.29
+    }
+  }
+}

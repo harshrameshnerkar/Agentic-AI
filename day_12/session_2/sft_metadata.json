@@ -1,0 +1,44 @@
+{
+  "dataset_name": "SRE-Structured-Triage-v1",
+  "task_description": "Automated SRE Alert-to-Remediation Triage & Structured Action Plan Formulation",
+  "total_examples": 300,
+  "train_examples": 252,
+  "val_examples": 48,
+  "target_format": "chat_messages_jsonl",
+  "provider_compatibility": [
+    "OpenAI",
+    "Google Vertex AI",
+    "Anthropic",
+    "HuggingFace TRL",
+    "AWS Bedrock"
+  ],
+  "quality_control_summary": {
+    "total_candidates_evaluated": 450,
+    "exact_duplicates_removed": 0,
+    "fuzzy_duplicates_removed": 2,
+    "schema_failures_removed": 0,
+    "token_boundary_failures_removed": 0,
+    "hitl_rubric_failures_removed": 17,
+    "total_accepted_examples": 300,
+    "retention_rate_pct": 66.7,
+    "category_distribution": {
+      "DATABASE": 58,
+      "NETWORK_INGRESS": 61,
+      "APPLICATION": 58,
+      "INFRASTRUCTURE": 61,
+      "SECURITY_AUTH": 62
+    },
+    "severity_distribution": {
+      "SEV-2": 109,
+      "SEV-3": 107,
+      "SEV-1": 84
+    },
+    "mean_prompt_tokens": 62.2,
+    "mean_completion_tokens": 178.6
+  },
+  "files": {
+    "train": "sft_train.jsonl",
+    "val": "sft_val.jsonl",
+    "full": "sft_full_300.jsonl"
+  }
+}

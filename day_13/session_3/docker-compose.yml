@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # 1. Nginx Reverse Proxy / Load Balancer
+  # ============================================================================
+  nginx-lb:
+    image: nginx:alpine
+    container_name: opssentinel-lb
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - agent-replica-1
+      - agent-replica-2
+      - agent-replica-3
+    restart: unless-stopped
+
+  # ============================================================================
+  # 2. Horizontally Scaled Agent Replicas (Stateless Workers)
+  # ============================================================================
+  agent-replica-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opssentinel-replica-1
+    environment:
+      - APP_ENV=production
+      - PORT=8000
+      - PRIMARY_PROVIDER=anthropic
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - RATE_LIMIT_RPM=60
+      - REDIS_URL=redis://redis-coordinator:6379/0
+    depends_on:
+      - redis-coordinator
+    restart: unless-stopped
+
+  agent-replica-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opssentinel-replica-2
+    environment:
+      - APP_ENV=production
+      - PORT=8000
+      - PRIMARY_PROVIDER=anthropic
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - RATE_LIMIT_RPM=60
+      - REDIS_URL=redis://redis-coordinator:6379/0
+    depends_on:
+      - redis-coordinator
+    restart: unless-stopped
+
+  agent-replica-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opssentinel-replica-3
+    environment:
+      - APP_ENV=production
+      - PORT=8000
+      - PRIMARY_PROVIDER=anthropic
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - RATE_LIMIT_RPM=60
+      - REDIS_URL=redis://redis-coordinator:6379/0
+    depends_on:
+      - redis-coordinator
+    restart: unless-stopped
+
+  # ============================================================================
+  # 3. Redis Shared State (Distributed Token Bucket & Checkpoint Lock)
+  # ============================================================================
+  redis-coordinator:
+    image: redis:7-alpine
+    container_name: opssentinel-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

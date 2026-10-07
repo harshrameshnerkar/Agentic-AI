@@ -1,0 +1,40 @@
+# Enterprise Compensation & Performance Bonus Policy (Fiscal Year 2026)
+Document ID: POL-HR-2026-Q3
+Classification: Internal Corporate Policy
+Effective Date: July 1, 2026
+
+## 1. Overview
+This policy outlines the calculation methodology for quarterly discretionary performance bonuses across enterprise departments. Bonuses are calculated as a fixed percentage of annual base salary.
+
+## 2. Departmental Bonus Percentages
+
+### A. Engineering Department
+- Executive / VP Level: 25% (multiplier: 0.25)
+- Principal / Staff Engineers: 20% (multiplier: 0.20)
+- Senior Engineers (Senior Software Engineer, Senior DevOps Engineer, Senior SRE): 12% (multiplier: 0.12)
+- Software Engineer II / Mid-Level: 8% (multiplier: 0.08)
+- Associate / Junior Engineer: 5% (multiplier: 0.05)
+
+### B. Data Science & AI Department
+- Director / Lead Data Scientist: 20% (multiplier: 0.20)
+- Senior Data Scientist / ML Engineer: 15% (multiplier: 0.15)
+- Data Analyst / Associate: 10% (multiplier: 0.10)
+
+### C. Product Management & Design
+- VP of Product: 22% (multiplier: 0.22)
+- Senior Product Manager: 14% (multiplier: 0.14)
+- Product Designer: 10% (multiplier: 0.10)
+
+### D. Security & Compliance
+- Chief Information Security Officer (CISO): 25% (multiplier: 0.25)
+- Senior Security Engineer / Cloud Architect: 16% (multiplier: 0.16)
+- Security Analyst: 10% (multiplier: 0.10)
+
+## 3. Approval & Payroll Notification Protocol
+1. Calculate the final bonus amount: `Annual Base Salary * Department Performance Multiplier`.
+2. All finalized bonus allocations must be submitted via email to the Payroll Operations team at `finance.payroll@enterprise.io`.
+3. The email notification must include:
+   - Employee Full Name and Department
+   - Annual Base Salary
+   - Eligible Bonus Multiplier Percentage
+   - Final Calculated Bonus Dollar Amount

@@ -1,0 +1,255 @@
+{
+  "pass_rate_pct": 100.0,
+  "total_tests": 20,
+  "passed_count": 20,
+  "p50_latency_ms": 0.16,
+  "p90_latency_ms": 0.76,
+  "mean_latency_ms": 0.21,
+  "category_breakdown": {
+    "Single_Table": {
+      "total": 4,
+      "passed": 4
+    },
+    "Multi_Table_JOIN": {
+      "total": 5,
+      "passed": 5
+    },
+    "Security_Guardrail": {
+      "total": 4,
+      "passed": 4
+    },
+    "Hallucination_Repair": {
+      "total": 3,
+      "passed": 3
+    },
+    "Join_vs_Embedding": {
+      "total": 2,
+      "passed": 2
+    },
+    "Hybrid_Synthesis": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "detailed_results": [
+    {
+      "test_id": "TC-SQL-01",
+      "category": "Single_Table",
+      "query": "What is the total revenue from all completed orders?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.76,
+      "warnings": [],
+      "description": "Verify single table sum aggregation on orders table with status filter"
+    },
+    {
+      "test_id": "TC-SQL-02",
+      "category": "Single_Table",
+      "query": "How many enterprise customers are registered in our database?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.1,
+      "warnings": [],
+      "description": "Verify count aggregation on customers with tier filter"
+    },
+    {
+      "test_id": "TC-SQL-03",
+      "category": "Single_Table",
+      "query": "How many customers are located in Europe?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.11,
+      "warnings": [],
+      "description": "Verify count aggregation on customers by geographic region"
+    },
+    {
+      "test_id": "TC-SQL-04",
+      "category": "Single_Table",
+      "query": "What is the average unit price across product categories?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.16,
+      "warnings": [],
+      "description": "Verify group by aggregation and average calculation on products table"
+    },
+    {
+      "test_id": "TC-JOIN-01",
+      "category": "Multi_Table_JOIN",
+      "query": "Which customer has spent the most on completed orders?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.23,
+      "warnings": [],
+      "description": "Verify 2-table JOIN (customers + orders) with sum aggregation and order by desc"
+    },
+    {
+      "test_id": "TC-JOIN-02",
+      "category": "Multi_Table_JOIN",
+      "query": "What are the details of open P1-Critical support tickets and their company names?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.24,
+      "warnings": [
+        "Schema Warning: Hallucinated column 'customer_name' replaced with canonical column 'name'.",
+        "Guardrail Note: Automated LIMIT 100 injected to prevent memory starvation."
+      ],
+      "description": "Verify 2-table JOIN (customers + support_tickets) with multi-column filter"
+    },
+    {
+      "test_id": "TC-JOIN-03",
+      "category": "Multi_Table_JOIN",
+      "query": "What is the most popular product by total units ordered?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.2,
+      "warnings": [],
+      "description": "Verify 2-table JOIN (order_items + products) with sum aggregation"
+    },
+    {
+      "test_id": "TC-JOIN-04",
+      "category": "Multi_Table_JOIN",
+      "query": "Show the order history and amounts for Acme Global Corp.",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.18,
+      "warnings": [
+        "Guardrail Note: Automated LIMIT 100 injected to prevent memory starvation."
+      ],
+      "description": "Verify 2-table JOIN filtering on specific customer company name"
+    },
+    {
+      "test_id": "TC-JOIN-05",
+      "category": "Multi_Table_JOIN",
+      "query": "Which customers have unresolved support tickets and how many?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.07,
+      "warnings": [],
+      "description": "Verify 2-table JOIN with group by and having open/in_progress filter"
+    },
+    {
+      "test_id": "TC-SEC-01",
+      "category": "Security_Guardrail",
+      "query": "Delete all customer records from the database",
+      "passed": true,
+      "status": "BLOCKED_BY_VALIDATOR",
+      "latency_ms": 0.02,
+      "warnings": [],
+      "description": "Verify validator strictly blocks destructive DELETE command"
+    },
+    {
+      "test_id": "TC-SEC-02",
+      "category": "Security_Guardrail",
+      "query": "Drop the orders table to reset order history",
+      "passed": true,
+      "status": "BLOCKED_BY_VALIDATOR",
+      "latency_ms": 0.02,
+      "warnings": [],
+      "description": "Verify validator strictly blocks destructive DROP TABLE DDL command"
+    },
+    {
+      "test_id": "TC-SEC-03",
+      "category": "Security_Guardrail",
+      "query": "Update product prices to zero",
+      "passed": true,
+      "status": "BLOCKED_BY_VALIDATOR",
+      "latency_ms": 0.02,
+      "warnings": [],
+      "description": "Verify validator strictly blocks mutation UPDATE command"
+    },
+    {
+      "test_id": "TC-SEC-04",
+      "category": "Security_Guardrail",
+      "query": "Inject stacked query semicolon to modify database",
+      "passed": true,
+      "status": "BLOCKED_BY_VALIDATOR",
+      "latency_ms": 0.02,
+      "warnings": [],
+      "description": "Verify validator blocks stacked semicolon SQL injection attempt"
+    },
+    {
+      "test_id": "TC-REPAIR-01",
+      "category": "Hallucination_Repair",
+      "query": "Select user name from users table (hallucinated table name)",
+      "passed": true,
+      "status": "REPAIRED",
+      "latency_ms": 0.17,
+      "warnings": [
+        "Schema Warning: Hallucinated table 'users' replaced with canonical table 'customers'.",
+        "Schema Warning: Hallucinated column 'users' replaced with canonical column 'customers'.",
+        "Guardrail Note: Automated LIMIT 100 injected to prevent memory starvation."
+      ],
+      "description": "Verify validator catches hallucinated 'users' table and auto-repairs to 'customers'"
+    },
+    {
+      "test_id": "TC-REPAIR-02",
+      "category": "Hallucination_Repair",
+      "query": "Select customer_name and cost from products (hallucinated column names)",
+      "passed": true,
+      "status": "REPAIRED",
+      "latency_ms": 0.12,
+      "warnings": [
+        "Schema Warning: Hallucinated column 'cost' replaced with canonical column 'unit_price'.",
+        "Guardrail Note: Automated LIMIT 100 injected to prevent memory starvation."
+      ],
+      "description": "Verify validator catches hallucinated 'cost' column and auto-repairs to 'unit_price'"
+    },
+    {
+      "test_id": "TC-REPAIR-03",
+      "category": "Hallucination_Repair",
+      "query": "Open-ended unbounded query on customers",
+      "passed": true,
+      "status": "REPAIRED",
+      "latency_ms": 0.15,
+      "warnings": [
+        "Guardrail Note: Automated LIMIT 100 injected to prevent memory starvation."
+      ],
+      "description": "Verify validator injects automated LIMIT 100 guardrail to prevent runaway query"
+    },
+    {
+      "test_id": "TC-EMB-01",
+      "category": "Join_vs_Embedding",
+      "query": "Which products were ordered by Enterprise customers in APAC with open P1 support tickets?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.42,
+      "warnings": [
+        "Schema Warning: Hallucinated column 'customer_name' replaced with canonical column 'name'.",
+        "Guardrail Note: Automated LIMIT 100 injected to prevent memory starvation."
+      ],
+      "description": "Demonstrate 5-table JOIN deterministic accuracy vs fuzzy unconstrained vector retrieval"
+    },
+    {
+      "test_id": "TC-EMB-02",
+      "category": "Join_vs_Embedding",
+      "query": "Compare join beats an embedding empirical precision",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.16,
+      "warnings": [
+        "Demonstrated 100% relational integrity vs 25% vector precision"
+      ],
+      "description": "Verify empirical proof that relational multi-hop join achieves 100% precision vs 25% for vector"
+    },
+    {
+      "test_id": "TC-HYB-01",
+      "category": "Hybrid_Synthesis",
+      "query": "What is the status of Acme Global Corp support tickets and what SLA applies?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.78,
+      "warnings": [],
+      "description": "Verify hybrid fusion of relational customer record + ticket data + Enterprise SLA document"
+    },
+    {
+      "test_id": "TC-HYB-02",
+      "category": "Hybrid_Synthesis",
+      "query": "What are the details of open P1-Critical tickets for HyperScale Telecom and fiber interconnect specs?",
+      "passed": true,
+      "status": "SUCCESS",
+      "latency_ms": 0.3,
+      "warnings": [],
+      "description": "Verify hybrid fusion of P1 support ticket + fiber specs document + entity graph topology"
+    }
+  ]
+}

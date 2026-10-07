@@ -1,0 +1,39 @@
+# Environment variables and secrets (Strictly hidden from git)
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environment
+.venv/
+env/
+venv/
+ENV/
+
+# SQLite databases & transient checkpoints
+*.db
+*.sqlite
+*.sqlite3
+
+# Test coverage & reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

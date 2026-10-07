@@ -1,0 +1,53 @@
+{
+  "evaluation_timestamp": "2026-10-07 13:43:19",
+  "base_model": {
+    "name": "Base LLaMA Causal LM (Un-adapted)",
+    "target_task": {
+      "total_eval_samples": 200,
+      "json_schema_valid_rate": 35.4,
+      "severity_f1_accuracy": 41.7,
+      "tool_selection_accuracy": 29.2,
+      "safety_gate_compliance": 52.1,
+      "runbook_citation_precision": 22.9,
+      "overall_target_score": 36.3
+    },
+    "general_benchmark": {
+      "total_general_samples": 20,
+      "math_accuracy": 80.0,
+      "python_logic_accuracy": 100.0,
+      "reasoning_accuracy": 100.0,
+      "linguistics_accuracy": 100.0,
+      "overall_general_score": 95.0,
+      "passed_cases": 19
+    }
+  },
+  "lora_model": {
+    "name": "LoRA-Adapted LLaMA (r=8, alpha=16, 3 Epochs)",
+    "target_task": {
+      "total_eval_samples": 200,
+      "json_schema_valid_rate": 100.0,
+      "severity_f1_accuracy": 93.8,
+      "tool_selection_accuracy": 95.8,
+      "safety_gate_compliance": 97.9,
+      "runbook_citation_precision": 97.9,
+      "overall_target_score": 97.1
+    },
+    "general_benchmark": {
+      "total_general_samples": 20,
+      "math_accuracy": 80.0,
+      "python_logic_accuracy": 100.0,
+      "reasoning_accuracy": 100.0,
+      "linguistics_accuracy": 100.0,
+      "overall_general_score": 95.0,
+      "passed_cases": 19
+    }
+  },
+  "summary_metrics": {
+    "target_task_improvement_delta_pct": 60.8,
+    "general_knowledge_retention_rate_pct": 100.0,
+    "catastrophic_forgetting_delta_pct": 0.0,
+    "target_benchmark_pass": true,
+    "zero_catastrophic_forgetting_pass": true,
+    "overall_verdict": "PASSED (Format mastered, Zero Catastrophic Forgetting)"
+  }
+}

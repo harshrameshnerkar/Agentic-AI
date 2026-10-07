@@ -1,0 +1,4 @@
+# Day 12 Session 4: Distillation & Model Routing Dependencies
+pydantic>=2.0.0
+numpy>=1.24.0
+python-dotenv>=1.0.0

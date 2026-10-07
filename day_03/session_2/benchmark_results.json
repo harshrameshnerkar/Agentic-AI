@@ -1,0 +1,230 @@
+[
+  {
+    "id": "Q1",
+    "question": "What is the guaranteed Monthly Uptime Percentage for Tier 1 services, and what percentage service credit is awarded if availability falls to 99.85%?",
+    "ground_truth": "Tier 1 uptime is 99.995%. For availability below 99.90% but at or above 99.00% (which includes 99.85%), customers receive a 25% Service Credit.",
+    "key_facts": [
+      "99.995%",
+      "25%",
+      "Tier 1"
+    ],
+    "top_k": 2,
+    "config_300": {
+      "chunks": [
+        "cloud_platform_sla.pdf:P2 (0.811)",
+        "cloud_platform_sla.pdf:P1 (0.750)"
+      ],
+      "total_tokens": 571,
+      "fact_coverage": 100.0,
+      "missing_facts": [],
+      "answer": "Based on the provided context:\n\n* The guaranteed Monthly Uptime Percentage for Tier 1 services is at least 99.90% (implied by the service credit schedule where availability below 99.995% down to 99.90% represents the baseline threshold [Source: cloud_platform_sla.pdf | Page: 2 | Chunk: cloud_platform_sla_p2_c0] and referenced via Tier 3 context [Source: cloud_platform_sla.pdf | Page: 1 | Chunk: cloud_platform_sla_p1_c1]). *Note: The exact guaranteed percentage string for Tier 1 is partially cut off on page 1, but page 2 establishes the tier ranges.*\n* If availability falls to 99.85% (which falls below 99.90% but at or above 99.00%), a **25% Service Credit** is awarded [Source: cloud_platform_sla.pdf | Page: 2 | Chunk: cloud_platform_sla_p2_c0].",
+      "answer_fact_coverage": 100.0
+    },
+    "config_800": {
+      "chunks": [
+        "cloud_platform_sla.pdf:P2 (0.801)",
+        "cloud_platform_sla.pdf:P1 (0.717)"
+      ],
+      "total_tokens": 991,
+      "fact_coverage": 100.0,
+      "missing_facts": [],
+      "answer": "Based on the provided context:\n\n* The guaranteed Monthly Uptime Percentage for Tier 1 services is not less than 99.995% (*Source: cloud_platform_sla.pdf, Page: 1*).\n* If availability falls to 99.85% (which falls below 99.90% but at or above 99.00%), a 25% Service Credit is awarded (*Source: cloud_platform_sla.pdf, Page: 2*).",
+      "answer_fact_coverage": 100.0
+    }
+  },
+  {
+    "id": "Q2",
+    "question": "What are the guaranteed RTO and RPO metrics for Tier 1 databases, and what DDoS attack threshold is excluded unless Enterprise Shield is active?",
+    "ground_truth": "Recovery Time Objective (RTO) is 15 minutes. Recovery Point Objective (RPO) is 5 seconds. Volumetric DDoS attacks exceeding 500 Gbps are excluded unless enrolled in Enterprise Shield.",
+    "key_facts": [
+      "15 minutes",
+      "5 seconds",
+      "500 Gbps",
+      "Enterprise Shield"
+    ],
+    "top_k": 2,
+    "config_300": {
+      "chunks": [
+        "cloud_platform_sla.pdf:P3 (0.718)",
+        "cloud_platform_sla.pdf:P1 (0.677)"
+      ],
+      "total_tokens": 586,
+      "fact_coverage": 75.0,
+      "missing_facts": [
+        "15 minutes"
+      ],
+      "answer": "Based on the provided context:\n\n* **Recovery Time Objective (RTO):** A maximum allowable downtime of fifteen (15) minutes to restore full read/write operations following catastrophic datacenter failure (*cloud_platform_sla.pdf*, page 3).\n* **Recovery Point Objective (RPO):** A maximum data loss window of five (5) seconds (*cloud_platform_sla.pdf*, page 3).\n* **DDoS Attack Threshold:** Volumetric Distributed Denial of Service (DDoS) attacks exceeding 500 Gbps are excluded unless the customer has actively enrolled in CloudPlatform Enterprise Shield (*cloud_platform_sla.pdf*, page 3).",
+      "answer_fact_coverage": 50.0
+    },
+    "config_800": {
+      "chunks": [
+        "cloud_platform_sla.pdf:P3 (0.703)",
+        "cloud_platform_sla.pdf:P1 (0.669)"
+      ],
+      "total_tokens": 945,
+      "fact_coverage": 75.0,
+      "missing_facts": [
+        "15 minutes"
+      ],
+      "answer": "Based on the provided context excerpts, the metrics and threshold are as follows:\n\n* **Recovery Time Objective (RTO):** A maximum allowable downtime of fifteen (15) minutes to restore full read/write operations following catastrophic datacenter failure for Tier 1 Mission-Critical transactional databases (*Source: cloud_platform_sla.pdf, Page: 3*).\n* **Recovery Point Objective (RPO):** A maximum data loss window of five (5) seconds for Tier 1 Mission-Critical transactional databases (*Source: cloud_platform_sla.pdf, Page: 3*).\n* **DDoS Attack Threshold:** Volumetric Distributed Denial of Service (DDoS) attacks exceeding 500 Gbps are excluded from availability commitments and credit remedies, unless the customer has actively enrolled in CloudPlatform Enterprise Shield (*Source: cloud_platform_sla.pdf, Page: 3*).",
+      "answer_fact_coverage": 50.0
+    }
+  },
+  {
+    "id": "Q3",
+    "question": "Under what specific conditions is an employee permitted to fly business class, whose approval is required, and is first class ever allowed?",
+    "ground_truth": "Business class is restricted to non-stop transoceanic international flights exceeding 8 continuous hours (or multi-leg >12 hours), requiring prior written approval from the departmental Vice President (VP). First class is strictly prohibited under all circumstances.",
+    "key_facts": [
+      "exceeding eight (8) hours",
+      "transoceanic",
+      "Vice President",
+      "First class is strictly prohibited"
+    ],
+    "top_k": 2,
+    "config_300": {
+      "chunks": [
+        "employee_travel_policy.pdf:P1 (0.791)",
+        "employee_travel_policy.pdf:P1 (0.740)"
+      ],
+      "total_tokens": 537,
+      "fact_coverage": 75.0,
+      "missing_facts": [
+        "First class is strictly prohibited"
+      ],
+      "answer": "Based on the provided document, the specific conditions, approval requirements, and rules regarding business and first class air travel are as follows:\n\n* **Business Class Conditions:** Permitted strictly for non-stop transoceanic international flights with a continuous scheduled flight duration exceeding eight (8) hours, or multi-leg international journeys with a scheduled flight time exceeding 12 aggregate hours.\n* **Business Class Approval:** Prior written authorization from the executive Vice President (VP) is mandatory.\n* **First Class:** First class air travel is strictly prohibited under all circumstances across all personnel levels, including executive officers.\n\n**Source Citation:**\n* `employee_travel_policy.pdf`, Page 1 (`employee_travel_policy_p1_c1`)",
+      "answer_fact_coverage": 75.0
+    },
+    "config_800": {
+      "chunks": [
+        "employee_travel_policy.pdf:P1 (0.756)",
+        "employee_travel_policy.pdf:P2 (0.661)"
+      ],
+      "total_tokens": 915,
+      "fact_coverage": 75.0,
+      "missing_facts": [
+        "First class is strictly prohibited"
+      ],
+      "answer": "Based on the provided document, an employee is permitted to fly business class under the following specific conditions:\n* On non-stop transoceanic international flights with a continuous scheduled flight duration exceeding eight (8) hours.\n* On multi-leg international journeys with a scheduled flight time exceeding 12 aggregate hours.\n\n**Approval Required:**\nPrior written authorization from the executive Vice President (VP) is mandatory (*employee_travel_policy.pdf*, Page 1).\n\n**Is First Class Allowed:**\nFirst class air travel is strictly prohibited under all circumstances across all personnel levels, including executive officers (*employee_travel_policy.pdf*, Page 1).\n\n**Sources:**\n- *employee_travel_policy.pdf*, Page 1",
+      "answer_fact_coverage": 75.0
+    }
+  },
+  {
+    "id": "Q4",
+    "question": "What is the daily meal per diem ceiling and its breakdown, and what is the emergency medical travel insurance policy number and hotline?",
+    "ground_truth": "Total per diem is $75.00/day ($15 breakfast, $25 lunch, $35 dinner). Emergency travel insurance policy number is GLOBAL-SEC-88421 with 24/7 hotline +1-800-555-0199.",
+    "key_facts": [
+      "$75.00",
+      "$15",
+      "$25",
+      "$35",
+      "GLOBAL-SEC-88421",
+      "+1-800-555-0199"
+    ],
+    "top_k": 2,
+    "config_300": {
+      "chunks": [
+        "employee_travel_policy.pdf:P2 (0.714)",
+        "employee_travel_policy.pdf:P2 (0.705)"
+      ],
+      "total_tokens": 463,
+      "fact_coverage": 66.7,
+      "missing_facts": [
+        "GLOBAL-SEC-88421",
+        "+1-800-555-0199"
+      ],
+      "answer": "Based on the provided context:\n\n* **Daily meal per diem ceiling and breakdown:** Employees traveling on overnight business are allocated a total daily meal per diem ceiling of $75.00 USD, broken down into the following meal allocations:\n  * Breakfast: $15.00 USD\n  * Lunch: $25.00 USD\n  * Dinner: $35.00 USD\n  *(Source: employee_travel_policy.pdf, Page 2)*\n\n* **Emergency medical travel insurance policy number and hotline:** Information not provided in context.",
+      "answer_fact_coverage": 66.7
+    },
+    "config_800": {
+      "chunks": [
+        "employee_travel_policy.pdf:P3 (0.707)",
+        "employee_travel_policy.pdf:P2 (0.701)"
+      ],
+      "total_tokens": 830,
+      "fact_coverage": 100.0,
+      "missing_facts": [],
+      "answer": "Based on the provided context excerpts, the details are as follows:\n\n* **Daily meal per diem ceiling and breakdown:** The total daily meal per diem ceiling is $75.00 USD, broken down as follows:\n  * Breakfast: $15.00 USD\n  * Lunch: $25.00 USD\n  * Dinner: $35.00 USD\n  *(Source: employee_travel_policy.pdf, Page 2)*\n\n* **Emergency medical travel insurance policy number and hotline:** \n  * Master Corporate Policy Reference Number (underwritten by Allianz Global Assistance): **GLOBAL-SEC-88421** (Group Plan Code: ALLIANZ-CORP-MED-99)\n  * 24/7 Emergency Assistance Hotline: **+1-800-555-0199** (North America toll-free) or direct international collect line at **+1-415-555-0288**\n  *(Source: employee_travel_policy.pdf, Page 3)*",
+      "answer_fact_coverage": 100.0
+    }
+  },
+  {
+    "id": "Q5",
+    "question": "What tool and logical decoding plugin power the zero-downtime CDC pipeline, and what is the strict replication lag threshold required before cutover?",
+    "ground_truth": "Powered by Debezium connectors running on Apache Kafka using the native 'pgoutput' logical decoding plugin with replication slot 'debezium_cdc_slot'. Replication lag must remain strictly under 250 milliseconds for at least 2 hours before cutover.",
+    "key_facts": [
+      "Debezium",
+      "Apache Kafka",
+      "pgoutput",
+      "250 milliseconds"
+    ],
+    "top_k": 2,
+    "config_300": {
+      "chunks": [
+        "database_migration_guide.pdf:P2 (0.785)",
+        "database_migration_guide.pdf:P3 (0.718)"
+      ],
+      "total_tokens": 463,
+      "fact_coverage": 75.0,
+      "missing_facts": [
+        "250 milliseconds"
+      ],
+      "answer": "Based on the provided context, the CDC pipeline is powered by Debezium connectors running inside an Apache Kafka Connect cluster, using the native 'pgoutput' logical replication decoding plugin. \n\nThe strict pre-cutover condition requires the CDC consumer replication lag to remain strictly under 250 milliseconds for at least two (2) continuous hours before cutover authorization is granted.\n\n*Source: database_migration_guide.pdf, Page: 2*",
+      "answer_fact_coverage": 100.0
+    },
+    "config_800": {
+      "chunks": [
+        "database_migration_guide.pdf:P2 (0.772)",
+        "database_migration_guide.pdf:P3 (0.718)"
+      ],
+      "total_tokens": 826,
+      "fact_coverage": 75.0,
+      "missing_facts": [
+        "250 milliseconds"
+      ],
+      "answer": "Based on the provided context:\n\n* **Tool and Logical Decoding Plugin:** The CDC pipeline is powered by **Debezium connectors** running inside an Apache Kafka Connect cluster, using the native **'pgoutput'** plugin configured for logical replication decoding on the source PostgreSQL engine ([Source: database_migration_guide.pdf | Page: 2](database_migration_guide.pdf)).\n* **Strict Replication Lag Threshold:** The CDC consumer replication lag must remain strictly under **250 milliseconds** for at least **two (2) continuous hours** during normal business traffic before authorization is granted to initiate live application cutover ([Source: database_migration_guide.pdf | Page: 2](database_migration_guide.pdf)).",
+      "answer_fact_coverage": 100.0
+    }
+  },
+  {
+    "id": "Q6",
+    "question": "When is the production cutover window scheduled, what DNS TTL is required 48 hours prior, and what specific conditions trigger an immediate automated rollback?",
+    "ground_truth": "Cutover window is Sunday between 02:00 UTC and 04:00 UTC. DNS TTL must be reduced to 60 seconds 48 hours prior. Automated rollback triggers if: (a) CDC queue fails to drain within 120 seconds; (b) HTTP 5xx error rate exceeds 0.05% for 3 consecutive minutes; or (c) query latency spikes by >300% on p99 or deadlocks exceed 50/min.",
+    "key_facts": [
+      "Sunday between 02:00 UTC and 04:00 UTC",
+      "60 seconds",
+      "120 seconds",
+      "0.05%"
+    ],
+    "top_k": 2,
+    "config_300": {
+      "chunks": [
+        "database_migration_guide.pdf:P3 (0.740)",
+        "database_migration_guide.pdf:P2 (0.718)"
+      ],
+      "total_tokens": 432,
+      "fact_coverage": 0.0,
+      "missing_facts": [
+        "Sunday between 02:00 UTC and 04:00 UTC",
+        "60 seconds",
+        "120 seconds",
+        "0.05%"
+      ],
+      "answer": "Based on the provided context:\n\n* **Production Cutover Window Schedule:** The production cutover window is scheduled strictly during the lowest traffic volume period: Sunday between 02:00 UTC and 04:00 UTC ([Source: database_migration_guide.pdf | Page: 3]).\n* **DNS TTL (T-48 Hours):** The DNS Time-To-Live (TTL) on database endpoint CNAME records must be reduced to sixty (60) seconds ([Source: database_migration_guide.pdf | Page: 3]).\n* **Automated Rollback Triggers:** An immediate, unconditional automated rollback to the source on-premises database is mandatorily triggered if any of the rollback triggers occur (though the specific list of triggers is cut off at the end of the excerpt) ([Source: database_migration_guide.pdf | Page: 3]).",
+      "answer_fact_coverage": 25.0
+    },
+    "config_800": {
+      "chunks": [
+        "database_migration_guide.pdf:P3 (0.742)",
+        "database_migration_guide.pdf:P1 (0.614)"
+      ],
+      "total_tokens": 883,
+      "fact_coverage": 50.0,
+      "missing_facts": [
+        "Sunday between 02:00 UTC and 04:00 UTC",
+        "60 seconds"
+      ],
+      "answer": "Based on the provided document, here are the answers to your questions:\n\n* **Production Cutover Window Schedule:** The production cutover window is scheduled strictly during Sunday between 02:00 UTC and 04:00 UTC [Source: database_migration_guide.pdf | Page: 3].\n* **DNS TTL (T-48 Hours):** 48 hours prior to the cutover (Phase 1), the DNS Time-To-Live (TTL) on database endpoint CNAME records must be reduced to sixty (60) seconds [Source: database_migration_guide.pdf | Page: 3].\n* **Conditions Triggering an Immediate Automated Rollback:** An immediate, unconditional automated rollback is triggered if any of the following occur:\n  1. The CDC replication queue fails to drain to zero within 120 seconds of entering READ ONLY maintenance mode [Source: database_migration_guide.pdf | Page: 3].\n  2. The post-cutover API Gateway HTTP 5xx error rate exceeds 0.05% for three (3) consecutive minutes during live canary verification [Source: database_migration_guide.pdf | Page: 3].\n  3. Application database query latency spikes by more than 300% on p99 metrics or database deadlocks exceed 50 per minute [Source: database_migration_guide.pdf | Page: 3].",
+      "answer_fact_coverage": 75.0
+    }
+  }
+]

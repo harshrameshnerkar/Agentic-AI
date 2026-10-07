@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Observability Hub | Production Monitoring & Telemetry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Agentic Observability Hub</span>
+          <span class="brand-subtitle">Langfuse / LangSmith Standard &bull; Production Telemetry</span>
+        </div>
+      </div>
+
+      <div class="nav-controls">
+        <div class="status-indicator">
+          <span class="pulse-beacon"></span>
+          <span class="status-text">LIVE TELEMETRY STREAMING</span>
+        </div>
+        <div class="env-pill">production-us-east-1</div>
+        <div class="time-range-pill">14-Day Rolling Window</div>
+        <button id="refreshBtn" class="btn-refresh" title="Refresh Live Metrics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Sync
+        </button>
+      </div>
+    </header>
+
+    <!-- Active Alerts Ticker / Banner -->
+    <section id="alertsContainer" class="alerts-banner-container">
+      <!-- Populated dynamically via JS -->
+    </section>
+
+    <!-- KPI Metric Cards Ribbon -->
+    <section class="kpi-grid">
+      <div class="kpi-card" id="kpiPassRateCard">
+        <div class="kpi-header">
+          <span class="kpi-label">Overall Pass Rate</span>
+          <span class="sla-badge" id="passRateBadge">SLA &ge; 95%</span>
+        </div>
+        <div class="kpi-value" id="kpiPassRate">--%</div>
+        <div class="kpi-footer">
+          <span class="sub-metric" id="kpiTracesCount">0 total traces</span>
+          <span class="trend-indicator" id="passTrend">Target Met</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiLatencyCard">
+        <div class="kpi-header">
+          <span class="kpi-label">P95 Latency SLA</span>
+          <span class="sla-badge" id="latencyBadge">&le; 1,500ms</span>
+        </div>
+        <div class="kpi-value" id="kpiP95Latency">--ms</div>
+        <div class="kpi-footer">
+          <span class="sub-metric" id="kpiLatencyPercentiles">p50: --ms &bull; p90: --ms</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiCostCard">
+        <div class="kpi-header">
+          <span class="kpi-label">Total Inference Cost</span>
+          <span class="badge-neutral">Token Spend</span>
+        </div>
+        <div class="kpi-value" id="kpiTotalCost">$0.00</div>
+        <div class="kpi-footer">
+          <span class="sub-metric" id="kpiAvgCost">Avg: $0.00 / query</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiGroundednessCard">
+        <div class="kpi-header">
+          <span class="kpi-label">Groundedness Score</span>
+          <span class="sla-badge" id="groundedBadge">Min 0.85</span>
+        </div>
+        <div class="kpi-value" id="kpiGroundedness">0.00</div>
+        <div class="kpi-footer">
+          <span class="sub-metric" id="kpiHallucinationRate">Hallucinations: 0.0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiFeedbackCard">
+        <div class="kpi-header">
+          <span class="kpi-label">User CSAT Feedback</span>
+          <span class="badge-positive">Thumbs Up</span>
+        </div>
+        <div class="kpi-value" id="kpiCSAT">--%</div>
+        <div class="kpi-footer">
+          <span class="sub-metric">Human approval alignment</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiSilentDecayCard">
+        <div class="kpi-header">
+          <span class="kpi-label">Quality Decay Drift</span>
+          <span class="badge-status" id="decayBadge">Checking...</span>
+        </div>
+        <div class="kpi-value" id="kpiDecayStatus">HEALTHY</div>
+        <div class="kpi-footer">
+          <span class="sub-metric" id="decaySuspect">Sliding Z-score audit</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Analytics Charts Section -->
+    <section class="charts-section">
+      <!-- Chart 1: Pass Rate Over Time with SLA line -->
+      <div class="chart-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h3>Pass Rate & Silent Decay Trend</h3>
+            <span class="panel-subtitle">Daily success % vs 95% SLA Target Line & Phase Markers</span>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot emerald"></span> Pass Rate</span>
+            <span class="legend-item"><span class="dot crimson-dash"></span> 95% SLA Target</span>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="passRateCanvas" height="240"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Latency Percentiles (p50, p90, p95, p99) -->
+      <div class="chart-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h3>Latency Percentiles (p50, p90, p95)</h3>
+            <span class="panel-subtitle">Response duration drift over rolling operational window (ms)</span>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot cyan"></span> p50</span>
+            <span class="legend-item"><span class="dot violet"></span> p90</span>
+            <span class="legend-item"><span class="dot rose"></span> p95</span>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="latencyCanvas" height="240"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 3: Cost Over Time -->
+      <div class="chart-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h3>Daily Token Cost & Volume</h3>
+            <span class="panel-subtitle">Cumulative inference cost in USD per operational day</span>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot amber"></span> Cost ($ USD)</span>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="costCanvas" height="240"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 4: Failure Categories Breakdown -->
+      <div class="chart-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h3>Failure Categories Over Time</h3>
+            <span class="panel-subtitle">Categorized breakdown of agent operational errors</span>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot rose"></span> Timeout</span>
+            <span class="legend-item"><span class="dot amber"></span> Tool Error</span>
+            <span class="legend-item"><span class="dot violet"></span> Hallucination</span>
+            <span class="legend-item"><span class="dot cyan"></span> Rate Limit</span>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="failureCanvas" height="240"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trace Explorer Table Section -->
+    <section class="explorer-section">
+      <div class="explorer-header">
+        <div class="explorer-title-group">
+          <h3>Production Trace Explorer</h3>
+          <span class="panel-subtitle">Live multi-span audit log from production agent runs</span>
+        </div>
+
+        <div class="explorer-filters">
+          <input type="text" id="traceSearchInput" class="search-input" placeholder="Search trace ID or incident query...">
+          <select id="categoryFilter" class="filter-select">
+            <option value="ALL">All Categories</option>
+            <option value="NONE">Success (NONE)</option>
+            <option value="TIMEOUT">TIMEOUT</option>
+            <option value="TOOL_FAILURE">TOOL_FAILURE</option>
+            <option value="HALLUCINATION">HALLUCINATION</option>
+            <option value="RATE_LIMIT_ERROR">RATE_LIMIT_ERROR</option>
+            <option value="UNAUTHORIZED_DESTRUCTIVE_ACTION">UNAUTHORIZED_ACTION</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="trace-table">
+          <thead>
+            <tr>
+              <th>Trace ID</th>
+              <th>Timestamp</th>
+              <th>Incident Query</th>
+              <th>Model</th>
+              <th>Latency</th>
+              <th>Cost</th>
+              <th>Status</th>
+              <th>Groundedness</th>
+              <th>Failure Category</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="traceTableBody">
+            <!-- Populated dynamically via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Trace Inspection Slide-out Modal / Drawer -->
+  <div id="traceModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h2 id="modalTraceId">TRC-D01-001</h2>
+          <span id="modalTraceStatus" class="status-pill">SUCCESS</span>
+        </div>
+        <button id="modalCloseBtn" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-section">
+          <h4>Incident Query</h4>
+          <p id="modalQueryText" class="query-block">Loading query...</p>
+        </div>
+
+        <div class="detail-section">
+          <h4>Agent Response</h4>
+          <p id="modalResponseText" class="response-block">Loading response...</p>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-item">
+            <span class="m-label">Latency</span>
+            <span class="m-val" id="modalLatency">0ms</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-label">Cost</span>
+            <span class="m-val" id="modalCost">$0.00</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-label">Prompt Tokens</span>
+            <span class="m-val" id="modalPromptTokens">0</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-label">Completion Tokens</span>
+            <span class="m-val" id="modalComplTokens">0</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-label">Groundedness</span>
+            <span class="m-val" id="modalGroundedness">1.0</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Span Execution Tree (Hierarchy)</h4>
+          <div id="modalSpanTree" class="span-tree">
+            <!-- Spans rendered dynamically -->
+          </div>
+        </div>
+
+        <div class="detail-section feedback-section">
+          <h4>User Feedback & Ground Truth Calibration</h4>
+          <div class="feedback-box" id="modalFeedbackBox">
+            <!-- User feedback rating & comment -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>
