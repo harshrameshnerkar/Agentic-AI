@@ -1,4 +1,4 @@
-# Agentic AI — HSM Internship Assignment
+# Agentic AI: Production-Grade Autonomous Systems & Enterprise Capstone
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg?logo=python&logoColor=white)](https://python.org)
 [![FastAPI Microservice](https://img.shields.io/badge/FastAPI-Production%20REST-009688.svg?logo=fastapi&logoColor=white)](day_15/session_1/api_server.py)
@@ -11,13 +11,13 @@
 
 > **Author & Engineer:** [Harsh Ramesh Nerkar](https://github.com/harshrameshnerkar)  
 > **Repository:** [`harshrameshnerkar/Agentic-AI`](https://github.com/harshrameshnerkar/Agentic-AI)  
-> **Program:** **Agentic AI — HSM Internship Assignment**
+> **Program:** **Agentic AI — Production Engineering Curriculum**
 
 ---
 
 ## 📌 Executive Summary
 
-This repository contains the complete **15-day hands-on engineering assignments** completed during the **HSM Agentic AI Internship**. 
+This repository contains the complete **15-day hands-on engineering assignments** completed across the **15-Day Autonomous Agentic AI Engineering Curriculum**. 
 
 Moving far beyond naive prompt wrappers and single-turn completions, this repository implements the full architectural spectrum of modern **Autonomous Agent Engineering, Multi-Agent Swarms, Model Context Protocol (MCP), and LLMOps at Scale**:
 - Deterministic ReAct execution loops & structured tool schemas
@@ -55,7 +55,7 @@ Moving far beyond naive prompt wrappers and single-turn completions, this reposi
 
 ## 🏆 Final Capstone Spotlight: OpsSentinel AI Enterprise (Day 15)
 
-The internship culminates in **OpsSentinel AI Enterprise** ([`day_15/`](day_15/README.md)) — an autonomous Site Reliability Engineering (SRE) copilot designed to detect, triage, and remediate distributed cloud infrastructure incidents under enterprise SLAs and strict blast-radius controls.
+The program culminates in **OpsSentinel AI Enterprise** ([`day_15/`](day_15/README.md)) — an autonomous Site Reliability Engineering (SRE) copilot designed to detect, triage, and remediate distributed cloud infrastructure incidents under enterprise SLAs and strict blast-radius controls.
 
 ```
                            +-------------------------------------------+

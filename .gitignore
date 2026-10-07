@@ -31,6 +31,7 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+eval_report.md
 
 # IDE & OS
 .vscode/
