@@ -36,20 +36,20 @@ Moving far beyond naive prompt wrappers and single-turn completions, this reposi
 
 | Day | Topic Name | Technical Scope & Key Deliverables | Code Link |
 |:---:|---|---|:---:|
-| **Day 1** | **LLM Fundamentals & API Basics** | • Setup, first LLM API calls, tokenization mechanics<br>• Temperature, top_p, frequency penalty parameters, context windows, cost models | [`day_01/`](day_01/) |
-| **Day 2** | **Advanced Prompting & Structured Output** | • Chain-of-Thought (CoT), Task Decomposition, Few-Shot prompting<br>• Pydantic schema validation, JSON mode parsing, prompt templates & versioning | [`day_02/`](day_02/) |
-| **Day 3** | **Embeddings, Vector DB & RAG** | • Dense vector embeddings, cosine/dot similarity, chunking strategies<br>• Vector database indexing, retrieval failure modes, semantic search | [`day_03/`](day_03/) |
-| **Day 4** | **Tool Calling & Function Execution** | • OpenAI/Anthropic/Gemini function schemas, tool registration<br>• Multi-step tool use, argument extraction, error handling loops | [`day_04/`](day_04/) |
-| **Day 6** | **Tool Calling & MCP** | • Model Context Protocol (MCP) integration & tool design best practices<br>• Blast-radius classification, safe read vs destructive write tiers, compensating rollbacks | [`day_06/`](day_06/) |
-| **Day 7** | **Agents: ReAct, Frameworks & Memory** | • Pure Thought-Action-Observation ReAct execution loops<br>• LangGraph `StateGraph` workflows, conversational & episodic checkpointed memory | [`day_07/`](day_07/) |
-| **Day 8** | **Multi-Agent Systems & Orchestration** | • Centralized Supervisor router, collaborative worker swarms<br>• Inter-agent communication protocols, context compaction & engineering | [`day_08/`](day_08/) |
-| **Day 9** | **Guardrails, Security & Agent Evaluation** | • Prompt injection detection, jailbreak mitigation, Canary token leaks<br>• Dual-LLM safety boundary guards, adversarial red-teaming test suite | [`day_09/`](day_09/) |
-| **Day 10** | **Capstone, Deployment & Final Review** | • OpsSentinel AI Midterm Capstone: autonomous multi-tool SRE diagnostic copilot<br>• Containerized deployment, interactive Streamlit UI, comprehensive review | [`day_10/`](day_10/) |
-| **Day 11** | **Advanced Retrieval Architectures** | • Hybrid dense/sparse search (BM25 + vector), graph & structured metadata RAG<br>• Query rewriting, sub-query decomposition, dynamic retrieval routing | [`day_11/`](day_11/) |
-| **Day 12** | **Fine-Tuning & Model Customisation** | • Decision framework: RAG vs Fine-Tuning, SFT data synthesis & QC filters<br>• Parameter-Efficient Fine-Tuning (PEFT/LoRA), multi-tier cost router | [`day_12/`](day_12/) |
-| **Day 13** | **Production Agent Architecture** | • High-throughput async tool dispatch via `asyncio.gather` (3.2x speedup)<br>• SQLite WAL ACID checkpointer, multi-tenant state isolation, circuit breakers | [`day_13/`](day_13/) |
-| **Day 14** | **LLMOps, Evaluation at Scale & Incidents** | • Automated GitHub Actions CI regression gates with 100-case golden datasets<br>• Canary/shadow trace evaluators, emergency kill switches & postmortems | [`day_14/`](day_14/) |
-| **Day 15** | **Production Capstone & Final Assessment** | • Hardened autonomous SRE control center with sub-2ms intent router<br>• FastAPI microservice, SHA-256 Merkle audit trail, HITL approval gate<br>• 4-Page publication TDD, 10x cost projection, 20-min executive defense | [`day_15/`](day_15/) |
+| **1** | **LLM Fundamentals & API Basics** | • Setup, first LLM API calls, tokenization mechanics<br>• Temperature, top_p, frequency penalty parameters, context windows, cost models | [`day_01/`](day_01/) |
+| **2** | **Advanced Prompting & Structured Output** | • Chain-of-Thought (CoT), Task Decomposition, Few-Shot prompting<br>• Pydantic schema validation, JSON mode parsing, prompt templates & versioning | [`day_02/`](day_02/) |
+| **3** | **Embeddings, Vector DB & RAG** | • Dense vector embeddings, cosine/dot similarity, chunking strategies<br>• Vector database indexing, retrieval failure modes, semantic search | [`day_03/`](day_03/) |
+| **4** | **Tool Calling & Function Execution** | • OpenAI/Anthropic/Gemini function schemas, tool registration<br>• Multi-step tool use, argument extraction, error handling loops | [`day_04/`](day_04/) |
+| **6** | **Tool Calling & MCP** | • Model Context Protocol (MCP) integration & tool design best practices<br>• Blast-radius classification, safe read vs destructive write tiers, compensating rollbacks | [`day_06/`](day_06/) |
+| **7** | **Agents: ReAct, Frameworks & Memory** | • Pure Thought-Action-Observation ReAct execution loops<br>• LangGraph `StateGraph` workflows, conversational & episodic checkpointed memory | [`day_07/`](day_07/) |
+| **8** | **Multi-Agent Systems & Orchestration** | • Centralized Supervisor router, collaborative worker swarms<br>• Inter-agent communication protocols, context compaction & engineering | [`day_08/`](day_08/) |
+| **9** | **Guardrails, Security & Agent Evaluation** | • Prompt injection detection, jailbreak mitigation, Canary token leaks<br>• Dual-LLM safety boundary guards, adversarial red-teaming test suite | [`day_09/`](day_09/) |
+| **10** | **Capstone, Deployment & Final Review** | • OpsSentinel AI Midterm Capstone: autonomous multi-tool SRE diagnostic copilot<br>• Containerized deployment, interactive Streamlit UI, comprehensive review | [`day_10/`](day_10/) |
+| **11** | **Advanced Retrieval Architectures** | • Hybrid dense/sparse search (BM25 + vector), graph & structured metadata RAG<br>• Query rewriting, sub-query decomposition, dynamic retrieval routing | [`day_11/`](day_11/) |
+| **12** | **Fine-Tuning & Model Customisation** | • Decision framework: RAG vs Fine-Tuning, SFT data synthesis & QC filters<br>• Parameter-Efficient Fine-Tuning (PEFT/LoRA), multi-tier cost router | [`day_12/`](day_12/) |
+| **13** | **Production Agent Architecture** | • High-throughput async tool dispatch via `asyncio.gather` (3.2x speedup)<br>• SQLite WAL ACID checkpointer, multi-tenant state isolation, circuit breakers | [`day_13/`](day_13/) |
+| **14** | **LLMOps, Evaluation at Scale & Incidents** | • Automated GitHub Actions CI regression gates with 100-case golden datasets<br>• Canary/shadow trace evaluators, emergency kill switches & postmortems | [`day_14/`](day_14/) |
+| **15** | **Production Capstone & Final Assessment** | • Hardened autonomous SRE control center with sub-2ms intent router<br>• FastAPI microservice, SHA-256 Merkle audit trail, HITL approval gate<br>• 4-Page publication TDD, 10x cost projection, 20-min executive defense | [`day_15/`](day_15/) |
 
 ---
 
