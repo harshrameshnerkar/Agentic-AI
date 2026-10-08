@@ -34,7 +34,7 @@ Moving far beyond naive prompt wrappers and single-turn completions, this reposi
 
 ## 📚 Complete 15-Day Topic-Wise Syllabus & Deliverables
 
-| Day | Topic Name | Technical Scope & Key Deliverables | Code Link |
+| Days | Topic Name | Technical Scope & Key Deliverables | Code Link |
 |:---:|---|---|:---:|
 | **1** | **LLM Fundamentals & API Basics** | • Setup, first LLM API calls, tokenization mechanics<br>• Temperature, top_p, frequency penalty parameters, context windows, cost models | [`day_01/`](day_01/) |
 | **2** | **Advanced Prompting & Structured Output** | • Chain-of-Thought (CoT), Task Decomposition, Few-Shot prompting<br>• Pydantic schema validation, JSON mode parsing, prompt templates & versioning | [`day_02/`](day_02/) |
