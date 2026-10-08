@@ -1,0 +1,4 @@
+# Day 17 - Session 1: Requirements
+# Built with Python standard library (asyncio, dataclasses, json, re, time, unittest)
+pytest>=8.0.0
+pytest-asyncio>=0.23.0

@@ -51,6 +51,7 @@ Moving far beyond naive prompt wrappers and single-turn completions, this reposi
 | **14** | **LLMOps, Evaluation at Scale & Incidents** | • Automated GitHub Actions CI regression gates with 100-case golden datasets<br>• Canary/shadow trace evaluators, emergency kill switches & postmortems | [`day_14/`](day_14/) |
 | **15** | **Production Capstone & Final Assessment** | • Hardened autonomous SRE control center with sub-2ms intent router<br>• FastAPI microservice, SHA-256 Merkle audit trail, HITL approval gate<br>• 4-Page publication TDD, 10x cost projection, 20-min executive defense | [`day_15/`](day_15/) |
 | **16** | **Scoping a Real Problem** | • **Session 1 (Discovery):** Stakeholder problem statement in stakeholder's words, 7-stage workflow replacement analysis & Monte Carlo MTTR simulation<br>• **Session 2 (Constraints):** Signed-off success metrics charter (95% accuracy, <=90s p95 latency, <=$0.15 cost ceiling), 3-tier blast radius classification, 5 Never-Automate red lines & cryptographic HMAC-SHA256 HITL gateway<br>• **Session 3 (Feasibility Spike):** Data & documentation audit, 2-hour timeboxed retrieval spike (BM25 vs. Dense vs. Hybrid RRF), official Feasibility Note & 93% static retrieval ceiling analysis | [`day_16/`](day_16/) |
+| **17** | **Build Sprint 1** | • **Session 1 (Standup & Riskiest Task):** 15-minute standup (Done, Next, Blocked), Sprint 1 Kanban tracker moving TASK-1.1 to In Progress, concurrent async diagnostic tool dispatcher, 50k-line log anomaly compactor & circuit-breaker resilience | [`day_17/`](day_17/) |
 
 ---
 
