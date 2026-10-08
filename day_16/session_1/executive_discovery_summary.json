@@ -1,0 +1,30 @@
+{
+  "simulation_meta": {
+    "total_incidents_simulated": 210,
+    "team_size_sres": 14,
+    "blended_hourly_rate_usd": 95.0
+  },
+  "latency_metrics": {
+    "mean_human_triage_minutes": 85.5,
+    "mean_agent_triage_seconds": 58.1,
+    "mean_human_downtime_minutes": 96.0,
+    "mean_agent_downtime_minutes": 1.6,
+    "speedup_factor": 88.3
+  },
+  "reliability_metrics": {
+    "human_error_count": 37,
+    "human_error_rate_pct": 17.62,
+    "agent_error_count": 0,
+    "agent_error_rate_pct": 0.0
+  },
+  "financial_roi_monthly": {
+    "human_toil_hours": 299.2,
+    "agent_toil_hours": 3.4,
+    "toil_hours_saved": 295.8,
+    "salary_savings_usd": 28101.28,
+    "human_sla_penalties_usd": 960444.58,
+    "agent_sla_penalties_usd": 0.0,
+    "net_monthly_savings_usd": 988545.86,
+    "annualized_projected_savings_usd": 11862550.27
+  }
+}

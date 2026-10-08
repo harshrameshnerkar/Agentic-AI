@@ -50,6 +50,7 @@ Moving far beyond naive prompt wrappers and single-turn completions, this reposi
 | **13** | **Production Agent Architecture** | • High-throughput async tool dispatch via `asyncio.gather` (3.2x speedup)<br>• SQLite WAL ACID checkpointer, multi-tenant state isolation, circuit breakers | [`day_13/`](day_13/) |
 | **14** | **LLMOps, Evaluation at Scale & Incidents** | • Automated GitHub Actions CI regression gates with 100-case golden datasets<br>• Canary/shadow trace evaluators, emergency kill switches & postmortems | [`day_14/`](day_14/) |
 | **15** | **Production Capstone & Final Assessment** | • Hardened autonomous SRE control center with sub-2ms intent router<br>• FastAPI microservice, SHA-256 Merkle audit trail, HITL approval gate<br>• 4-Page publication TDD, 10x cost projection, 20-min executive defense | [`day_15/`](day_15/) |
+| **16** | **Scoping a Real Problem** | • Stakeholder discovery with VP of Infrastructure & Mentor<br>• Written problem statement in stakeholder's words & workflow replacement analysis<br>• Stochastic Monte Carlo triage simulation comparing human vs. agent MTTR | [`day_16/`](day_16/) |
 
 ---
 
