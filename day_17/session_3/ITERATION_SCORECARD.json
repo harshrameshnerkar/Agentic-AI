@@ -1,0 +1,46 @@
+{
+  "Step 0: Baseline (Vanilla RAG)": {
+    "step_name": "Step 0: Baseline (Vanilla RAG)",
+    "overall_pass_rate_pct": 30.0,
+    "static_pass_rate_pct": 100.0,
+    "ephemeral_pass_rate_pct": 0.0,
+    "avg_recall_pct": 30.0,
+    "avg_latency_ms": 280.1,
+    "avg_cost_usd": 0.000115,
+    "total_passed": 6,
+    "total_cases": 20
+  },
+  "Step 1: +Hybrid Retrieval (RRF)": {
+    "step_name": "Step 1: +Hybrid Retrieval (RRF)",
+    "overall_pass_rate_pct": 30.0,
+    "static_pass_rate_pct": 100.0,
+    "ephemeral_pass_rate_pct": 0.0,
+    "avg_recall_pct": 30.0,
+    "avg_latency_ms": 310.1,
+    "avg_cost_usd": 0.00013,
+    "total_passed": 6,
+    "total_cases": 20
+  },
+  "Step 2: +Cluster Telemetry Tool": {
+    "step_name": "Step 2: +Cluster Telemetry Tool",
+    "overall_pass_rate_pct": 100.0,
+    "static_pass_rate_pct": 100.0,
+    "ephemeral_pass_rate_pct": 100.0,
+    "avg_recall_pct": 95.7,
+    "avg_latency_ms": 883.5,
+    "avg_cost_usd": 0.000351,
+    "total_passed": 20,
+    "total_cases": 20
+  },
+  "Step 3: +Conditional Routing": {
+    "step_name": "Step 3: +Conditional Routing",
+    "overall_pass_rate_pct": 100.0,
+    "static_pass_rate_pct": 100.0,
+    "ephemeral_pass_rate_pct": 100.0,
+    "avg_recall_pct": 95.7,
+    "avg_latency_ms": 763.0,
+    "avg_cost_usd": 0.000329,
+    "total_passed": 20,
+    "total_cases": 20
+  }
+}

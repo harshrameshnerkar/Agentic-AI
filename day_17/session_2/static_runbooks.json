@@ -1,0 +1,50 @@
+[
+  {
+    "doc_id": "RBK-001",
+    "service": "vault-infra",
+    "title": "Vault Root Token Rotation Procedure",
+    "content": "Standard operational runbook for Vault root token rotation: Execute vault operator step-down, generate temporary rotation token with 3-key quorum, and update secret lease before revoking prior credentials."
+  },
+  {
+    "doc_id": "RBK-002",
+    "service": "cloud-storage",
+    "title": "Cold Storage Disaster Recovery S3 Lifecycle Policy",
+    "content": "Compliance document SEC-DR-401 mandates: 90 days hot S3 standard storage, transition to 365 days Glacier flexible retrieval, and permanent cryptographic purge after 7 years."
+  },
+  {
+    "doc_id": "RBK-003",
+    "service": "notification-service",
+    "title": "Twilio SMS Circuit Breaker & Retry Policy",
+    "content": "Standard retry limit for Twilio SMS: 3 retries with exponential backoff (200ms, 800ms, 3200ms) with jitter. Trip circuit breaker after 50% failures over a 10s rolling window."
+  },
+  {
+    "doc_id": "RBK-004",
+    "service": "oncall-policy",
+    "title": "PagerDuty Tier 1 Escalation Timeouts",
+    "content": "Tier 1 incident SLA: Primary on-call has 5 minutes to acknowledge. Escalates automatically to secondary on-call at 10 minutes, and escalates to engineering director at 15 minutes."
+  },
+  {
+    "doc_id": "RBK-005",
+    "service": "cert-manager",
+    "title": "TLS Edge & mTLS Certificate Expiry Standard",
+    "content": "Public edge Let's Encrypt certificates auto-renew every 60 days on a 90-day expiry cycle. Internal CA mTLS pod certificates rotate automatically every 30 days."
+  },
+  {
+    "doc_id": "RBK-006",
+    "service": "iam-bastion",
+    "title": "Emergency Break-Glass Bastion Console Access",
+    "content": "Emergency break-glass procedure when SSO is down: Retrieve physical YubiKey hardware token from security safe, connect to offline console port, and authenticate using break-glass TOTP."
+  },
+  {
+    "doc_id": "RBK-007",
+    "service": "auth-service",
+    "title": "Generic Service Restart Runbook",
+    "content": "Standard restart procedure: run kubectl rollout restart deployment/auth-service in namespace prod-core. Monitor pod phase until Running and ready."
+  },
+  {
+    "doc_id": "RBK-008",
+    "service": "payment-gateway",
+    "title": "Generic 504 Gateway Timeout Runbook",
+    "content": "When payment gateway responds with 504: check upstream network latency, check AWS NAT gateway connection count, and ensure ingress controllers have healthy endpoints."
+  }
+]

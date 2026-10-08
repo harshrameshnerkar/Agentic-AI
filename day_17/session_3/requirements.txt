@@ -1,0 +1,3 @@
+# Day 17 Session 3: First Real Iteration Dependencies
+# Self-contained, zero external non-standard packages required
+# Uses Python standard library (json, time, math, re, unittest, argparse)

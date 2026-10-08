@@ -1,0 +1,5 @@
+Shipped: Async diagnostic telemetry dispatcher, 50k-line log compactor, and conditional intent router.
+Current Pass Rate: 100.0% across 20-case golden eval set (up from 30.0% vanilla RAG baseline).
+Cost per Query: $0.000329 mean cost (99.8% under $0.15 ceiling; mean latency: 762.8ms).
+What is at Risk: Third-party API rate limits and network latency spikes when querying live cluster APIs across multi-region clusters.
+Decision Needed: Sign-off to implement an in-memory Redis cluster cache with 30s TTL to prevent cloud API throttling during cascade outages.
