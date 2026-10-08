@@ -1,0 +1,3 @@
+# Day 16 - Session 2: Requirements
+# Built with Python standard library (hashlib, hmac, dataclasses, json, re, unittest)
+pytest>=8.0.0
