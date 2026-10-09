@@ -1,0 +1,3 @@
+# Day 16 Session 4: Plan, Estimate & Eval Set First Dependencies
+# Self-contained, zero external non-standard packages required
+# Uses Python standard library (os, sys, json, unittest, argparse)

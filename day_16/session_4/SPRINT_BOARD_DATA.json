@@ -1,0 +1,145 @@
+{
+  "timestamp": "2026-10-08T18:00:00Z",
+  "eval_dataset_statistics": {
+    "total_cases": 30,
+    "categories": {
+      "ephemeral_cluster": 16,
+      "static_runbook": 8,
+      "adversarial_red_line": 6
+    },
+    "blast_radius_tiers": {
+      "Tier 3 (Consequential)": 12,
+      "Tier 1 (Read-Only)": 9,
+      "Tier 2 (Scoped Safe)": 9
+    },
+    "expected_hitl_actions": {
+      "HUMAN_APPROVAL_REQUIRED": 7,
+      "NONE": 18,
+      "BLOCKED_RED_LINE": 5
+    }
+  },
+  "sprint_planning_metrics": {
+    "capacity_hours": 32.0,
+    "must_have": {
+      "sp": 21,
+      "hours": 18.0,
+      "task_count": 5
+    },
+    "should_have": {
+      "sp": 13,
+      "hours": 11.0,
+      "task_count": 4
+    },
+    "could_have": {
+      "sp": 8,
+      "hours": 7.0,
+      "task_count": 2
+    },
+    "wont_have_count": 3,
+    "committed_hours": 29.0,
+    "buffer_hours": 3.0,
+    "capacity_load_pct": 90.6
+  },
+  "moscow_tasks": {
+    "MUST_HAVE": [
+      {
+        "id": "MUST-01",
+        "name": "30-Case Golden Evaluation Harness",
+        "sp": 3,
+        "hours": 2.5,
+        "owner": "Harsh"
+      },
+      {
+        "id": "MUST-02",
+        "name": "De-Risk Riskiest Tool Integration",
+        "sp": 5,
+        "hours": 4.0,
+        "owner": "Harsh"
+      },
+      {
+        "id": "MUST-03",
+        "name": "Non-Agent Baseline Scoring (Plain vs RAG)",
+        "sp": 3,
+        "hours": 3.0,
+        "owner": "Harsh"
+      },
+      {
+        "id": "MUST-04",
+        "name": "Ephemeral Cluster Telemetry Diagnostic Tool",
+        "sp": 5,
+        "hours": 4.5,
+        "owner": "Harsh"
+      },
+      {
+        "id": "MUST-05",
+        "name": "Cryptographic HMAC-SHA256 HITL Gateway",
+        "sp": 5,
+        "hours": 4.0,
+        "owner": "Harsh"
+      }
+    ],
+    "SHOULD_HAVE": [
+      {
+        "id": "SHOULD-01",
+        "name": "Sub-5ms Intent Router",
+        "sp": 3,
+        "hours": 2.5,
+        "owner": "Harsh"
+      },
+      {
+        "id": "SHOULD-02",
+        "name": "In-Process 50k-Line Log Compactor",
+        "sp": 3,
+        "hours": 2.5,
+        "owner": "Harsh"
+      },
+      {
+        "id": "SHOULD-03",
+        "name": "Redis Cluster State In-Memory Cache (30s TTL)",
+        "sp": 5,
+        "hours": 4.0,
+        "owner": "Harsh"
+      },
+      {
+        "id": "SHOULD-04",
+        "name": "Automated CI Regression Gate",
+        "sp": 2,
+        "hours": 2.0,
+        "owner": "Harsh"
+      }
+    ],
+    "COULD_HAVE": [
+      {
+        "id": "COULD-01",
+        "name": "Slack / PagerDuty Interactive Webhook Bot",
+        "sp": 5,
+        "hours": 4.0,
+        "owner": "Harsh"
+      },
+      {
+        "id": "COULD-02",
+        "name": "Automated Postmortem Markdown Generator",
+        "sp": 3,
+        "hours": 3.0,
+        "owner": "Harsh"
+      }
+    ],
+    "WONT_HAVE": [
+      {
+        "id": "WONT-01",
+        "name": "Autonomous Production Database Migrations",
+        "reason": "Violates Red Line #1"
+      },
+      {
+        "id": "WONT-02",
+        "name": "Fine-Tuning a Foundation LLM from Scratch",
+        "reason": "Prohibitive compute cost ($>50k)"
+      },
+      {
+        "id": "WONT-03",
+        "name": "Multi-Cloud Autonomous Failover (AWS to GCP)",
+        "reason": "Out of scope"
+      }
+    ]
+  }
+}
