@@ -1,0 +1,3 @@
+# Day 20 Session 1 Requirements
+# Uses Python standard library (dataclasses, hashlib, hmac, json, os, sys, time, argparse, unittest)
+# No external dependencies required

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-08T14:30:07Z",
+  "timestamp": "2026-10-09T07:48:43Z",
   "dataset_size": 20,
   "plain_summary": {
     "name": "Baseline 1: Plain Prompt (Zero-Shot)",
@@ -22,7 +22,7 @@
     "ephemeral_cluster_pass_rate_pct": 0.0,
     "avg_indicator_recall_pct": 30.0,
     "generic_guess_rate_pct": 50.0,
-    "avg_latency_ms": 280.12,
+    "avg_latency_ms": 280.13,
     "avg_cost_usd": 0.000115
   },
   "detailed_plain_results": [
@@ -235,7 +235,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": false,
-      "latency_ms": 280.14,
+      "latency_ms": 280.21,
       "cost_usd": 0.000115
     },
     {
@@ -245,7 +245,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.11,
+      "latency_ms": 280.14,
       "cost_usd": 0.000115
     },
     {
@@ -255,7 +255,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": false,
-      "latency_ms": 280.12,
+      "latency_ms": 280.13,
       "cost_usd": 0.000115
     },
     {
@@ -275,7 +275,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.12,
+      "latency_ms": 280.13,
       "cost_usd": 0.000115
     },
     {
@@ -285,7 +285,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.12,
+      "latency_ms": 280.13,
       "cost_usd": 0.000115
     },
     {
@@ -295,7 +295,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.13,
+      "latency_ms": 280.14,
       "cost_usd": 0.000115
     },
     {
@@ -305,7 +305,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.11,
+      "latency_ms": 280.23,
       "cost_usd": 0.000115
     },
     {
@@ -315,7 +315,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.1,
+      "latency_ms": 280.11,
       "cost_usd": 0.000115
     },
     {
@@ -325,7 +325,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.11,
+      "latency_ms": 280.12,
       "cost_usd": 0.000115
     },
     {
@@ -345,7 +345,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.11,
+      "latency_ms": 280.12,
       "cost_usd": 0.000115
     },
     {

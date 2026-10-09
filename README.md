@@ -17,7 +17,7 @@
 
 ## 📌 Executive Summary
 
-This repository contains the complete **15-day hands-on engineering assignments** completed across the **15-Day Autonomous Agentic AI Engineering Curriculum**. 
+This repository contains the complete **20-day hands-on engineering assignments** completed across the **20-Day Autonomous Agentic AI Engineering Curriculum**. 
 
 Moving far beyond naive prompt wrappers and single-turn completions, this repository implements the full architectural spectrum of modern **Autonomous Agent Engineering, Multi-Agent Swarms, Model Context Protocol (MCP), and LLMOps at Scale**:
 - Deterministic ReAct execution loops & structured tool schemas
@@ -32,7 +32,7 @@ Moving far beyond naive prompt wrappers and single-turn completions, this reposi
 
 ---
 
-## 📚 Complete 15-Day Topic-Wise Syllabus & Deliverables
+## 📚 Complete 20-Day Topic-Wise Syllabus & Deliverables
 
 | Days | Topic Name | Technical Scope & Key Deliverables | Code Link |
 |:---:|---|---|:---:|
@@ -54,6 +54,7 @@ Moving far beyond naive prompt wrappers and single-turn completions, this reposi
 | **17** | **Build Sprint 1** | • **Session 1 (Standup & Riskiest Task):** 15-minute standup (Done, Next, Blocked), Sprint 1 Kanban tracker moving TASK-1.1 to In Progress, concurrent async diagnostic tool dispatcher, 50k-line log anomaly compactor & circuit-breaker resilience<br>• **Session 2 (Simplest Thing That Works):** Non-agent baseline evaluation (Plain Prompt 0% vs. Vanilla RAG 30%), golden 20-case evaluation dataset, empirical proof of ephemeral cluster gap<br>• **Session 3 (First Real Iteration):** Scientific step-by-step evolution (+Retrieval 30%, +Cluster Tool 100%, +Conditional Routing 100% with 13.7% latency reduction)<br>• **Session 4 (Progress Update):** Strict 5-line executive status update to mentor Dr. Rostova & Redis cluster state caching sign-off | [`day_17/`](day_17/) |
 | **18** | **Build Sprint 2 & Code Review** | • **Session 1 (Standup & Replan):** 15-minute standup & explicit scope cut (Slack bot moved from Must to Could), capacity rebalancing (13.5h load vs 16.0h cap), updated Sprint Board & Replan Manager<br>• **Session 2 (Integration & Safety):** Universal REST/CLI delivery surface, regex PII scrubber (SSN, CC, email, JWT, API tokens), blast radius classifier, HMAC approval gateway & tamper-evident SHA-256 hash-chained audit logging<br>• **Session 3 (Code Review):** Formal PR #18, line-by-line review addressing 5 comments without defensiveness (UsedNonceRegistry replay defense, ReDoS guards, Enum tiers, RLock thread-safety, @dataclass TriageResult)<br>• **Session 4 (Regression Suite):** Automated one-command CI regression runner evaluating 35 golden cases (30 baseline + 5 regression bugs), 100.0% pass rate, sub-50ms latency, zero-tolerance non-zero exit gate | [`day_18/`](day_18/) |
 | **19** | **Hardening, Documentation & Handover** | • **Session 1 (Standup & Freeze):** 15-minute standup & formal feature freeze agreement (v1.0.0-rc1), zero-new-feature invariant, allowed/disallowed commit matrix & automated freeze auditor<br>• **Session 2 (Break Your Own System):** 6-vector adversarial chaos test harness (prompt injections, malformed JSON schemas, empty RAG zero-matches, downstream socket crashes, upstream 429 outages, runaway recursive loops) & 8-column failure-mode matrix<br>• **Session 3 (Handover Pack):** Complete 8-section production engineering manual (1-click setup, architecture, prompt catalog, on-call runbooks, unit economics model with $0.0028/query baseline, roadmap & walkthrough)<br>• **Session 4 (Clean-Clone Test):** Independent peer review sandbox trial by Senior SRE Alex Chen with 0 author questions, resolution of 3 documentation bugs, and AST-verified headless non-interactive execution | [`day_19/`](day_19/) |
+| **20** | **Demo, Retrospective & Final Assessment** | • **Session 1 (Stakeholder Demo):** 20-minute executive presentation to VP of Infra & Lead SRE, leading with workflow impact ($42k/mo saved, 45ms MTTR), live incident walkthroughs & explicit refusal boundary disclosures<br>• **Session 2 (Results & Limitations):** Formal 3-page technical results report evaluating stratified pass rates (100.0% on 35 cases), p95 latency (48.2ms), unit cost ($0.0028), scope cut defense & honest limitations<br>• **Session 3 (Retrospective):** Engineering sprint retrospective analyzing estimation variance (+60% on retrieval spike, -100% on cut Slack bot) & deep-dives into 3 mistakes (HMAC replay nonces, ReDoS, and audit lock race condition)<br>• **Session 4 (Final Assessment & Conversion):** 4-Week technical interview rubric (5.0/5.0 Exceeds Expectations), live multi-region Byzantine audit system-design defense, and unanimous Full-Time Conversion Approval | [`day_20/`](day_20/) |
 
 ---
 

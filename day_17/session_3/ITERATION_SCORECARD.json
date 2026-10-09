@@ -27,7 +27,7 @@
     "static_pass_rate_pct": 100.0,
     "ephemeral_pass_rate_pct": 100.0,
     "avg_recall_pct": 95.7,
-    "avg_latency_ms": 883.5,
+    "avg_latency_ms": 883.4,
     "avg_cost_usd": 0.000351,
     "total_passed": 20,
     "total_cases": 20
@@ -38,7 +38,7 @@
     "static_pass_rate_pct": 100.0,
     "ephemeral_pass_rate_pct": 100.0,
     "avg_recall_pct": 95.7,
-    "avg_latency_ms": 763.0,
+    "avg_latency_ms": 762.8,
     "avg_cost_usd": 0.000329,
     "total_passed": 20,
     "total_cases": 20

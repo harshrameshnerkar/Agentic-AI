@@ -1,0 +1,71 @@
+{
+  "assessment_date": "2026-10-10T17:30:00+05:30",
+  "candidate": {
+    "name": "Harsh Ramesh Nerkar",
+    "role": "Autonomous Agent Systems Engineer Intern",
+    "education": "B.Tech Computer Science and Engineering",
+    "target_conversion_role": "AI Systems Engineer II (Production Agentic Systems)"
+  },
+  "review_panel": [
+    {
+      "name": "Dr. Elena Rostova",
+      "title": "Principal AI Systems Architect (Mentor)",
+      "recommendation": "STRONG_HIRE",
+      "score": 5.0
+    },
+    {
+      "name": "Sarah Lin",
+      "title": "Staff SRE / On-Call Incident Commander (Peer Reviewer)",
+      "recommendation": "STRONG_HIRE",
+      "score": 5.0
+    },
+    {
+      "name": "Marcus Vance",
+      "title": "VP of Cloud Infrastructure (Hiring Manager)",
+      "recommendation": "STRONG_HIRE",
+      "score": 5.0
+    }
+  ],
+  "competency_rubric": [
+    {
+      "week": "Week 1 (Days 1-5)",
+      "focus": "LLM Basics, Advanced Prompting, RAG & Function Calling",
+      "score": 5.0,
+      "max_score": 5.0,
+      "rating": "EXCEEDS_EXPECTATIONS"
+    },
+    {
+      "week": "Week 2 (Days 6-10)",
+      "focus": "MCP Tool Design, Multi-Agent Swarms, Security Boundaries & Midterm Capstone",
+      "score": 5.0,
+      "max_score": 5.0,
+      "rating": "EXCEEDS_EXPECTATIONS"
+    },
+    {
+      "week": "Week 3 (Days 11-15)",
+      "focus": "Advanced Retrieval, LoRA Fine-Tuning, Async Concurrency, CI/CD Gates & OpsSentinel",
+      "score": 5.0,
+      "max_score": 5.0,
+      "rating": "EXCEEDS_EXPECTATIONS"
+    },
+    {
+      "week": "Week 4 (Days 16-20)",
+      "focus": "Enterprise Problem Scoping, Sprint Execution, PR Review, Chaos Testing & Handover",
+      "score": 5.0,
+      "max_score": 5.0,
+      "rating": "EXCEEDS_EXPECTATIONS"
+    }
+  ],
+  "system_design_challenge": {
+    "topic": "Multi-Region Byzantine-Resilient Distributed SRE Agent with Sub-50ms p99",
+    "evaluation": "Candidate demonstrated profound mastery of edge routing, local SLMs, Raft consensus for audit chaining, and graceful network partition handling.",
+    "grade": "EXCEPTIONAL (Grade A+)"
+  },
+  "final_decision": {
+    "verdict": "CONVERSION_APPROVED",
+    "composite_score": 5.0,
+    "max_possible": 5.0,
+    "offer_level": "AI Systems Engineer II",
+    "compensation_bracket": "Top Tier (Level E4 Equivalent)"
+  }
+}

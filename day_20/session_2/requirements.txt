@@ -1,0 +1,3 @@
+# Day 20 Session 2 Requirements
+# Uses Python standard library (dataclasses, json, os, sys, argparse, unittest)
+# No external dependencies required

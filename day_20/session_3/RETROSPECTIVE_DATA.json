@@ -1,0 +1,71 @@
+{
+  "retro_date": "2026-10-10T15:30:00+05:30",
+  "project": "OpsSentinel AI Enterprise",
+  "version": "1.0.0-rc1",
+  "participants": [
+    "Harsh Ramesh Nerkar (Systems Engineer / Intern)",
+    "Dr. Elena Rostova (Principal AI Systems Architect / Mentor)"
+  ],
+  "sprint_variance": [
+    {
+      "task_id": "TASK-1.1",
+      "task_name": "Retrieval Feasibility Spike (Day 16 S3)",
+      "estimated_hours": 2.0,
+      "actual_hours": 3.2,
+      "variance_pct": 60.0,
+      "cause": "Underestimated complexity of benchmarking 3 distinct retrieval engines (BM25, Dense Vector, RRF Hybrid)."
+    },
+    {
+      "task_id": "TASK-2.2",
+      "task_name": "Slack Interactive Bot Delivery Surface",
+      "estimated_hours": 3.5,
+      "actual_hours": 0.0,
+      "variance_pct": -100.0,
+      "cause": "Deliberately pruned during Day 18 replan to preserve contingency buffer and focus on security hardening."
+    },
+    {
+      "task_id": "TASK-3.1",
+      "task_name": "Code Review & PR #18 Refactoring (Day 18 S3)",
+      "estimated_hours": 1.5,
+      "actual_hours": 2.5,
+      "variance_pct": 66.7,
+      "cause": "Architectural refactoring of HMAC UsedNonceRegistry and RLock audit log serialization took longer than anticipated."
+    },
+    {
+      "task_id": "TASK-4.1",
+      "task_name": "Regression Suite & CI Gate Runner (Day 18 S4)",
+      "estimated_hours": 2.0,
+      "actual_hours": 1.8,
+      "variance_pct": -10.0,
+      "cause": "Pre-code 30-case dataset from Day 16 made test harness wiring exceptionally fast and direct."
+    }
+  ],
+  "three_specific_mistakes": [
+    {
+      "id": "MISTAKE-01",
+      "title": "HMAC Clock-Skew Replay Vulnerability",
+      "context": "Day 18 Session 2 HMAC approval gateway",
+      "what_happened": "Assumed a 300s timestamp window was secure without recording consumed signatures; allowed an attacker to replay valid approvals.",
+      "technical_lesson": "Cryptographic authorization requires a stateful UsedNonceRegistry with TTL cache to guarantee every approval is strictly single-use."
+    },
+    {
+      "id": "MISTAKE-02",
+      "title": "Catastrophic Regex Backtracking (ReDoS) Risk",
+      "context": "Day 18 Session 2 PII regex scrubber",
+      "what_happened": "Constructed credit card pattern with nested quantifiers without length boundaries, creating vulnerability to ReDoS CPU exhaustion.",
+      "technical_lesson": "Never run unbounded regexes on raw input; always enforce a 100KB payload gate and use pre-compiled bounded patterns."
+    },
+    {
+      "id": "MISTAKE-03",
+      "title": "Audit Hash Chain Concurrency Forking",
+      "context": "Day 18 Session 2 tamper-evident audit logger",
+      "what_happened": "Appended audit log records without concurrency locking, creating a race condition where parallel threads could read the same parent hash and fork the chain.",
+      "technical_lesson": "All cryptographic chain modifications must be strictly serialized using reentrant thread locks (threading.RLock)."
+    }
+  ],
+  "action_items_next_sprint": [
+    "Adopt 1-hour timeboxing for all architectural feasibility spikes",
+    "Integrate automated ReDoS complexity scanning in pre-commit hooks",
+    "Mandate single-use nonce registries for any future cryptographic token designs"
+  ]
+}

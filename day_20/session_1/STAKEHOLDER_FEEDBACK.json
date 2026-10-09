@@ -1,0 +1,36 @@
+{
+  "demo_date": "2026-10-10T10:30:00+05:30",
+  "project": "OpsSentinel AI Enterprise",
+  "version": "1.0.0-rc1",
+  "presenter": "Harsh Ramesh Nerkar",
+  "attendees": [
+    {
+      "name": "Marcus Vance",
+      "title": "VP of Cloud Infrastructure & SRE Operations",
+      "verdict": "ACCEPTED_FOR_PILOT",
+      "quote": "The UsedNonceRegistry and HMAC approval flow provide the exact compliance guarantee our security team requires.",
+      "score": 5.0
+    },
+    {
+      "name": "Sarah Lin",
+      "title": "Staff SRE / On-Call Incident Commander",
+      "verdict": "ACCEPTED_FOR_PILOT",
+      "quote": "The 45ms triage response will cut pager fatigue substantially during P1 storm events.",
+      "score": 5.0
+    },
+    {
+      "name": "Dr. Elena Rostova",
+      "title": "Principal AI Systems Architect",
+      "verdict": "ACCEPTED_FOR_PILOT",
+      "quote": "Leading with the system's hard boundaries established immediate credibility with executive stakeholders.",
+      "score": 5.0
+    }
+  ],
+  "agreed_boundaries": [
+    "Zero autonomous Tier-3 destructive actions without cryptographic HMAC signature",
+    "Mandatory fallback to human SRE when confidence score < 0.40",
+    "Mandatory pre-ingress PII sanitization for all telemetry streams",
+    "Immutable SHA-256 hash chaining on all audit trail entries"
+  ],
+  "next_step": "Deploy to staging cluster for 2-week canary shadow evaluation"
+}
