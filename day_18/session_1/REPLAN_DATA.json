@@ -1,0 +1,90 @@
+{
+  "capacity_hours": 16.0,
+  "pre_replan": {
+    "must_hours": 18.0,
+    "must_sp": 21,
+    "deficit_hours": 2.0,
+    "is_over_capacity": true
+  },
+  "post_replan": {
+    "must_hours": 13.5,
+    "must_sp": 16,
+    "should_hours": 4.5,
+    "could_hours": 7.0,
+    "buffer_hours": 2.5,
+    "capacity_load_pct": 84.4,
+    "is_over_capacity": false
+  },
+  "hours_freed": 4.5,
+  "scope_cuts": [
+    {
+      "task_id": "TASK-2.4",
+      "task_name": "Bidirectional Slack/Teams Bot",
+      "from_category": "MUST_HAVE",
+      "to_category": "COULD_HAVE",
+      "story_points": 5,
+      "hours": 4.5,
+      "reason": "Cutting scope deliberately rather than silently missing it. Protects 16h capacity for HMAC cryptographic safety and automated regression testing.",
+      "approver": "Dr. Elena Rostova (Mentor)"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "TASK-2.1",
+      "name": "REST Delivery Surface & Universal CLI",
+      "category": "MUST_HAVE",
+      "sp": 5,
+      "hours": 4.0
+    },
+    {
+      "id": "TASK-2.2",
+      "name": "PII Redaction & Security Guardrails",
+      "category": "MUST_HAVE",
+      "sp": 3,
+      "hours": 3.0
+    },
+    {
+      "id": "TASK-2.3",
+      "name": "HMAC-SHA256 Cryptographic HITL Gate",
+      "category": "MUST_HAVE",
+      "sp": 5,
+      "hours": 4.0
+    },
+    {
+      "id": "TASK-2.4",
+      "name": "Bidirectional Slack/Teams Bot",
+      "category": "COULD_HAVE",
+      "sp": 5,
+      "hours": 4.5,
+      "is_cut": true
+    },
+    {
+      "id": "TASK-2.5",
+      "name": "Automated CI Regression Test Gate",
+      "category": "MUST_HAVE",
+      "sp": 3,
+      "hours": 2.5
+    },
+    {
+      "id": "TASK-2.6",
+      "name": "Redis Cluster State Cache (30s TTL)",
+      "category": "SHOULD_HAVE",
+      "sp": 3,
+      "hours": 2.5
+    },
+    {
+      "id": "TASK-2.7",
+      "name": "SHA-256 Merkle Audit Log Chain",
+      "category": "SHOULD_HAVE",
+      "sp": 2,
+      "hours": 2.0
+    },
+    {
+      "id": "TASK-2.8",
+      "name": "Auto-Generated Markdown Postmortem",
+      "category": "COULD_HAVE",
+      "sp": 3,
+      "hours": 2.5
+    }
+  ]
+}
