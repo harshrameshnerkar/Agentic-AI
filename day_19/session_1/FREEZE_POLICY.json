@@ -1,0 +1,66 @@
+{
+  "release_tag": "v1.0.0-rc1",
+  "baseline_commit": "728b238",
+  "effective_timestamp": "2026-10-09T10:00:00+05:30",
+  "policy_status": "ACTIVE_FREEZE",
+  "signatories": [
+    {
+      "name": "Harsh Ramesh Nerkar",
+      "role": "Systems Engineer / Intern",
+      "signed": true
+    },
+    {
+      "name": "Dr. Elena Rostova",
+      "role": "Principal AI Systems Architect / Mentor",
+      "signed": true
+    }
+  ],
+  "allowed_commit_prefixes": [
+    "fix:",
+    "docs:",
+    "test:",
+    "harden:",
+    "refactor:",
+    "chore:"
+  ],
+  "disallowed_commit_prefixes": [
+    "feat:",
+    "feature:",
+    "add-api:",
+    "new-tool:"
+  ],
+  "rules": {
+    "zero_new_features": true,
+    "allow_bug_fixes": true,
+    "allow_documentation": true,
+    "allow_tests": true,
+    "allow_defensive_hardening": true,
+    "enforce_clean_clone_readiness": true
+  },
+  "approved_backlog": [
+    {
+      "id": "TASK-19.1",
+      "title": "Feature Freeze Auditor & Policy Checksum",
+      "category": "HARDENING",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": "TASK-19.2",
+      "title": "Adversarial Chaos & Failure-Mode Table",
+      "category": "TEST",
+      "status": "QUEUED"
+    },
+    {
+      "id": "TASK-19.3",
+      "title": "Production Handover Pack & Runbook",
+      "category": "DOCS",
+      "status": "QUEUED"
+    },
+    {
+      "id": "TASK-19.4",
+      "title": "Clean-Clone Sandbox Verification",
+      "category": "TEST",
+      "status": "QUEUED"
+    }
+  ]
+}
