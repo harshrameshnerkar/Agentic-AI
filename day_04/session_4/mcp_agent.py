@@ -28,13 +28,15 @@ from mcp_client import MCPClientManager
 # Load environment configuration
 env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=env_path)
+if not os.getenv("OPENAI_API_KEY"):
+    load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".." / ".." / ".env")
 
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gemini-3-flash-preview")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gemini-3.1-flash-lite")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("GEMINI_API_KEY")
 
 if not OPENAI_API_KEY:
-    raise ValueError(f"API key missing. Ensure OPENAI_API_KEY is configured in {env_path}")
+    raise ValueError(f"API key missing. Ensure OPENAI_API_KEY is configured in {env_path} or project root .env")
 
 
 class MCPAgent:

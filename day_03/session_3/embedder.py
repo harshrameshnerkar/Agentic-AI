@@ -18,6 +18,8 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
+if not os.getenv("OPENAI_API_KEY"):
+    load_dotenv(Path(__file__).parent / ".." / ".." / ".env")
 
 BASE_URL = os.getenv("OPENAI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
 API_KEY = os.getenv("OPENAI_API_KEY")

@@ -23,7 +23,7 @@ load_dotenv()
 
 BASE_URL = os.getenv("OPENAI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
 API_KEY = os.getenv("OPENAI_API_KEY")
-CHAT_MODEL = os.getenv("OPENAI_MODEL", "gemini-3.5-flash-lite")
+CHAT_MODEL = os.getenv("OPENAI_MODEL", "gemini-3.1-flash-lite")
 
 
 BENCHMARK_QUESTIONS = [

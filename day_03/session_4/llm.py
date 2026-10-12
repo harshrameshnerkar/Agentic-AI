@@ -19,10 +19,12 @@ from dotenv import load_dotenv
 from reranker import RerankedPassage
 
 load_dotenv()
+if not os.getenv("OPENAI_API_KEY"):
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
 BASE_URL = os.getenv("OPENAI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
 API_KEY = os.getenv("OPENAI_API_KEY")
-CHAT_MODEL = os.getenv("OPENAI_MODEL", "gemini-3.5-flash-lite")
+CHAT_MODEL = os.getenv("OPENAI_MODEL", "gemini-3.1-flash-lite")
 
 
 class LLMResponse:

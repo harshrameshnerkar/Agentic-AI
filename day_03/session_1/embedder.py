@@ -9,13 +9,15 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+if not os.getenv("OPENAI_API_KEY"):
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
 API_KEY = os.getenv("OPENAI_API_KEY")
 BASE_URL = os.getenv("OPENAI_BASE_URL")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
 
 if not API_KEY:
-    raise ValueError("Missing OPENAI_API_KEY in .env file.")
+    raise ValueError("Missing OPENAI_API_KEY in .env file or project root .env.")
 
 client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 

@@ -1,200 +1,180 @@
+"""
+Day 01 - Session 03: Generation Parameters & Streaming
+======================================================
+Explore how core LLM hyperparameters influence text generation:
+  1. Temperature: Controls randomness and creativity (0.0 = deterministic, 1.2 = creative).
+  2. Top-P (Nucleus Sampling): Bounds token selection to cumulative probability threshold.
+  3. Max Tokens: Constrains the maximum length of the generated response.
+  4. Streaming: Delivers tokens incrementally for responsive user interfaces.
+  5. Seed: Attempts reproducible generation across identical requests.
+"""
+
 import os
 import sys
+from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# Ensure UTF-8 output on Windows terminal
+# Ensure UTF-8 output on Windows terminals
 if sys.stdout.encoding != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
-# ------------------------------------------------------------
-# CONFIGURATION
-# ------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Setup Credentials & Client
+# ---------------------------------------------------------------------------
+local_env = Path(__file__).resolve().parent / ".env"
+root_env = Path(__file__).resolve().parents[2] / ".env"
 
-load_dotenv()
+if local_env.exists():
+    load_dotenv(local_env)
+elif root_env.exists():
+    load_dotenv(root_env)
+else:
+    load_dotenv()
 
-API_KEY = os.getenv("OPENAI_API_KEY")
+API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("GEMINI_API_KEY")
 BASE_URL = os.getenv("OPENAI_BASE_URL")
-MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+MODEL = os.getenv("OPENAI_MODEL", "gemini-3.1-flash-lite")
 
 if not API_KEY:
-    raise ValueError("OPENAI_API_KEY not found in .env")
+    print("Error: Missing OPENAI_API_KEY in .env")
+    sys.exit(1)
 
-# Initialize client (supports both standard OpenAI or custom endpoints)
 client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
-
-# ------------------------------------------------------------
-# SAME PROMPT FOR TEMPERATURE EXPERIMENT
-# ------------------------------------------------------------
-
-PROMPT = """
-Explain Agentic AI in 5 sentences and give one real-world example.
-""".strip()
-
-SYSTEM = "You are a concise AI/ML instructor."
+PROMPT = "Explain Agentic AI in 3 concise sentences and provide one practical real-world example."
+SYSTEM_PROMPT = "You are an expert AI engineer explaining concepts with precision and clarity."
 
 
-# ------------------------------------------------------------
-# REQUIRED TASK:
-# TEMPERATURE = 0, 0.7, 1.2
-# ------------------------------------------------------------
+def test_temperature_effects() -> None:
+    """
+    Demonstrate how temperature affects response determinism.
+    - Temperature 0.0: Greedy sampling, consistent and analytical.
+    - Temperature 0.7: Balanced creativity, good for general assistance.
+    - Temperature 1.2: High entropy, diverse and creative phrasing.
+    """
+    print("\n" + "=" * 75)
+    print(" EXPERIMENT 1: TEMPERATURE VARIATION (0.0 vs 0.7 vs 1.2)")
+    print("=" * 75)
 
-def temperature_test():
+    temperatures = [0.0, 0.7, 1.2]
 
-    print("\n" + "=" * 60)
-    print("TEMPERATURE EXPERIMENT")
-    print("=" * 60)
-
-    for temperature in [0, 0.7, 1.2]:
-
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM
-                },
-                {
-                    "role": "user",
-                    "content": PROMPT
-                }
-            ],
-            temperature=temperature,
-            max_tokens=250  # Gives enough tokens for 5 sentences + example
-        )
-
-        content = response.choices[0].message.content or "(No text returned)"
-        print(f"\nTEMPERATURE = {temperature}")
-        print("-" * 60)
-        print(content.strip())
-
-
-# ------------------------------------------------------------
-# OTHER PARAMETERS — QUICK DEMO (top_p, max_tokens)
-# ------------------------------------------------------------
-
-def parameter_demo():
-
-    print("\n" + "=" * 60)
-    print("OTHER GENERATION PARAMETERS (top_p & max_tokens)")
-    print("=" * 60)
-
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": SYSTEM
-            },
-            {
-                "role": "user",
-                "content": "Explain what an LLM is in 2 short bullet points."
-            }
-        ],
-        temperature=0.7,
-        top_p=0.9,       # Nucleus sampling
-        max_tokens=150   # Limits generated output
-    )
-
-    content = response.choices[0].message.content or "(No text returned)"
-    print("\nTOP_P (0.9) + MAX_TOKENS (150):")
-    print(content.strip())
-
-
-# ------------------------------------------------------------
-# STREAMING
-# ------------------------------------------------------------
-
-def streaming_demo():
-
-    print("\n" + "=" * 60)
-    print("STREAMING DEMONSTRATION")
-    print("=" * 60)
-
-    stream = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {
-                "role": "user",
-                "content": "Explain tokens in an LLM in one sentence."
-            }
-        ],
-        max_tokens=100,
-        stream=True
-    )
-
-    print()
-    for chunk in stream:
-        if chunk.choices and chunk.choices[0].delta.content:
-            print(
-                chunk.choices[0].delta.content,
-                end="",
-                flush=True
-            )
-    print("\n")
-
-
-# ------------------------------------------------------------
-# SEED / REPRODUCIBILITY
-# ------------------------------------------------------------
-
-def seed_demo():
-
-    print("\n" + "=" * 60)
-    print("SEED / REPRODUCIBILITY")
-    print("=" * 60)
-
-    try:
-        for run in range(2):
+    for temp in temperatures:
+        try:
             response = client.chat.completions.create(
                 model=MODEL,
                 messages=[
-                    {
-                        "role": "user",
-                        "content": "Give three facts about machine learning."
-                    }
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": PROMPT}
+                ],
+                temperature=temp,
+                max_tokens=220
+            )
+            content = response.choices[0].message.content or "(No text returned)"
+            print(f"\n[Temperature: {temp}]")
+            print("-" * 75)
+            print(content.strip())
+        except Exception as e:
+            print(f"\n[Temperature: {temp}] Execution error: {e}")
+
+
+def test_top_p_and_max_tokens() -> None:
+    """
+    Demonstrate nucleus sampling (top_p) and output truncation (max_tokens).
+    """
+    print("\n" + "=" * 75)
+    print(" EXPERIMENT 2: TOP_P (0.85) AND MAX TOKENS (100)")
+    print("=" * 75)
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": "List 3 key differences between a chain and an autonomous agent."}
+            ],
+            temperature=0.5,
+            top_p=0.85,
+            max_tokens=120
+        )
+        content = response.choices[0].message.content or "(No text returned)"
+        tokens_used = response.usage.total_tokens if response.usage else 0
+        print("-" * 75)
+        print(content.strip())
+        print("-" * 75)
+        print(f"Tokens consumed: {tokens_used}")
+    except Exception as e:
+        print(f"Parameter test error: {e}")
+
+
+def test_streaming_generation() -> None:
+    """
+    Demonstrate real-time token streaming using server-sent events.
+    """
+    print("\n" + "=" * 75)
+    print(" EXPERIMENT 3: REAL-TIME TOKEN STREAMING")
+    print("=" * 75)
+    print("Streaming output: ", end="", flush=True)
+
+    try:
+        stream = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "user", "content": "Define 'context window' in two bullet points."}
+            ],
+            max_tokens=100,
+            stream=True
+        )
+
+        for chunk in stream:
+            if chunk.choices and chunk.choices[0].delta.content:
+                print(chunk.choices[0].delta.content, end="", flush=True)
+        print("\n")
+    except Exception as e:
+        print(f"\nStreaming error: {e}")
+
+
+def test_seed_reproducibility() -> None:
+    """
+    Demonstrate deterministic generation using a fixed random seed.
+    Note: Some third-party endpoints may not natively support the seed attribute.
+    """
+    print("=" * 75)
+    print(" EXPERIMENT 4: SEED REPRODUCIBILITY CHECK (seed=42)")
+    print("=" * 75)
+
+    try:
+        for run_idx in (1, 2):
+            response = client.chat.completions.create(
+                model=MODEL,
+                messages=[
+                    {"role": "user", "content": "Name three essential qualities of production code."}
                 ],
                 temperature=0.7,
-                max_tokens=150,
-                seed=42  # Attempt same seed for both runs
+                max_tokens=100,
+                seed=42
             )
-
             content = response.choices[0].message.content or "(No text returned)"
-            print(f"\nRUN {run + 1}:")
+            print(f"\nRun #{run_idx}:")
             print(content.strip())
-
     except Exception as e:
-        print(f"\n[Note on Seeds]:")
-        print(f"The 'seed' parameter is natively supported by OpenAI.")
-        print(f"Current endpoint ({MODEL}) does not support the 'seed' field: {e}")
+        print(f"Seed reproducibility note: Endpoint {MODEL} handled seed with notice: {e}")
 
 
-# ------------------------------------------------------------
-# MAIN PROGRAM
-# ------------------------------------------------------------
+def main() -> None:
+    print("=" * 75)
+    print(" DAY 01 - SESSION 03: LLM GENERATION PARAMETERS & STREAMING")
+    print("=" * 75)
+    print(f"Active Model: {MODEL}")
 
-def main():
+    test_temperature_effects()
+    test_top_p_and_max_tokens()
+    test_streaming_generation()
+    test_seed_reproducibility()
 
-    print("\nDAY 1 — SESSION 3")
-    print("GENERATION PARAMETERS")
-    print(f"MODEL: {MODEL}")
-
-    # 1. Required core task: Temperature 0, 0.7, 1.2
-    temperature_test()
-
-    # 2. Other parameter demonstrations
-    parameter_demo()
-
-    # 3. Streaming demonstration
-    streaming_demo()
-
-    # 4. Seed reproducibility check
-    seed_demo()
-
-    print("\n" + "=" * 60)
-    print("SESSION 3 COMPLETED SUCCESSFULLY")
-    print("=" * 60)
+    print("\n" + "=" * 75)
+    print("Session 03 generation experiments completed successfully.")
+    print("=" * 75 + "\n")
 
 
 if __name__ == "__main__":

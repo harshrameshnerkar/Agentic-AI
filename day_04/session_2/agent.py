@@ -25,10 +25,12 @@ from schemas import get_all_tools
 from tool_runtime import dispatch_tool
 
 load_dotenv()
+if not os.getenv("OPENAI_API_KEY"):
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
 BASE_URL = os.getenv("OPENAI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
 API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL = os.getenv("OPENAI_MODEL", "gemini-3.5-flash-lite")
+MODEL = os.getenv("OPENAI_MODEL", "gemini-3.1-flash-lite")
 
 
 class AgentStepTelemetry:

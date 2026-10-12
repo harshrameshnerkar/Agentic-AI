@@ -28,6 +28,8 @@ from schemas import TOOLS_SCHEMA
 from history_manager import ConversationHistoryManager
 
 load_dotenv()
+if not os.getenv("OPENAI_API_KEY"):
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
 SYSTEM_PROMPT = """You are an autonomous enterprise AI agent equipped with tools to query databases, read project files, perform mathematical calculations, and send notification emails.
 
@@ -76,7 +78,7 @@ class MultiStepToolAgent:
     ):
         self.api_key = os.getenv("OPENAI_API_KEY") or os.getenv("GEMINI_API_KEY")
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
-        self.model_name = model_name or os.getenv("OPENAI_MODEL", "gemini-flash-latest")
+        self.model_name = model_name or os.getenv("OPENAI_MODEL", "gemini-3.1-flash-lite")
         self.max_turns = max_turns
         self.enable_compaction = enable_compaction
         self.compaction_threshold = compaction_threshold

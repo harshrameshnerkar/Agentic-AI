@@ -1,154 +1,81 @@
+"""
+Day 02 - Session 01: Chain-of-Thought & Prompt Chaining
+========================================================
+Demonstrates the power of prompt decomposition when solving multi-step reasoning
+and mathematical problems:
+  - Method A (Direct): Single-shot prompting asking for the final answer directly.
+  - Method B (3-Step Chain): Decomposes the task into:
+      1. Variable & Constraint Extraction
+      2. Step-by-Step Intermediate Calculation
+      3. Verification & Final Formatting
+"""
+
 import os
 import sys
 import json
 import time
+from pathlib import Path
+from typing import Dict, Any, List
 from dotenv import load_dotenv
 from openai import OpenAI
+
+from dataset import REASONING_DATASET
 
 # Ensure UTF-8 output on Windows terminal
 if sys.stdout.encoding != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
-# =====================================================================
-# SETUP: LOAD CREDENTIALS & INITIALIZE CLIENT
-# =====================================================================
-load_dotenv()
+# ---------------------------------------------------------------------------
+# Setup Credentials & Client
+# ---------------------------------------------------------------------------
+local_env = Path(__file__).resolve().parent / ".env"
+root_env = Path(__file__).resolve().parents[2] / ".env"
 
-API_KEY = os.getenv("OPENAI_API_KEY")
+if local_env.exists():
+    load_dotenv(local_env)
+elif root_env.exists():
+    load_dotenv(root_env)
+else:
+    load_dotenv()
+
+API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("GEMINI_API_KEY")
 BASE_URL = os.getenv("OPENAI_BASE_URL")
-MODEL = os.getenv("OPENAI_MODEL", "gemini-3.5-flash-lite")
+MODEL = os.getenv("OPENAI_MODEL", "gemini-3.1-flash-lite")
 
 if not API_KEY:
-    raise ValueError("Missing OPENAI_API_KEY in .env file.")
+    print("Error: Missing OPENAI_API_KEY in .env")
+    sys.exit(1)
 
 client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
-# =====================================================================
-# BENCHMARK DATASET: 6 MULTI-STEP REASONING PROBLEMS
-# Each problem involves arithmetic, order of operations, and constraints.
-# =====================================================================
-DATASET = [
-    {
-        "id": 1,
-        "title": "Cloud Server Auto-Scaling Bill",
-        "problem": (
-            "A company runs 3 base servers 24 hours a day for 30 days at $0.50/hour each. "
-            "During peak hours (4 hours every day for all 30 days), they spin up 5 additional servers "
-            "at $0.80/hour each. They get a 10% volume discount on the total server usage bill before "
-            "a fixed $50 maintenance fee is added. What is the final monthly bill in dollars?"
-        ),
-        "ground_truth": 1454.0,
-        "tolerance": 0.01
-    },
-    {
-        "id": 2,
-        "title": "Warehouse Packaging & Pallet Logistics",
-        "problem": (
-            "A warehouse needs to ship 1,750 widgets. Each small box holds 12 widgets. "
-            "Any leftover widgets that don't fill a full box are packed in a special padded envelope. "
-            "Each pallet can hold up to 25 small boxes. Padded envelopes cannot be placed on pallets "
-            "and are shipped as individual loose items. "
-            "How many shipping containers total (pallets + loose small boxes not on pallets + padded envelopes) "
-            "must be loaded onto the shipping truck?"
-        ),
-        "ground_truth": 26.0,
-        "tolerance": 0.01
-    },
-    {
-        "id": 3,
-        "title": "Multi-Leg Flight Journey Duration",
-        "problem": (
-            "A traveler takes a multi-leg journey: Flight 1 takes 6 hours, followed by a 3-hour layover, "
-            "and Flight 2 takes 7 hours. However, Flight 1 was delayed by 45 minutes on departure, "
-            "reducing the layover time to 2 hours and 15 minutes because the connection was maintained. "
-            "Flight 2 experienced a 30-minute headwind delay in the air. "
-            "How many total elapsed hours (including delays and layovers) did the entire journey take "
-            "from the scheduled departure time of Flight 1 to the actual wheels-down arrival of Flight 2? "
-            "Provide the answer in total hours as a decimal."
-        ),
-        "ground_truth": 16.5,
-        "tolerance": 0.01
-    },
-    {
-        "id": 4,
-        "title": "Factory Machine Defect Rate",
-        "problem": (
-            "Machine A produces 150 microchips per hour with a 6% defect rate and runs for an 8-hour shift. "
-            "Machine B produces 200 microchips per hour with a 5% defect rate, but breaks down after running for only 5 hours. "
-            "All defective chips are discarded. How many total non-defective (good) chips were produced across both machines?"
-        ),
-        "ground_truth": 2078.0,
-        "tolerance": 0.01
-    },
-    {
-        "id": 5,
-        "title": "Subscription Downgrade Prorated Credit",
-        "problem": (
-            "A customer pays $90 upfront for a 30-day Premium plan. After exactly 10 days, they downgrade to a Basic plan "
-            "($30 per 30-day cycle) for the remaining 20 days. The billing system calculates unused credit on Premium for the 20 days "
-            "($90 * 20/30), subtracts the cost of the Basic plan for those 20 days ($30 * 20/30), and deducts a $5 downgrade "
-            "administrative fee. What is the net dollar credit refunded to the customer?"
-        ),
-        "ground_truth": 35.0,
-        "tolerance": 0.01
-    },
-    {
-        "id": 6,
-        "title": "Engineering Sprint Story Point Capacity",
-        "problem": (
-            "A software team has 6 engineers working 8 hours a day for a 10-day sprint. "
-            "25% of all total engineering hours are reserved for meetings, reviews, and support. "
-            "The remaining hours are dedicated to user story points. "
-            "If each story point requires exactly 3.6 dedicated engineering hours, "
-            "how many story points can the team complete in the sprint?"
-        ),
-        "ground_truth": 100.0,
-        "tolerance": 0.01
-    }
-]
 
-
-# =====================================================================
-# HELPER: RATE-LIMIT RESILIENT API CALL
-# =====================================================================
-def call_llm(messages: list, temperature: float = 0.0, response_format: dict = None, max_retries: int = 3) -> str:
-    """Wrapper around client.chat.completions.create with automatic rate limit backoff."""
-    for attempt in range(max_retries):
-        try:
-            kwargs = {
-                "model": MODEL,
-                "messages": messages,
-                "temperature": temperature
-            }
-            if response_format:
-                kwargs["response_format"] = response_format
-
-            resp = client.chat.completions.create(**kwargs)
-            return resp.choices[0].message.content.strip()
-
-        except Exception as e:
-            err = str(e)
-            if "429" in err or "RateLimitError" in type(e).__name__:
-                print("\n   [Rate Limit Notice] Cooling down for 32s to refresh free-tier quota...")
-                time.sleep(32)
-            elif attempt < max_retries - 1:
-                time.sleep(3)
-            else:
-                raise e
-
-
-# =====================================================================
-# METHOD A: DIRECT SINGLE PROMPT (ZERO-SHOT DIRECT)
-# Asking the model to produce the final answer immediately without CoT.
-# =====================================================================
-def solve_single_prompt(problem_text: str) -> dict:
+def call_llm(messages: List[Dict[str, str]], temperature: float = 0.0, response_format: Any = None) -> str:
     """
-    Direct prompting: Forces the model to output only the final number immediately.
-    Common failure mode: Models make calculation slips because no intermediate
-    reasoning tokens are generated before predicting the final number.
+    Standardized wrapper for chat completion with error handling.
+    """
+    try:
+        kwargs: Dict[str, Any] = {
+            "model": MODEL,
+            "messages": messages,
+            "temperature": temperature,
+        }
+        if response_format:
+            kwargs["response_format"] = response_format
+
+        response = client.chat.completions.create(**kwargs)
+        return (response.choices[0].message.content or "").strip()
+    except Exception as e:
+        print(f"API Error: {e}")
+        return "{}"
+
+
+def solve_direct(problem_text: str) -> Dict[str, Any]:
+    """
+    Method A: Direct Prompting.
+    Asks the model for the final numerical answer without encouraging intermediate work.
     """
     prompt = f"""Solve this problem. Provide ONLY a valid JSON object with the final numerical answer.
-Do NOT show any work, explanation, or intermediate text.
+Do NOT show any work, explanation, or conversational text.
 
 Problem:
 {problem_text}
@@ -156,7 +83,7 @@ Problem:
 Output format:
 {{"final_answer": <number>}}
 """
-    raw = call_llm(
+    raw_response = call_llm(
         messages=[
             {"role": "system", "content": "You are a concise computational assistant. Output only JSON."},
             {"role": "user", "content": prompt}
@@ -166,108 +93,80 @@ Output format:
     )
 
     try:
-        data = json.loads(raw)
-        return {"answer": float(data.get("final_answer", 0)), "raw": raw}
+        data = json.loads(raw_response)
+        return {"answer": float(data.get("final_answer", 0.0)), "raw": raw_response}
     except Exception:
-        # Fallback extraction if JSON parsing fails
         import re
-        numbers = re.findall(r"[-+]?\d*\.\d+|\d+", raw)
-        ans = float(numbers[-1]) if numbers else 0.0
-        return {"answer": ans, "raw": raw}
+        nums = re.findall(r"[-+]?\d*\.\d+|\d+", raw_response)
+        return {"answer": float(nums[-1]) if nums else 0.0, "raw": raw_response}
 
 
-# =====================================================================
-# METHOD B: 3-STEP PROMPT CHAIN (TASK DECOMPOSITION)
-# Splitting the problem into 3 discrete, specialized stages:
-#   Stage 1: Variable & Constraint Extractor
-#   Stage 2: Step-by-Step Reasoner & Intermediate Calculator
-#   Stage 3: Verifier & Final Output Formatter
-# =====================================================================
-def solve_three_step_chain(problem_text: str) -> dict:
+def solve_three_step_chain(problem_text: str) -> Dict[str, Any]:
     """
-    Prompt Chaining / Decomposition:
-    - Step 1: Extracts parameters, units, constraints into structured JSON.
-    - Step 2: Carries out calculation steps methodically using extracted data.
-    - Step 3: Verifies constraints, edge cases, and emits final verified number.
+    Method B: 3-Step Chain Decomposition.
+    Stage 1: Extract constants and constraints into structured JSON.
+    Stage 2: Carry out step-by-step arithmetic.
+    Stage 3: Verify constraints and output formatted answer.
     """
-    # -------------------------------------------------------------
-    # STAGE 1: VARIABLE & CONSTRAINT EXTRACTION
-    # -------------------------------------------------------------
-    stage1_prompt = f"""Read the problem and extract all numerical quantities, rates, durations, fees, and constraints.
-Do NOT solve the problem yet. Just extract the key facts into structured JSON.
+    # Stage 1: Extraction
+    stage1_prompt = f"""Read the problem carefully. Extract all numerical parameters, rates, constraints, and units.
+Do not solve yet. Output structured JSON.
 
 Problem:
 {problem_text}
 
-Return JSON with:
+JSON format:
 {{
-  "entities_and_values": {{ ... }},
-  "rules_and_constraints": [ ... ]
-}}
-"""
-    stage1_output = call_llm(
+  "parameters": {{ ... }},
+  "constraints": [ ... ]
+}}"""
+
+    stage1_json = call_llm(
         messages=[
-            {"role": "system", "content": "You are a data extraction specialist. Extract facts cleanly into JSON."},
+            {"role": "system", "content": "You are a parameter extraction engine. Output valid JSON."},
             {"role": "user", "content": stage1_prompt}
         ],
         temperature=0.0,
         response_format={"type": "json_object"}
     )
 
-    # Brief pacing delay between stages
-    time.sleep(1.0)
-
-    # -------------------------------------------------------------
-    # STAGE 2: STEP-BY-STEP REASONING & ARITHMETIC CALCULATION
-    # -------------------------------------------------------------
-    stage2_prompt = f"""Using the extracted facts below, calculate the intermediate values step by step.
-Show each intermediate calculation and formula clearly.
+    # Stage 2: Step-by-Step Reasoning
+    stage2_prompt = f"""Using these extracted parameters, perform the step-by-step arithmetic to solve the problem.
 
 Original Problem:
 {problem_text}
 
-Extracted Facts:
-{stage1_output}
+Extracted Parameters:
+{stage1_json}
 
-Return JSON with:
+JSON format:
 {{
-  "step_by_step_calculations": [ ... ],
-  "tentative_result": <number>
-}}
-"""
-    stage2_output = call_llm(
+  "steps": [ ... ],
+  "intermediate_result": <number>
+}}"""
+
+    stage2_json = call_llm(
         messages=[
-            {"role": "system", "content": "You are a mathematical reasoning engine. Execute computations step by step."},
+            {"role": "system", "content": "You are a mathematical calculation engine. Output valid JSON."},
             {"role": "user", "content": stage2_prompt}
         ],
         temperature=0.0,
         response_format={"type": "json_object"}
     )
 
-    time.sleep(1.0)
+    # Stage 3: Verification and Final Formatting
+    stage3_prompt = f"""Review the calculation steps against the original constraints to ensure no fees, units, or edge conditions were missed.
+Emit the final verified numerical answer.
 
-    # -------------------------------------------------------------
-    # STAGE 3: CONSTRAINT VERIFICATION & FINAL FORMATTING
-    # -------------------------------------------------------------
-    stage3_prompt = f"""Review the original problem, the extracted facts, and the calculations.
-Check for any overlooked constraints, order-of-operation issues, or rounding errors.
-Produce the final verified numerical answer.
+Calculation Summary:
+{stage2_json}
 
-Original Problem:
-{problem_text}
+JSON format:
+{{"final_answer": <number>}}"""
 
-Calculations:
-{stage2_output}
-
-Return JSON format:
-{{
-  "verification_notes": "<brief check>",
-  "final_answer": <number>
-}}
-"""
-    stage3_output = call_llm(
+    stage3_json = call_llm(
         messages=[
-            {"role": "system", "content": "You are a strict QA auditor and verifier. Output verified JSON."},
+            {"role": "system", "content": "You are a verification engine. Output valid JSON."},
             {"role": "user", "content": stage3_prompt}
         ],
         temperature=0.0,
@@ -275,109 +174,72 @@ Return JSON format:
     )
 
     try:
-        data = json.loads(stage3_output)
-        return {
-            "answer": float(data.get("final_answer", 0)),
-            "stage1": stage1_output,
-            "stage2": stage2_output,
-            "stage3": stage3_output
-        }
+        data = json.loads(stage3_json)
+        return {"answer": float(data.get("final_answer", 0.0)), "chain": stage3_json}
     except Exception:
         import re
-        numbers = re.findall(r"[-+]?\d*\.\d+|\d+", stage3_output)
-        ans = float(numbers[-1]) if numbers else 0.0
-        return {"answer": ans, "stage3": stage3_output}
+        nums = re.findall(r"[-+]?\d*\.\d+|\d+", stage3_json)
+        return {"answer": float(nums[-1]) if nums else 0.0, "chain": stage3_json}
 
 
-# =====================================================================
-# BENCHMARK EXECUTION & ACCURACY COMPARISON
-# =====================================================================
-def main():
-    print("=" * 95)
-    print(" DAY 2 - SESSION 1: CHAIN-OF-THOUGHT & TASK DECOMPOSITION BENCHMARK")
-    print("=" * 95)
-    print(f"Model Under Test : {MODEL}")
-    print(f"Total Problems   : {len(DATASET)}")
-    print("Comparing        : Single Direct Prompt vs. 3-Step Decomposed Chain")
-    print("=" * 95)
+def run_benchmark(problems: List[Dict[str, Any]]) -> None:
+    print("=" * 85)
+    print(" DAY 02 - SESSION 01: DIRECT PROMPTING vs 3-STEP CHAIN DECOMPOSITION")
+    print("=" * 85)
+    print(f"Active Model       : {MODEL}")
+    print(f"Problem Count      : {len(problems)}")
+    print("=" * 85)
+    print()
 
-    single_correct = 0
+    direct_correct = 0
     chain_correct = 0
 
-    results = []
+    print(f"{'#':<3} {'Problem Title':<32} {'Ground Truth':<14} {'Direct Ans':<14} {'Chain Ans':<14}")
+    print("-" * 85)
 
-    for item in DATASET:
-        p_id = item["id"]
-        title = item["title"]
-        problem = item["problem"]
-        expected = item["ground_truth"]
-        tol = item["tolerance"]
+    for p in problems:
+        p_id = p["id"]
+        title = p["title"]
+        gt = p["ground_truth"]
+        tol = p["tolerance"]
 
-        print(f"\n[Problem {p_id}/6]: {title}")
-        print("-" * 95)
+        # Run Method A
+        res_a = solve_direct(p["problem"])
+        ans_a = res_a["answer"]
+        match_a = abs(ans_a - gt) <= tol
+        if match_a:
+            direct_correct += 1
 
-        # 1. Run Single Direct Prompt
-        print("   Running Method A (Single Direct Prompt)...", end="", flush=True)
-        res_single = solve_single_prompt(problem)
-        ans_single = res_single["answer"]
-        match_single = abs(ans_single - expected) <= tol
-        if match_single:
-            single_correct += 1
-            print(f" Answer: {ans_single} ✅ PASS")
-        else:
-            print(f" Answer: {ans_single} (Expected: {expected}) ❌ FAIL")
-
-        # Pace calls to stay under free tier limit
-        time.sleep(3.5)
-
-        # 2. Run 3-Step Decomposed Chain
-        print("   Running Method B (3-Step Chain Pipeline)...", end="", flush=True)
-        res_chain = solve_three_step_chain(problem)
-        ans_chain = res_chain["answer"]
-        match_chain = abs(ans_chain - expected) <= tol
-        if match_chain:
+        # Run Method B
+        res_b = solve_three_step_chain(p["problem"])
+        ans_b = res_b["answer"]
+        match_b = abs(ans_b - gt) <= tol
+        if match_b:
             chain_correct += 1
-            print(f" Answer: {ans_chain} ✅ PASS")
-        else:
-            print(f" Answer: {ans_chain} (Expected: {expected}) ❌ FAIL")
 
-        results.append({
-            "id": p_id,
-            "title": title,
-            "expected": expected,
-            "single_ans": ans_single,
-            "single_match": match_single,
-            "chain_ans": ans_chain,
-            "chain_match": match_chain
-        })
+        mark_a = "PASS" if match_a else "FAIL"
+        mark_b = "PASS" if match_b else "FAIL"
 
-        # Inter-problem pacing
-        time.sleep(3.5)
+        print(f"{p_id:<3} {title[:30]:<32} {gt:<14.2f} {ans_a:<8.2f}({mark_a})  {ans_b:<8.2f}({mark_b})")
+        time.sleep(0.5)
 
-    # -------------------------------------------------------------
-    # FINAL COMPARATIVE EVALUATION TABLE
-    # -------------------------------------------------------------
-    print("\n" + "=" * 95)
-    print(" COMPARATIVE BENCHMARK REPORT: SINGLE PROMPT VS 3-STEP CHAIN")
-    print("=" * 95)
-    print(f"{'ID':<4} {'Problem Title':<38} {'Expected':<10} {'Single':<12} {'3-Step Chain':<12} {'Advantage'}")
-    print("-" * 95)
+    print("-" * 85)
+    print("COMPARATIVE RESULTS:")
+    print(f"  Method A (Direct Single-Shot) : {direct_correct}/{len(problems)} ({direct_correct / len(problems) * 100:.1f}%)")
+    print(f"  Method B (3-Step Chain)       : {chain_correct}/{len(problems)} ({chain_correct / len(problems) * 100:.1f}%)")
+    print("=" * 85)
+    print("Reasoning benchmark completed successfully.\n")
 
-    for r in results:
-        single_str = f"{r['single_ans']} {'✅' if r['single_match'] else '❌'}"
-        chain_str = f"{r['chain_ans']} {'✅' if r['chain_match'] else '❌'}"
-        advantage = "Chain Won" if (r['chain_match'] and not r['single_match']) else ("Tie" if r['chain_match'] == r['single_match'] else "Single Won")
-        print(f"{r['id']:<4} {r['title'][:36]:<38} {r['expected']:<10} {single_str:<12} {chain_str:<12} {advantage}")
 
-    acc_single = (single_correct / len(DATASET)) * 100
-    acc_chain = (chain_correct / len(DATASET)) * 100
+def main() -> None:
+    if "--full" in sys.argv or "--all" in sys.argv:
+        subset = REASONING_DATASET
+    else:
+        # First 2 problems by default for snappy demonstration
+        subset = REASONING_DATASET[:2]
+        print("[Note] Running 2-problem demo. Pass '--full' to evaluate all 6 problems.\n")
 
-    print("-" * 95)
-    print(f"Method A (Single Direct Prompt) Accuracy : {single_correct}/{len(DATASET)} ({acc_single:.1f}%)")
-    print(f"Method B (3-Step Decomposed Chain) Accuracy : {chain_correct}/{len(DATASET)} ({acc_chain:.1f}%)")
-    print("=" * 95)
-    print(f"Accuracy Delta: +{acc_chain - acc_single:.1f}% improvement via Task Decomposition & Chain-of-Thought!")
-    print("=" * 95)
+    run_benchmark(subset)
 
 
 if __name__ == "__main__":

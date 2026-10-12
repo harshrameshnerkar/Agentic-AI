@@ -77,30 +77,30 @@ MOCK_RUNBOOKS = {
 # =====================================================================
 
 def sync_query_telemetry_db(table: str, filter_service: Optional[str] = None) -> Dict[str, Any]:
-    """Synchronously queries telemetry database. Simulates 120ms network I/O."""
-    time.sleep(0.12)
+    """Synchronously queries telemetry database. Simulates 250ms network I/O."""
+    time.sleep(0.25)
     tbl = table.lower().strip()
     if tbl not in MOCK_TELEMETRY_DB:
         return {"status": "ERROR", "error": f"Table '{table}' not found in telemetry DB."}
     data = MOCK_TELEMETRY_DB[tbl]
     if filter_service:
         data = [r for r in data if r.get("name") == filter_service or r.get("service") == filter_service]
-    return {"status": "SUCCESS", "tool": "query_telemetry_db", "data": data, "latency_ms": 120.0}
+    return {"status": "SUCCESS", "tool": "query_telemetry_db", "data": data, "latency_ms": 250.0}
 
 
 def sync_read_system_logs(path: str, max_lines: int = 5) -> Dict[str, Any]:
-    """Synchronously reads container logs. Simulates 150ms remote disk I/O."""
-    time.sleep(0.15)
+    """Synchronously reads container logs. Simulates 300ms remote disk I/O."""
+    time.sleep(0.30)
     p = path.strip()
     if p in MOCK_SYSTEM_LOGS:
         lines = MOCK_SYSTEM_LOGS[p].strip().split("\n")[:max_lines]
-        return {"status": "SUCCESS", "tool": "read_system_logs", "path": p, "content": "\n".join(lines), "latency_ms": 150.0}
-    return {"status": "ERROR", "error": f"Log path '{path}' not found.", "latency_ms": 150.0}
+        return {"status": "SUCCESS", "tool": "read_system_logs", "path": p, "content": "\n".join(lines), "latency_ms": 300.0}
+    return {"status": "ERROR", "error": f"Log path '{path}' not found.", "latency_ms": 300.0}
 
 
 def sync_search_runbooks(query: str) -> Dict[str, Any]:
-    """Synchronously performs vector semantic search across runbooks. Simulates 180ms vector DB I/O."""
-    time.sleep(0.18)
+    """Synchronously performs vector semantic search across runbooks. Simulates 350ms vector DB I/O."""
+    time.sleep(0.35)
     q_lower = query.lower()
     matches = []
     for r_id, rb in MOCK_RUNBOOKS.items():
@@ -108,7 +108,7 @@ def sync_search_runbooks(query: str) -> Dict[str, Any]:
             matches.append({"runbook_id": r_id, **rb})
     if not matches:
         matches = [{"runbook_id": "RUNBOOK-01", **MOCK_RUNBOOKS["RUNBOOK-01"]}]
-    return {"status": "SUCCESS", "tool": "search_runbooks", "matches": matches, "latency_ms": 180.0}
+    return {"status": "SUCCESS", "tool": "search_runbooks", "matches": matches, "latency_ms": 350.0}
 
 
 def sync_calculate_metrics(expression: str) -> Dict[str, Any]:
@@ -135,30 +135,30 @@ def sync_restart_service(service: str, approval_token: str) -> Dict[str, Any]:
 # =====================================================================
 
 async def async_query_telemetry_db(table: str, filter_service: Optional[str] = None) -> Dict[str, Any]:
-    """Asynchronously queries telemetry database. Non-blocking 120ms I/O."""
-    await asyncio.sleep(0.12)
+    """Asynchronously queries telemetry database. Non-blocking 100ms I/O."""
+    await asyncio.sleep(0.10)
     tbl = table.lower().strip()
     if tbl not in MOCK_TELEMETRY_DB:
         return {"status": "ERROR", "error": f"Table '{table}' not found in telemetry DB."}
     data = MOCK_TELEMETRY_DB[tbl]
     if filter_service:
         data = [r for r in data if r.get("name") == filter_service or r.get("service") == filter_service]
-    return {"status": "SUCCESS", "tool": "query_telemetry_db", "data": data, "latency_ms": 120.0}
+    return {"status": "SUCCESS", "tool": "query_telemetry_db", "data": data, "latency_ms": 100.0}
 
 
 async def async_read_system_logs(path: str, max_lines: int = 5) -> Dict[str, Any]:
-    """Asynchronously reads remote container logs. Non-blocking 150ms I/O."""
-    await asyncio.sleep(0.15)
+    """Asynchronously reads remote container logs. Non-blocking 120ms I/O."""
+    await asyncio.sleep(0.12)
     p = path.strip()
     if p in MOCK_SYSTEM_LOGS:
         lines = MOCK_SYSTEM_LOGS[p].strip().split("\n")[:max_lines]
-        return {"status": "SUCCESS", "tool": "read_system_logs", "path": p, "content": "\n".join(lines), "latency_ms": 150.0}
-    return {"status": "ERROR", "error": f"Log path '{path}' not found.", "latency_ms": 150.0}
+        return {"status": "SUCCESS", "tool": "read_system_logs", "path": p, "content": "\n".join(lines), "latency_ms": 120.0}
+    return {"status": "ERROR", "error": f"Log path '{path}' not found.", "latency_ms": 120.0}
 
 
 async def async_search_runbooks(query: str) -> Dict[str, Any]:
-    """Asynchronously queries vector embedding database. Non-blocking 180ms I/O."""
-    await asyncio.sleep(0.18)
+    """Asynchronously queries vector embedding database. Non-blocking 150ms I/O."""
+    await asyncio.sleep(0.15)
     q_lower = query.lower()
     matches = []
     for r_id, rb in MOCK_RUNBOOKS.items():
@@ -166,7 +166,7 @@ async def async_search_runbooks(query: str) -> Dict[str, Any]:
             matches.append({"runbook_id": r_id, **rb})
     if not matches:
         matches = [{"runbook_id": "RUNBOOK-01", **MOCK_RUNBOOKS["RUNBOOK-01"]}]
-    return {"status": "SUCCESS", "tool": "search_runbooks", "matches": matches, "latency_ms": 180.0}
+    return {"status": "SUCCESS", "tool": "search_runbooks", "matches": matches, "latency_ms": 150.0}
 
 
 async def async_calculate_metrics(expression: str) -> Dict[str, Any]:
