@@ -1,8 +1,7 @@
 # Day 20 - Session 3: Engineering Sprint Retrospective
 
-**Date:** October 10, 2026 | 14:00 - 16:00 (2.0 hours)  
 **Topic:** Sprint Board Variance, Technical Lessons & Radical Candor  
-**Participants:** Harsh Ramesh Nerkar (Systems Engineer / Intern), Dr. Elena Rostova (Principal AI Systems Architect / Mentor)  
+**Participants:** Harsh Ramesh Nerkar (AI Intern), Dr. Elena Rostova (Principal AI Systems Architect / Mentor)  
 **System:** OpsSentinel AI Enterprise (`v1.0.0-rc1`)
 
 ---
