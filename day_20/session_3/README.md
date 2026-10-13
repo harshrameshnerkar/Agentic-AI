@@ -3,7 +3,6 @@
 ## 📌 Syllabus & Session Objectives
 - **Session:** Day 20 - Session 3: Sprint Retrospective
 - **Topic:** Demo, Retrospective & Final Assessment — Honest Estimation Variance & Technical Lessons
-- **Timebox:** 14:00 - 16:00 (2.0 hours)
 - **What to Learn:** What went well, what did not, where the estimates were wrong and why, what you would do differently. Reviewing the Sprint Board variance honestly rather than defending it.
 - **Task:** A written retrospective including at least 3 specific mistakes and their lessons.
 - **Resources:** Intern (Harsh Ramesh Nerkar) + Mentor (Dr. Elena Rostova).
