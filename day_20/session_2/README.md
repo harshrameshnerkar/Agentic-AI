@@ -3,7 +3,6 @@
 ## 📌 Syllabus & Session Objectives
 - **Session:** Day 20 - Session 2: Results & Limitations Report
 - **Topic:** Demo, Retrospective & Final Assessment — Formal 3-Page Technical Results Evaluation
-- **Timebox:** 11:00 - 13:00 (2.0 hours)
 - **What to Learn:** Pass rate by query type against the Day 1 criterion, cost per query and projected monthly spend, p95 latency, safety posture, what was cut and why, honest limitations.
 - **Task:** A 3-page final report submitted.
 - **Resources:** Intern (Harsh Ramesh Nerkar).
