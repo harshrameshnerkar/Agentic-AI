@@ -42,7 +42,7 @@ class Embedder:
         self.pacing_seconds = pacing_seconds
         self.client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
-    def embed_texts(self, texts: List[str], cache_key: str = None) -> np.ndarray:
+    def embed_texts(self, texts: List[str], cache_key: str | None = None) -> np.ndarray:
         """
         Embeds a list of text strings in paced batches.
 
@@ -117,6 +117,8 @@ class Embedder:
                     time.sleep(wait_time)
                 else:
                     raise e
+
+        raise RuntimeError(f"Failed to generate embedding for query after {max_retries} attempts.")
 
 
 if __name__ == "__main__":
