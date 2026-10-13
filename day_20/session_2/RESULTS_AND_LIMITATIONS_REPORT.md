@@ -1,9 +1,8 @@
 # OpsSentinel AI Enterprise — Final Results & Limitations Report
 
 **Document Classification:** Enterprise Engineering Technical Report  
-**Author:** Harsh Ramesh Nerkar (Systems Engineer)  
+**Author:** Harsh Ramesh Nerkar (AI Intern)  
 **Lead Reviewer:** Dr. Elena Rostova (Principal AI Systems Architect)  
-**Date:** October 10, 2026  
 **Target Release:** `v1.0.0-rc1`
 
 ---
