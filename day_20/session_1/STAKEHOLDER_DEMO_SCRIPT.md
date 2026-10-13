@@ -1,7 +1,6 @@
 # Day 20 - Session 1: Stakeholder Demo & Executive Presentation
 
-**Session Date:** October 10, 2026 | 09:30 - 11:00 (1.5 hours)  
-**Presenter:** Harsh Ramesh Nerkar (Systems Engineer / Intern)  
+**Presenter:** Harsh Ramesh Nerkar (AI Intern)  
 **Stakeholder Audience:**  
 - **Marcus Vance** (VP of Cloud Infrastructure & SRE Operations)  
 - **Sarah Lin** (Staff SRE / On-Call Incident Commander)  
@@ -22,11 +21,11 @@
 
 ## ⏱️ 20-Minute Demo Agenda & Script
 
-### Minutes 00:00 – 03:00: The Business & Workflow Impact
+### The Business & Workflow Impact
 - **The Problem Before:** Tier-1 on-call human SREs spent an average of **42.4 minutes** manually context-switching between AWS CloudWatch, Datadog, Slack alerts, and outdated Confluence runbooks. SRE toil cost estimated at **$42,500/month**.
 - **The Solution Now:** OpsSentinel AI triages, correlates telemetry, and surfaces verified runbook remediations in **45 milliseconds** with an evaluation pass rate of **100.0%** and unit cost of **$0.0028/query**.
 
-### Minutes 03:00 – 10:00: Live Incident Triage (2 Real Production Scenarios)
+### Live Incident Triage (2 Real Production Scenarios)
 1. **Scenario 1: Ephemeral Pod Connection Leak (PostgreSQL)**
    - *Inbound Alert:* `CRITICAL: db_connection_pool_exhausted on prod-orders-db-01 (active=250/250)`
    - *Agent Action:* Classifies blast radius (Tier 2 - Safe Read/Config), extracts root cause (connection leak in checkout-service v2.4.1), and generates read-only connection drain command.
@@ -37,13 +36,13 @@
    - *Agent Action:* Identifies Tier 3 (Destructive Write). Immediately blocks execution, transitions state to `AWAITING_APPROVAL`, generates single-use HMAC token, and demands cryptographic SRE approval.
    - *Human Action:* Sarah Lin signs HMAC token. Agent verifies nonce and records action in SHA-256 hash-chained audit log.
 
-### Minutes 10:00 – 15:00: Explicit "What It Must NOT Be Trusted With"
+### Explicit "What It Must NOT Be Trusted With"
 We explicitly showed the stakeholders what OpsSentinel AI **REFUSES** to do:
 1. **No Autonomous Destructive Execution:** The agent will NEVER restart, terminate, or drop a database/node without human HMAC sign-off.
 2. **No Hallucinated Runbooks:** Queries with vector similarity $< 0.40$ are rejected with `UNABLE_TO_RETRIEVE` and routed to a human.
 3. **No Unsanitized Inputs:** Logs with embedded prompt injections are instantly aborted with security audit alerts.
 
-### Minutes 15:00 – 20:00: Stakeholder Q&A and Formal Acceptance
+### Stakeholder Q&A and Formal Acceptance
 
 ---
 
