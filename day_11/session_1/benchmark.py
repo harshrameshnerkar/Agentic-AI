@@ -19,12 +19,6 @@ import json
 import numpy as np
 from typing import List, Dict, Any
 
-# Ensure UTF-8 output on Windows terminal
-if sys.platform == "win32":
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
 
 from dataset import BENCHMARK_DATASET, EvaluationTestCase
 from naive_rag import naive_rag

@@ -7,13 +7,6 @@ import os
 import sys
 from typing import List, Tuple, Dict, Any
 
-# Set UTF-8 encoding for Windows consoles
-if sys.platform == "win32":
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
 
 
 def validate_status_file(filepath: str) -> Tuple[bool, List[str], List[str]]:

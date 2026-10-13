@@ -12,8 +12,6 @@ Autonomous multi-step agent orchestrating a 4-tool chain:
 
 from __future__ import annotations
 import sys
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8")
 
 import os
 import re

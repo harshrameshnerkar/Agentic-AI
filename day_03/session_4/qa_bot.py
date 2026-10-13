@@ -16,9 +16,6 @@ import time
 from pathlib import Path
 from typing import List, Dict, Any
 
-# Ensure UTF-8 terminal encoding on Windows
-if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding="utf-8")
 
 from pipeline import RAGPipeline, RAGQueryResult
 

@@ -185,8 +185,6 @@ async def run_mcp_client_direct_demo():
       1. Tool 1: list_directory
       2. Tool 2: read_file
     """
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
 
     print("\n" + "=" * 75)
     print(" 🔌 MCP CLIENT DEMO: Connecting to Filesystem MCP Server via stdio")
