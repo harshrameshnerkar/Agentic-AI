@@ -81,7 +81,7 @@ def format_bot_response(res: RAGQueryResult) -> str:
         output.append("\nVERIFIED CITATIONS:")
         if res.citations:
             for cit in res.citations:
-                output.append(f"  [✓] {cit}")
+                output.append(f"  [PASS] {cit}")
         else:
             output.append("  (No direct in-line citations detected)")
 

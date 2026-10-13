@@ -5,7 +5,7 @@
     "static_pass_rate_pct": 100.0,
     "ephemeral_pass_rate_pct": 0.0,
     "avg_recall_pct": 30.0,
-    "avg_latency_ms": 280.1,
+    "avg_latency_ms": 280.0,
     "avg_cost_usd": 0.000115,
     "total_passed": 6,
     "total_cases": 20
@@ -16,7 +16,7 @@
     "static_pass_rate_pct": 100.0,
     "ephemeral_pass_rate_pct": 0.0,
     "avg_recall_pct": 30.0,
-    "avg_latency_ms": 310.1,
+    "avg_latency_ms": 310.0,
     "avg_cost_usd": 0.00013,
     "total_passed": 6,
     "total_cases": 20
@@ -27,7 +27,7 @@
     "static_pass_rate_pct": 100.0,
     "ephemeral_pass_rate_pct": 100.0,
     "avg_recall_pct": 95.7,
-    "avg_latency_ms": 883.4,
+    "avg_latency_ms": 868.0,
     "avg_cost_usd": 0.000351,
     "total_passed": 20,
     "total_cases": 20
@@ -38,7 +38,7 @@
     "static_pass_rate_pct": 100.0,
     "ephemeral_pass_rate_pct": 100.0,
     "avg_recall_pct": 95.7,
-    "avg_latency_ms": 762.8,
+    "avg_latency_ms": 752.0,
     "avg_cost_usd": 0.000329,
     "total_passed": 20,
     "total_cases": 20

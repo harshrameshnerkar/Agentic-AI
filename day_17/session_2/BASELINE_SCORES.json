@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-09T07:48:43Z",
+  "timestamp": "2026-10-13T14:22:45Z",
   "dataset_size": 20,
   "plain_summary": {
     "name": "Baseline 1: Plain Prompt (Zero-Shot)",
@@ -8,7 +8,7 @@
     "overall_pass_rate_pct": 0.0,
     "static_runbook_pass_rate_pct": 0.0,
     "ephemeral_cluster_pass_rate_pct": 0.0,
-    "avg_indicator_recall_pct": 3.75,
+    "avg_indicator_recall_pct": 0.0,
     "generic_guess_rate_pct": 100.0,
     "avg_latency_ms": 120.0,
     "avg_cost_usd": 4.5e-05
@@ -22,7 +22,7 @@
     "ephemeral_cluster_pass_rate_pct": 0.0,
     "avg_indicator_recall_pct": 30.0,
     "generic_guess_rate_pct": 50.0,
-    "avg_latency_ms": 280.13,
+    "avg_latency_ms": 280.0,
     "avg_cost_usd": 0.000115
   },
   "detailed_plain_results": [
@@ -40,7 +40,7 @@
       "incident_id": "INC-102",
       "category": "static_runbook",
       "service": "vault-infra",
-      "indicator_recall": 0.25,
+      "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
       "latency_ms": 120.0,
@@ -60,7 +60,7 @@
       "incident_id": "INC-104",
       "category": "static_runbook",
       "service": "cloud-storage",
-      "indicator_recall": 0.5,
+      "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
       "latency_ms": 120.0,
@@ -235,7 +235,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": false,
-      "latency_ms": 280.21,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -245,7 +245,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.14,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -255,7 +255,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": false,
-      "latency_ms": 280.13,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -265,7 +265,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.11,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -275,7 +275,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.13,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -285,7 +285,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.13,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -295,7 +295,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.14,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -305,7 +305,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.23,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -315,7 +315,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.11,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -325,7 +325,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.12,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -335,7 +335,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.12,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -345,7 +345,7 @@
       "indicator_recall": 1.0,
       "is_pass": true,
       "is_generic": false,
-      "latency_ms": 280.12,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -355,7 +355,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.11,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -365,7 +365,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": false,
-      "latency_ms": 280.1,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -375,7 +375,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.12,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -385,7 +385,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.12,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -395,7 +395,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.12,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -405,7 +405,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.13,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -415,7 +415,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": false,
-      "latency_ms": 280.1,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     },
     {
@@ -425,7 +425,7 @@
       "indicator_recall": 0.0,
       "is_pass": false,
       "is_generic": true,
-      "latency_ms": 280.12,
+      "latency_ms": 280.0,
       "cost_usd": 0.000115
     }
   ]

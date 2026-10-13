@@ -44,35 +44,35 @@
     "MUST_HAVE": [
       {
         "id": "MUST-01",
-        "name": "30-Case Golden Evaluation Harness",
+        "name": "30-Case Golden Harness",
         "sp": 3,
         "hours": 2.5,
         "owner": "Harsh"
       },
       {
         "id": "MUST-02",
-        "name": "De-Risk Riskiest Tool Integration",
+        "name": "De-Risk Riskiest Tool",
         "sp": 5,
         "hours": 4.0,
         "owner": "Harsh"
       },
       {
         "id": "MUST-03",
-        "name": "Non-Agent Baseline Scoring (Plain vs RAG)",
+        "name": "Non-Agent Baseline Scoring",
         "sp": 3,
         "hours": 3.0,
         "owner": "Harsh"
       },
       {
         "id": "MUST-04",
-        "name": "Ephemeral Cluster Telemetry Diagnostic Tool",
+        "name": "Ephemeral Diagnostic Tool",
         "sp": 5,
         "hours": 4.5,
         "owner": "Harsh"
       },
       {
         "id": "MUST-05",
-        "name": "Cryptographic HMAC-SHA256 HITL Gateway",
+        "name": "HMAC-SHA256 HITL Gateway",
         "sp": 5,
         "hours": 4.0,
         "owner": "Harsh"
@@ -81,28 +81,28 @@
     "SHOULD_HAVE": [
       {
         "id": "SHOULD-01",
-        "name": "Sub-5ms Intent Router",
+        "name": "Intent Router",
         "sp": 3,
         "hours": 2.5,
         "owner": "Harsh"
       },
       {
         "id": "SHOULD-02",
-        "name": "In-Process 50k-Line Log Compactor",
+        "name": "Log Compactor",
         "sp": 3,
         "hours": 2.5,
         "owner": "Harsh"
       },
       {
         "id": "SHOULD-03",
-        "name": "Redis Cluster State In-Memory Cache (30s TTL)",
+        "name": "Redis State Cache",
         "sp": 5,
         "hours": 4.0,
         "owner": "Harsh"
       },
       {
         "id": "SHOULD-04",
-        "name": "Automated CI Regression Gate",
+        "name": "CI Regression Gate",
         "sp": 2,
         "hours": 2.0,
         "owner": "Harsh"
@@ -111,14 +111,14 @@
     "COULD_HAVE": [
       {
         "id": "COULD-01",
-        "name": "Slack / PagerDuty Interactive Webhook Bot",
+        "name": "Slack Webhook Bot",
         "sp": 5,
         "hours": 4.0,
         "owner": "Harsh"
       },
       {
         "id": "COULD-02",
-        "name": "Automated Postmortem Markdown Generator",
+        "name": "Postmortem Generator",
         "sp": 3,
         "hours": 3.0,
         "owner": "Harsh"
@@ -127,17 +127,17 @@
     "WONT_HAVE": [
       {
         "id": "WONT-01",
-        "name": "Autonomous Production Database Migrations",
-        "reason": "Violates Red Line #1"
+        "name": "DB Migrations",
+        "reason": "Red Line 1"
       },
       {
         "id": "WONT-02",
-        "name": "Fine-Tuning a Foundation LLM from Scratch",
-        "reason": "Prohibitive compute cost ($>50k)"
+        "name": "Train LLM from scratch",
+        "reason": "Prohibitive cost"
       },
       {
         "id": "WONT-03",
-        "name": "Multi-Cloud Autonomous Failover (AWS to GCP)",
+        "name": "Multi-Cloud failover",
         "reason": "Out of scope"
       }
     ]

@@ -156,13 +156,13 @@ class SelfCorrectingAgent:
                 is_error = observation.get("status") == "error"
                 if is_error:
                     errors_encountered += 1
-                    print(f"  ⚠️ TOOL RETURNED ERROR OBSERVATION: {observation.get('error_type')}", flush=True)
+                    print(f"  [ERROR] TOOL RETURNED ERROR OBSERVATION: {observation.get('error_type')}", flush=True)
                     print(f"     Feedback Sent to Model: {observation.get('message')}", flush=True)
                 else:
                     if errors_encountered > 0 and self_corrections < errors_encountered:
                         self_corrections += 1
-                        print(f"  ✅ MODEL SUCCESSFULLY SELF-CORRECTED on Turn {turn}!", flush=True)
-                    print(f"  ✓ Tool Execution Succeeded.", flush=True)
+                        print(f"  [OK] MODEL SUCCESSFULLY SELF-CORRECTED on Turn {turn}!", flush=True)
+                    print(f"  [OK] Tool Execution Succeeded.", flush=True)
 
                 turn_logs.append({
                     "turn": turn,

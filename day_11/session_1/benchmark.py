@@ -66,8 +66,8 @@ def run_benchmark():
         naive_results.append(res_naive)
         adaptive_results.append(res_adaptive)
 
-        status_naive = "✓" if naive_passed else "✗"
-        status_adapt = "✓" if adaptive_passed else "✗"
+        status_naive = "PASS" if naive_passed else "FAIL"
+        status_adapt = "PASS" if adaptive_passed else "FAIL"
 
         print(
             f" [{idx:02d}/{total_tests}] {tc.test_id:<12} | Category: {tc.category:<15} | "
@@ -193,7 +193,7 @@ def run_benchmark():
     json_path = os.path.join(current_dir, "benchmark_results.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(results_payload, f, indent=2)
-    print(f"\n[✓] Raw benchmark telemetry saved to: {json_path}")
+    print(f"\n[OK] Raw benchmark telemetry saved to: {json_path}")
 
     # Persist benchmark_summary.md
     summary_path = os.path.join(current_dir, "benchmark_summary.md")
@@ -230,7 +230,7 @@ def run_benchmark():
 3. **Corrective RAG (CRAG) Precision**: Low-confidence semantic queries triggered the Retrieve-Grade-Rewrite loop, expanding acronyms and focusing keywords before synthesis.
 4. **Multi-Hop Fusion**: Hybrid questions successfully merged live database metrics with governing corporate policies.
 """)
-    print(f"[✓] Formatted markdown summary saved to: {summary_path}\n")
+    print(f"[OK] Formatted markdown summary saved to: {summary_path}\n")
 
 
 if __name__ == "__main__":

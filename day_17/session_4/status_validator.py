@@ -54,14 +54,14 @@ if __name__ == "__main__":
     print(" DAY 17 - SESSION 4: 5-LINE EXECUTIVE STATUS UPDATE VALIDATOR")
     print("=" * 80)
     if valid:
-        print("[✓] Status update passed all 5 strict validation checks:")
+        print("[PASS] Status update passed all 5 strict validation checks:")
         print("-" * 80)
         for idx, line in enumerate(lines, 1):
             print(f"  Line {idx}: {line}")
         print("-" * 80)
-        print("[✓] Exactly 5 lines verified. Ready for mentor sign-off.")
+        print("[PASS] Exactly 5 lines verified. Ready for mentor sign-off.")
     else:
-        print("[✗] Validation failed with errors:")
+        print("[FAIL] Validation failed with errors:")
         for e in errors:
             print(f"  - {e}")
     print("=" * 80)

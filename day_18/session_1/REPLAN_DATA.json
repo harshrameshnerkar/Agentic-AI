@@ -24,7 +24,7 @@
       "to_category": "COULD_HAVE",
       "story_points": 5,
       "hours": 4.5,
-      "reason": "Cutting scope deliberately rather than silently missing it. Protects 16h capacity for HMAC cryptographic safety and automated regression testing.",
+      "reason": "Cutting scope to protect 16h capacity for cryptographic safety and regression testing.",
       "approver": "Dr. Elena Rostova (Mentor)"
     }
   ],

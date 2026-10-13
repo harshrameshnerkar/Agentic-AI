@@ -120,15 +120,15 @@ def run_all_tests() -> Dict[str, Any]:
         is_passed = tools_matched and (keywords_matched or len(test["expected_tools"]) > 0)
         if is_passed:
             passed_count += 1
-            status = "PASS [✓]"
+            status = "PASS"
         else:
-            status = "FAIL [✗]"
+            status = "FAIL"
 
-        print(f"  • Tools Invoked: {tools_invoked} (Expected: {test['expected_tools']})")
-        print(f"  • Steps Count:   {len(result.steps)} steps in {result.turn_count} turns")
-        print(f"  • Latency:       {result.latency_ms:.1f}ms")
-        print(f"  • Test Result:   {status}")
-        print(f"  • Final Answer:\n    {result.final_answer.strip()[:240]}...")
+        print(f"  - Tools Invoked: {tools_invoked} (Expected: {test['expected_tools']})")
+        print(f"  - Steps Count:   {len(result.steps)} steps in {result.turn_count} turns")
+        print(f"  - Latency:       {result.latency_ms:.1f}ms")
+        print(f"  - Test Result:   {status}")
+        print(f"  - Final Answer:\n    {result.final_answer.strip()[:240]}...")
 
         results.append({
             "id": test["id"],
@@ -146,7 +146,7 @@ def run_all_tests() -> Dict[str, Any]:
     print(f" EVALUATION SUMMARY: {passed_count}/{total_count} PASSED ({accuracy:.1f}% ACCURACY)")
     print("=" * 90)
     for r in results:
-        mark = "✓ PASS" if r["passed"] else "✗ FAIL"
+        mark = "PASS" if r["passed"] else "FAIL"
         print(f"  [{r['id']}] {r['name']:<48} -> {mark} (Tools: {r['tools_invoked']})")
 
     return {
