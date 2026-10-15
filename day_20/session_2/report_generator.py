@@ -70,3 +70,17 @@ class ResultsReportManager:
             stratified_categories=len(stratified),
             limitations_count=len(limitations),
         )
+
+    def verify_all_slas(self) -> Tuple[bool, List[str]]:
+        res = self.verify_charter_slas()
+        failures = []
+        if not res.pass_rate_ok:
+            failures.append("Pass rate SLA breached")
+        if not res.latency_ok:
+            failures.append("Latency SLA breached")
+        if not res.cost_ok:
+            failures.append("Cost SLA breached")
+        if not res.regressions_ok:
+            failures.append("Regressions detected")
+        return res.all_slas_met, failures
+
