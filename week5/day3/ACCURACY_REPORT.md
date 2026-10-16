@@ -30,8 +30,8 @@
 - **Engineering Mitigation:** In Day 4 confidence routing, documents with missing due dates but explicit payment terms are flagged with intermediate confidence, allowing downstream ERP rules engines to compute canonical calendar due dates deterministically.
 
 ### 🔻 Weakest Field 2: `payment_terms` (80.0% Accuracy)
-- **Root Cause:** High jurisdictional heterogeneity in tax formatting (US EIN `XX-XXXXXXX`, EU VAT, UK VAT, Indian GSTIN). On low-resolution scans (200 DPI), hyphens are frequently blurred into digits or dropped entirely by OCR engines.
-- **Engineering Mitigation:** Implemented alphanumeric stripping in `FieldMatcher` and Pydantic field validators to tolerate formatting artifacts without corrupting core registration strings.
+- **Root Cause:** Commercial invoices express payment terms with diverse freeform phrasing (*'Net 30 days'*, *'Due Upon Receipt'*, *'Payable within 15 days of invoice'*, or completely absent on retail/walk-in receipts). Mapping natural language phrases to strict uppercase Enums can drop non-standard terms to `UNKNOWN`.
+- **Engineering Mitigation:** Expanded the Pydantic `payment_terms` validator with fuzzy phrase normalizers (e.g. detecting '30' or 'RECEIPT') to map varied phrasing cleanly while defaulting gracefully to `UNKNOWN`.
 
 ---
 

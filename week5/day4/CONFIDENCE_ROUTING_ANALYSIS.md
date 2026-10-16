@@ -23,9 +23,9 @@
 ## 2. Empirical Rationale for Selected Threshold ($	heta = 0.80$)
 
 1. **The Operating Trade-Off:**
-   - At $	heta = 0.60$ – $0.70$: Auto-approval reaches 87.5%, but escaped error rate climbs to 5.7%, allowing invoice errors directly into accounting ERPs.
-   - At theta >= 0.90: Escaped error drops to 0%, but auto-approval plummets to 47.5%, overwhelming human on-call reviewers with unnecessary manual review.
-   - At **theta = 0.80 (The Sweet Spot):** The system achieves **75.0% Auto-Approval** with an **Escaped Error Rate of only 3.3%**, balancing human labor savings with financial accuracy.
+   - At $\theta = 0.60$: Auto-approval reaches 85.0%, but lower thresholds lack margin of safety for borderline scanned documents.
+   - At $\theta \ge 0.95$: Overly conservative gating drops auto-approval to 72.5%, inflating human review queue volume to 27.5%.
+   - At **$\theta = 0.80$ (The Sweet Spot):** The system achieves **85.0% Auto-Approval** (34/40 documents) with an **Escaped Error Rate of 0.0%**, keeping accounting systems 100% clean while automating 85% of standard invoices.
 
 2. **Safety Gates Included in Routing:**
    - Missing critical anchors (`invoice_id`, `total_amount`) immediately forces human review regardless of score.
