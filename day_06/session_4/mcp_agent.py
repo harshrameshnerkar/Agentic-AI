@@ -1,7 +1,6 @@
 """
 Day 6 - Session 4: Model Context Protocol (MCP)
 Module: mcp_agent.py
-
 Autonomous AI Agent dynamically powered by tools discovered from a live ready-made MCP Server.
 """
 
@@ -34,7 +33,6 @@ class AutonomousMCPAgent:
     An agent that dynamically negotiates tools with an external MCP server,
     converts MCP schemas to OpenAI format, and executes remote tools autonomously.
     """
-
     def __init__(self, mcp_manager: MCPClientManager, model: str = OPENAI_MODEL):
         self.mcp = mcp_manager
         self.model = model
@@ -185,7 +183,6 @@ class AutonomousMCPAgent:
                     "output": result.output_text,
                     "latency_ms": exec_ms
                 })
-
                 # Pass observation back to context
                 messages.append({
                     "role": "tool",
@@ -193,7 +190,6 @@ class AutonomousMCPAgent:
                     "name": fn_name,
                     "content": result.output_text
                 })
-
             time.sleep(2.0)
 
         return {
