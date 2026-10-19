@@ -5,10 +5,8 @@ Demonstrates:
   2. Parallel tool calling (get_time + calculator in one turn)
   3. tool_choice modes ('auto', 'none', and forced function)
 """
-
 import time
 from tool_loop import ToolLoopTracer
-
 
 def main():
     print("=== Day 6 Session 1: Tool Calling Lifecycle ===")
@@ -35,7 +33,6 @@ def main():
     p3 = "What is 150 * 12 + 400?"
     r3 = tracer.run_trace(user_prompt=p3, tool_choice="none")
     print(f"   Tools requested: {r3.tool_calls_requested} (Expected: 0)")
-
 
 if __name__ == "__main__":
     main()
