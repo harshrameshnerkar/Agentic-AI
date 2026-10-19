@@ -104,7 +104,6 @@ def init_database() -> Path:
     conn.close()
     return DB_FILE
 
-
 if __name__ == "__main__":
     db_path = init_database()
     print(f"[+] Enterprise database successfully created and seeded at: {db_path}")
