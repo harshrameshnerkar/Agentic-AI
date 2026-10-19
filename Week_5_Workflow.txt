@@ -1,0 +1,556 @@
+Week 5 : WorkFlow 
+
+Step 1 : prepare_real_dataset.py 
+         - if __name__ == "__main__":    
+                - def build_mentor_dataset(): BUILDING MENTOR-GRADE REAL INVOICE DATASET & 40 GROUND TRUTH RECORDS.  
+                      - # Clean existing documents folder
+                      - 1. Fetch SuperStore Real PDFs
+                             - Downloading SuperStore Real PDF Archive...
+                             - def parse_superstore_pdf(text: str, filename: str): 
+                                       - Extracts factual data from a SuperStore commercial invoice. 
+                                       - Extract real numbers, IDs, and dates.
+                      - 2. Fetch Multi-Vendor Commercial Invoices from Donut Dataset :  
+                             - Fetching Multi-Vendor Real Invoices from Hugging Face Donut Dataset...
+                             - load_dataset("katanaml-org/invoices-donut-data-v1", split="train", streaming=True)
+                             - Parse date
+                             - def clean_currency_val(val_str: str): Calls urllib.request.urlopen to download the SuperStore zip archive from GitHub.
+                                  - Parses strings like '$ 192,81', '$0,75', '37 153,67' into standard float. 
+                                  - Calculate explicit due date (Net 30 days) for commercial B2B invoices.
+                      - 3. Assemble the 40 Ground Truth Documents :
+                             - Writing 40 Hand-Keyed Ground Truth Documents... 
+                             - Documents 01 to 20: Real Text PDFs (SuperStore commercial invoices)
+                             - Documents 21 to 25: Real Multi-Vendor Text/Vector PDFs (from Donut dataset converted to vector-wrapped PDFs) 
+                                  - Save image as high-res 300 DPI PDF 
+                             - Documents 26 to 35: Real Multi-Vendor Scanned PDFs (with scanner blur/texture)
+                                  - def render_scanned_pdf(img: Image.Image, out_path: Path): Saves PIL Image as a 200 DPI scanned PDF with subtle scanner texture.
+                             - Documents 36 to 40: Real Multi-Vendor Image Invoices (PNG & JPG)
+                     - 4. Save Ground Truth JSON & CSV
+                             - Saved 40 Ground Truth records to ground_truth_40.csv
+                     - 5. Populate 30 Holdout and Stress Documents (doc_041 to doc_070)
+                     - Stress Test 1: Corrupt PDF file (Day 5 Criterion #9) : doc_069_corrupt.pdf
+                     - Stress Test 2: Blank PDF file: doc_070_blank.pdf
+
+=======================================================================================================================================================================================================
+1. prepare_real_dataset.py → build_mentor_dataset()
+Step 1: Cleans out existing files in week5/data/documents/.
+Step 2: Calls urllib.request.urlopen to download the SuperStore zip archive from GitHub. Iterates with zipfile.ZipFile, reading PDFs in memory with pdfplumber. Calls parse_superstore_pdf(text, filename) on each to extract real numbers, IDs, and dates.
+Step 3: Streams real multi-vendor invoices from Hugging Face (load_dataset("katanaml-org/invoices-donut-data-v1")). Calls clean_currency_val() on net, gross, and VAT amounts, formatting vendor and client names and generating Net 30 due dates.
+Step 4: Assembles the 40 Ground Truth documents:
+20 SuperStore vector PDFs (doc_001.pdf to doc_020.pdf).
+5 high-res wrapped vector PDFs (doc_021.pdf to doc_025.pdf).
+10 scanned PDFs created with render_scanned_pdf(img, out_path) applying Gaussian blur to simulate scanner noise (doc_026.pdf to doc_035.pdf).
+5 raster images (doc_036.png to doc_040.jpg).
+Step 5: Writes ground_truth_40.json and ground_truth_40.csv.
+Step 6: Generates 30 holdout and stress documents (doc_041.pdf to doc_070.pdf), including doc_069_corrupt.pdf (malformed binary bytes) and doc_070_blank.pdf (0-content PDF page via pypdf.PdfWriter).
+=======================================================================================================================================================================================================
+         
+Step 2 : verify_day1.py
+         - def verify_day1():
+               - 1. Verify Acceptance Criterion #1: Field Specification : [CRITERION 1] Checking Field Specification Document...
+               - 2. Verify Acceptance Criterion #2: Ground Truth Dataset (40 docs) : [CRITERION 2] Checking Hand-Keyed Ground Truth Dataset (40 docs)...
+                       - # Check types & formatting
+                               - invoice_id, 
+                               - invoice_date (ISO 8601 YYYY-MM-DD), 
+                               - due_date (nullable ISO 8601 YYYY-MM-DD), 
+                               - vendor_name, 
+                               - vendor_tax_id, 
+                               - customer_name, 
+                               - currency, 
+                               - subtotal, tax_amount, total_amount, 
+                               - Accounting plausibility check,                    
+                               - payment_terms
+               - # Diversity Assertions (Mentor Expectations)
+                       - Insufficient vendor diversity!
+               - # Check Total Document Inventory in data/documents
+                       - Real Document Repository Statistics:
+                       - [MENTOR-GRADE REAL-WORLD DIVERSITY & VARIATION]:
+               - return FIELD_SPECIFICATION.md
+               - ground_truth_40.json , ground_truth_40.csv
+
+============================================================================================================================================================================================================
+2. verify_day1.py → verify_day1()
+Step 1: Checks if FIELD_SPECIFICATION.md exists and confirms all 11 required fields and missing value rules are present.
+Step 2: Loads ground_truth_40.json and checks that len(gt_data) == 40.
+Step 3: Loops over every record, verifying:
+Corresponding document exists on disk.
+invoice_date and due_date conform to ISO YYYY-MM-DD.
+currency is in VALID_CURRENCIES.
+subtotal, tax_amount, and total_amount are non-negative numeric types with plausible accounting relationships ($0.2 \times subtotal \le total \le 2.5 \times subtotal$).
+payment_terms belongs to the allowed enum set.
+Step 4: Asserts real-world diversity: $\ge 10$ unique vendors, 50/50 balance of present vs. null tax IDs, and 50/50 balance of zero vs. non-zero tax.
+============================================================================================================================================================================================================
+
+Step 3 : inspect_ocr_errors.py
+         - extractor.py
+         - document_loader.py
+         - COMMON_OCR_FAILURE_MODES
+         - def main(): 
+               - DAY 2: OCR ERROR INSPECTION & DOCUMENT LOADER AUDIT
+               - loader = DocumentLoader()
+               - extractor = DocumentExtractor()
+               - [INSPECTION 1] Loading and Parsing Real Scanned Documents:
+               - [INSPECTION 2] Documented Real-World OCR Failure Modes & Schema Defenses:
+               
+extractor.py :
+         - document_loader.py
+         - extraction_schema.py
+         - SYSTEM_EXTRACTION_PROMPT
+         - class ExtractionMetadata:
+         - class DocumentExtractor:
+               - Enterprise document extractor with validation retry loops and persistent caching.
+               - def __init__( self, cache_path: Optional[Union[str, Path]] = None, max_retries: int = 3, model: Optional[str] = None,):
+               - def _load_cache(self) -> Dict[str, Dict[str, Any]]:
+               - def _save_cache(self):
+               - def extract( self, doc: DocumentContent, force_fresh: bool = False, ) -> Tuple[InvoiceExtraction, ExtractionMetadata]:
+                       - Extracts invoice fields from a DocumentContent instance with automatic retries.
+                       - # Handle corrupt or unreadable files directly
+                       - # Check Cache
+                       - # Build initial prompt messages
+                       - # Self-healing retry loop
+                       - # Clean Markdown code fences if model output them
+                       - # Validate with strict Pydantic V2 schema
+                       - # Store in persistent cache
+                       - # Retries exhausted, construct fallback extraction
+                       - return InvoiceExtraction(), ExtractionMetadata(..)
+
+document_loader.py :
+         - class DocumentContent:
+               - # Standardized multi-modal container for loaded invoice documents.
+               - def get_summary(self) -> str: VALID , INVALID 
+                      - return doc_id, filename, doc_typre - has_len, has_image -> Status
+         - class DocumentLoader:
+               - # Universal multi-modal invoice loader with zero-crash guarantees.
+               - def __init__(self, render_scale: float = 2.0):
+               - def load_document(self, file_path: Union[str, Path]) -> DocumentContent:
+                     - # Handle Image formats directly
+                     - # Handle PDF formats
+                     - return DocumentContent()
+               - def _load_image(self, path: Path, doc_id: str, filename: str, suffix: str) -> DocumentContent:
+                     - # Reopen after verify() to read bytes
+                     - return DocumentContent()
+               - def _load_pdf(self, path: Path, doc_id: str, filename: str) -> DocumentContent:
+                     - # First check if PDF is corrupt / unreadable
+                     - try expect : return DocumentContent()
+                     - # Check if text is sufficient (Text PDF)
+                     - return DocumentContent()
+                     - # Scanned PDF or Blank page: Render page 0 via pypdfium2 into high-res bitmap
+                     - try expect : return DocumentContent()
+                     - # Check if image is completely blank (white/black)
+                     - return DocumentContent()
+               - def _is_image_blank(img: Image.Image, threshold: float = 0.995) -> bool:             
+                     - Heuristic to detect completely blank/uniform scanned pages.
+                     - return dominant_pixel_ratio = max(img.convert("L").histogram()) / float(img.width * img.height)
+
+extraction_schema.py :
+       - class CurrencyEnum(str, Enum):
+       - class PaymentTermsEnum(str, Enum):
+       - class InvoiceExtraction(BaseModel):
+             - Pydantic schema enforcing the 11-field commercial invoice contract.
+             - # Field validators for real types & cleaning
+             - def clean_invoice_id(cls, v: Any) -> Optional[str]:
+             - def validate_dates(cls, v: Any) -> Optional[date]:
+                   - def parse_flexible_date(val: Any) -> Optional[date]:
+                           - Parses various date representations into a canonical datetime.date object.
+                           - # Try ISO YYYY-MM-DD
+                           - # Regex search for YYYY-MM-DD within string
+             - def validate_decimals(cls, v: Any) -> Optional[Decimal]:
+                   - def parse_flexible_decimal(val: Any) -> Optional[Decimal]:
+                           - Parses numeric values or currency strings ('$ 1,200.50', '214,41') into Decimal.
+                           - # Remove currency symbols and extraneous whitespace
+                           - # Handle European vs US formatting (e.g. 1.200,50 vs 1,200.50)
+             - def validate_currency(cls, v: Any) -> Optional[CurrencyEnum]:
+             - def validate_payment_terms(cls, v: Any) -> PaymentTermsEnum:
+             - def clean_tax_id(cls, v: Any) -> Optional[str]:
+             - def to_ground_truth_dict(self) -> Dict[str, Any]:
+                   - Serializes extraction into format compatible with ground_truth_40.json.
+                   - return ...
+
+
+============================================================================================================================================================================================================
+3. inspect_ocr_errors.py → main()
+Step 1: Instantiates DocumentLoader and DocumentExtractor.
+Step 2: Iterates through sample scanned files (doc_026.pdf, doc_036.png, etc.) and calls loader.load_document(path).
+Step 3: Prints the detected document type, validity flag, and base64 string availability.
+Step 4: Dumps the catalog of 4 primary OCR failure modes (character confusion, decimal inversion, table bleed, omitted fields) and explains how extraction_schema.py mitigates each.
+============================================================================================================================================================================================================
+
+Step 4 : verify_day2.py
+         - extraction_schema.py
+         - document_loader.py
+         - def main():
+              - def test_loader_multimodal_resilience():
+                     - [CRITERION 3] Testing Document Loader Multimodal Handling...
+                     - loader = DocumentLoader()
+                     - 1. Text PDF
+                     - 2. Scanned PDF
+                     - 3. Image (PNG)
+                     - 4. Blank document
+                     - 5. Corrupt document
+             - def test_typed_pydantic_schema():
+                     - [CRITERION 4] Testing Strict Typed Pydantic Schema...
+                     - 1. Valid instantiation with canonical types
+                     - 2. Try to make it accept a malformed date (Acceptance test: 2024-02-30)
+                     - 3. Try to make it accept an invalid payment terms enum
+
+
+
+============================================================================================================================================================================================================
+4. verify_day2.py → main()
+Step 1: Calls test_loader_multimodal_resilience():
+Loads doc_001.pdf → asserts doc_type == "pdf_text" and length of font text $> 40$.
+Loads doc_026.pdf → asserts doc_type == "pdf_scanned" and image_base64 is not None.
+Loads doc_036.png → asserts doc_type == "image_png".
+Loads doc_070_blank.pdf → asserts loader does not crash.
+Loads doc_069_corrupt.pdf → asserts is_valid == False, doc_type == "corrupt", and error_message is populated.
+Step 2: Calls test_typed_pydantic_schema():
+Instantiates InvoiceExtraction with valid strings → asserts auto-conversion to date, Decimal, and enum types.
+Attempts to instantiate with invoice_date="2024-02-30" → asserts pydantic.ValidationError is raised.
+Passes unrecognized payment terms → asserts fallback to PaymentTermsEnum.UNKNOWN.
+============================================================================================================================================================================================================
+
+Step 5 : field_evaluator.py 
+         - Reads : ground_truth_40.json , extractions_cache.json   
+         - class FieldAccuracyMetric:
+         - class EvaluationResults:
+         - class FieldEvaluator:
+               - Calculates granular field-level extraction metrics against ground truth.
+               - def __init__(self):
+               - def run_evaluation(self) -> EvaluationResults:
+                     - def _generate_markdown_report(self, res: EvaluationResults):
+                          - FIELD_EXPLANATIONS 
+         - def main():
+               - evaluator = FieldEvaluator()
+               - res = evaluator.run_evaluation()
+               - return Report : ACCURACY_REPORT.md
+
+============================================================================================================================================================================================================
+5. field_evaluator.py → main()
+Step 1: Instantiates FieldEvaluator() and calls evaluator.run_evaluation().
+Step 2: Reads ground_truth_40.json and extractions_cache.json.
+Step 3: Loops over all 40 documents, calling FieldMatcher.evaluate_document(pred_data, gt).
+Step 4: Tallies correct extractions per field, computes per-field accuracy percentages, and calculates the overall field accuracy across 440 data points.
+Step 5: Sorts fields by accuracy to find the two lowest-scoring fields (weakest_field_1 and weakest_field_2).
+Step 6: Invokes _generate_markdown_report(), generating ACCURACY_REPORT.md with an 11-field table and root cause analysis.
+============================================================================================================================================================================================================
+
+Step 6 : verify_day3.py
+         - field_evaluator.py
+         - field_matcher.py 
+         - def main():
+                - def test_field_level_accuracy_reporting():
+                       - [CRITERION 5] Testing Granular Field-Level Accuracy Reporting...
+                       - evaluator = FieldEvaluator()
+                       - res = evaluator.run_evaluation()
+                       - Evaluated 40 ground truth documents across {len(FIELD_NAMES)} fields.
+                       - # Verify weakest fields make engineering sense (due_date and vendor_tax_id)
+                - def test_matching_rules_and_report_generation():  
+                       - [CRITERION 6] Testing Field Type Matching Rules & Report Generation...
+                       - 1. Fuzzy matching test
+                       - 2. Date normalization test
+                       - 3. Monetary epsilon test
+                       - 4. Report exists on disk
+              
+field_matcher.py : 
+         - def calculate_fuzzy_ratio(s1: str, s2: str) -> float:
+               - return float(fuzz.token_set_ratio(s1, s2))
+         - def calculate_fuzzy_ratio(s1: str, s2: str) -> float:
+               - Pure Python fallback for token set ratio matching without external dependencies.
+         - FIELD_NAMES = [..]
+         - class FieldMatcher:
+               - def is_empty(val: Any) -> bool:
+               - def match_invoice_id(cls, pred: Any, truth: Any) -> bool:
+               - def match_date(cls, pred: Any, truth: Any) -> bool:
+               - def match_fuzzy_name(cls, pred: Any, truth: Any, threshold: float = 85.0) -> bool:
+               - def match_tax_id(cls, pred: Any, truth: Any) -> bool:
+               - def match_amount(cls, pred: Any, truth: Any, epsilon: float = 0.02) -> bool:
+               - def match_enum(cls, pred: Any, truth: Any) -> bool:
+               - def match_field(cls, field_name: str, pred_val: Any, truth_val: Any) -> bool:
+               - def evaluate_document(cls, predicted: Dict[str, Any], ground_truth: Dict[str, Any]) -> Dict[str, bool]:
+                       - Evaluates all 11 fields for a single document against ground truth.
+
+============================================================================================================================================================================================================
+6. verify_day3.py → main()
+Step 1: Calls test_field_level_accuracy_reporting() → runs FieldEvaluator.run_evaluation(), verifies 40 documents and 11 fields are reported, and asserts that weakest fields are detected.
+Step 2: Calls test_matching_rules_and_report_generation():
+Tests FieldMatcher.match_fuzzy_name() with slight typographical variations.
+Tests FieldMatcher.match_date() with calendar date strings.
+Tests FieldMatcher.match_amount() with differences below and above the $0.02$ epsilon threshold.
+Verifies ACCURACY_REPORT.md exists and contains required sections.
+============================================================================================================================================================================================================
+
+Step 7 : tune_thresholds.py
+          - field_matcher.py
+          - extraction_schema.py
+          - confidence_engine.py
+          - document_loader.py
+          - class ThresholdPoint:
+          - class ThresholdTuner:
+                  - Simulates confidence routing across a spectrum of candidate thresholds.
+                  - CANDIDATE_THRESHOLDS = [..]
+                  - def __init__(self):
+                  - def run_sweep(self) -> List[ThresholdPoint]:
+                          - Reads : ground_truth_40.json , extractions_cache.json
+                          - # Precompute extraction and error status for all documents
+                          - Critical anchor financial evaluation: errors on core financial identifiers
+                          - Base confidence score
+                          - # Evaluate approval at this specific candidate threshold
+                  - def _generate_analysis_report(self, points: List[ThresholdPoint]):
+                          - Confidence Routing & Threshold Tuning Analysis
+                          - 1. Candidate Threshold Trade-Off Table
+                          - 2. Empirical Rationale for Selected Threshold ($\theta = 0.80$)      
+          - def main():
+                  - tuner = ThresholdTuner()
+                  - points = tuner.run_sweep()
+                  - Report generated at CONFIDENCE_ROUTING_ANALYSIS.md.
+
+confidence_engine.py :
+          - extractor.py
+          - extraction_schema.py
+          - document_loader.py
+          - class ConfidenceReport:
+          - class ConfidenceEngine:
+                  - Calculates multi-factor confidence scores and routes low-confidence extractions.
+                  - def __init__(self, threshold: float = DEFAULT_THRESHOLD):
+                  - def compute_confidence(self, doc: DocumentContent,extraction: InvoiceExtraction, metadata: Optional[ExtractionMetadata] = None, custom_threshold: Optional[float] = None, ) -> ConfidenceReport:
+                           - 1. Critical Anchor Presence (Max: 0.35)
+                           - 2. Financial Arithmetic Coherence (Max: 0.30)               
+                           - 3. Source Fidelity (Max: 0.20)
+                           - 4. Extraction Stability (Max: 0.15)
+                           - Auto-approval: must reach threshold AND have critical anchors without severe math mismatch
+                           - return ConfidenceReport(..)
+
+============================================================================================================================================================================================================
+7. tune_thresholds.py → main()
+Step 1: Instantiates ThresholdTuner() and calls tuner.run_sweep().
+Step 2: Loads ground truth and cached extractions. Pre-computes base confidence scores and flags critical errors for all 40 documents.
+Step 3: Loops over candidate thresholds $\theta \in [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]$.
+Step 4: For each threshold, measures:
+auto_approval_rate_pct: fraction of documents with score $\ge \theta$ without severe math errors or missing anchors.
+escaped_error_rate_pct: fraction of approved documents containing critical errors.
+review_rate_pct: percentage of documents routed to human reviewers.
+Step 5: Calls _generate_analysis_report(), outputting CONFIDENCE_ROUTING_ANALYSIS.md justifying $\theta = 0.80$ as the optimal tradeoff.
+============================================================================================================================================================================================================
+
+Step 8 : verify_day4.py
+         - tune_thresholds.py
+         - review_queue.py
+         - confidence_engine.py
+         - document_loader.py
+         - extraction_schema.py
+         - def main():
+                - def test_confidence_routing_poor_quality_scan():
+                       - [CRITERION 7] Testing Confidence Routing on Low-Confidence Scans...
+                       - 1. Clean vector PDF with complete anchors
+                       - 2. Degraded scan with missing anchor and arithmetic mismatch
+                       - Verify queue enrollment
+                - def test_threshold_evidence_tuning():
+                       - [CRITERION 8] Testing Empirical Evidence Threshold Tuning...
+                       - tuner = ThresholdTuner()
+                       - points = tuner.run_sweep()
+                       - # Verify monotonic properties: as threshold increases, auto-approval decreases 
+                       - # Verify 0.80 sweet spot point exists
+
+review_queue.py :
+         - class ReviewQueueItem:
+         - class HumanReviewQueue:
+               - Manages the lifecycle of documents requiring human-in-the-loop inspection.
+               - def __init__(self, queue_file: Optional[Path] = None):
+               - def _load_queue(self) -> Dict[str, ReviewQueueItem]:
+               - def _save_queue(self):
+               - def enqueue(self,document_id: str, filename: str, doc_type: str, confidence_score: float, review_reasons: List[str], extracted_data: Dict[str, Any], ) -> ReviewQueueItem:
+                       - return  item = ReviewQueueItem(..)
+               - def get_pending_items(self) -> List[ReviewQueueItem]:
+                       - return [item for item in self.items.values() if item.status == "PENDING_REVIEW"]
+               - def resolve_item( self, document_id: str, action: str,  # "APPROVED", "REJECTED", "OVERRIDDEN" notes: str = "", overrides: Optional[Dict[str, Any]] = None, ) -> Optional[ReviewQueueItem]:
+                       - return item
+
+============================================================================================================================================================================================================
+8. verify_day4.py → main()
+Step 1: Calls test_confidence_routing_poor_quality_scan():
+Tests a clean vector document (doc_001.pdf) → verifies score $\ge 0.80$ and is_auto_approved == True.
+Tests a degraded document (doc_026.pdf) missing invoice_id and having an arithmetic mismatch ($194.92 + 19.49 \ne 999.00$) → verifies score $< 0.80$, is_auto_approved == False, and multiple review reasons are logged.
+Enqueues the item in HumanReviewQueue and confirms status is PENDING_REVIEW.
+Step 2: Calls test_threshold_evidence_tuning() → sweeps thresholds and verifies auto-approval rate decreases monotonically as threshold rises.
+============================================================================================================================================================================================================
+
+Step 9 : batch_pipeline.py
+         - batch_runner.py
+         - batch_output
+         - def main():
+                - def run_batch_pipeline( input_dir: Path, output_dir: Path, confidence_threshold: float = 0.80, resume: bool = True, ):
+                        - # Collect all invoice files
+                        - # Write batch_extractions.json
+                        - # Write batch_extractions.csv
+                        - # Write batch_summary.json
+                        - return summary
+
+batch_runner.py : 
+           - confidence_engine.py
+           - document_loader.py
+           - extraction_schema.py
+           - extractor.py
+           - class ProcessedDocumentRecord:
+           - class BatchExecutionSummary:
+           - class BatchPipelineRunner:
+                     - Enterprise batch processing pipeline with atomic checkpointing and crash protection.
+                     - # Cost parameters for gemini-3.1-flash-lite / gemini-2.0-flash (approx $0.10/1M input, $0.40/1M output)
+                     - def __init__( self, checkpoint_path: Optional[Union[str, Path]] = None, confidence_threshold: float = 0.80, ):
+                               - Output : batch_checkpoint.json
+                     - def run_batch( self, document_paths: List[Union[str, Path]], resume_from_checkpoint: bool = True, ) -> Tuple[List[ProcessedDocumentRecord], BatchExecutionSummary]:
+                               - # Load existing checkpoint if resuming
+                               - Step 1: Load Document (Zero-crash guarantee)
+                               - Step 2: Extract structured fields
+                               - Step 3: Compute confidence & routing
+                               - # Catch unexpected crash to protect entire batch run
+                               - # Compute summary
+                     - def _save_checkpoint(self, results: Dict[str, ProcessedDocumentRecord]):
+                               - Persists atomic progress to disk.
+
+============================================================================================================================================================================================================
+9. batch_pipeline.py → main()
+Step 1: Parses command-line arguments (--input-dir, --output-dir, --threshold, --no-resume).
+Step 2: Calls run_batch_pipeline(), which discovers all .pdf, .png, and .jpg files in the input directory.
+Step 3: Instantiates BatchPipelineRunner and calls runner.run_batch().
+Step 4: Iterates over documents: loads via DocumentLoader, extracts via DocumentExtractor, and scores via ConfidenceEngine.
+Step 5: Writes atomic checkpoints after every document to prevent data loss.
+Step 6: Exports batch_extractions.json, batch_extractions.csv, and batch_summary.json to the output folder.
+============================================================================================================================================================================================================
+
+Step 10 : cost_calculator.py
+           - CACHE_PATH : extractions_cache.json
+           - REPORT_PATH : COST_AND_SCALING_REPORT.md
+           - class UnitEconomics:
+           - class ScalingProjection:
+           - class CostCalculator:
+                  - Calculates granular unit economics and 10,000-document scaling projections.
+                  - # Gemini 3.1 Flash-Lite / 2.0 Flash pricing
+                  - # Operational assumptions
+                  - def calculate_unit_economics(self) -> UnitEconomics:
+                          - return UnitEconomics()
+                  - def calculate_10k_projection(self, volume: int = 10000) -> ScalingProjection:
+                          - 1. Automated System Costs
+                          - 2. Human Review Labor (only on flagged 15%)
+                          - 3. 100% Manual Entry Baseline
+                  - def _generate_report(self, unit: UnitEconomics, proj: ScalingProjection):
+                          - 1. Measured Unit Economics per Document
+                          - 2. Monthly Financial Scaling Model: 10,000 Commercial Invoices
+                          - 3. High-Level ROI & Handover Takeaways
+           - def main():
+                 - calc = CostCalculator()
+                 - unit = calc.calculate_unit_economics()
+                 - proj = calc.calculate_10k_projection(10000)
+
+============================================================================================================================================================================================================
+10. cost_calculator.py → main()
+Step 1: Instantiates CostCalculator().
+Step 2: Calls calculate_unit_economics() → reads cached extractions, averages input/output tokens, and calculates cost per single document and cost per 1,000 documents based on API token rates.
+Step 3: Calls calculate_10k_projection(10000):
+Computes monthly automated API spend.
+Computes human review hours and labor cost for the 15% flagged review queue.
+Compares total hybrid cost against a 100% manual entry baseline ($3.5$ minutes per invoice at $$25$/hour).
+Calculates monthly/annual savings and cost reduction percentage.
+Step 4: Invokes _generate_report(), generating COST_AND_SCALING_REPORT.md.
+============================================================================================================================================================================================================
+
+Step 11 : streamlit_app.py
+          - # Page Configuration
+          - # Custom Styling (Vanilla CSS)
+          - def main():
+                   - def load_all_documents() -> List[str]:
+                   - def load_cached_extractions() -> Dict[str, Any]:
+                   - # TAB 1: SIDE-BY-SIDE REVIEW 
+                   - # Confidence heuristic
+                   - # Side by Side Columns
+                   - # LEFT COLUMN: Document Render
+                   - def render_pdf_page_image(path: Path) -> Optional[Image.Image]:
+                   - # RIGHT COLUMN: Extracted Fields
+                   - # TAB 2: BATCH METRICS DASHBOARD
+                   - # TAB 3: COST & ROI CALCULATOR
+
+============================================================================================================================================================================================================
+11. streamlit_app.py / app.py → main()
+Step 1: Configures Streamlit page (st.set_page_config) and injects CSS styling.
+Step 2: Loads document filenames and cached extractions into memory.
+Step 3: Renders three tabs:
+Tab 1 (Side-by-Side Review): Left column displays the rendered document image; right column displays an editable form pre-filled with the 11 extracted fields, confidence badges, and an approval button.
+Tab 2 (Batch Metrics): Displays KPI metric cards (Total Documents, Auto-Approval Rate, Field-Level Accuracy, Crash Survival Rate) and the 11 Acceptance Criteria table.
+Tab 3 (Cost & ROI Calculator): Interactive sliders for invoice volume, clerk hourly rate, and auto-approval percentage, rendering real-time savings metrics.
+============================================================================================================================================================================================================
+
+Step 12 : verify_day5.py
+          - cost_calculator.py
+          - batch_runner.py
+          - def test_batch_pipeline_corrupt_file_survival():
+                  - [CRITERION 9] Testing Batch Pipeline Survival on Corrupt Documents...
+                  - test_checkpoint.json
+                  - # Sequence with doc_069_corrupt.pdf in the middle
+                  - # Verify corrupt document was flagged without halting execution
+                  - # Verify subsequent document (doc_003) processed successfully
+                  - # Verify atomic checkpoint exists on disk with all 5 records
+          - def test_cost_per_doc_and_10k_projection():
+                  - [CRITERION 10] Testing Cost Per Document & 10,000-Document Scaling Model...
+                  - calc = CostCalculator()
+                  - unit = calc.calculate_unit_economics()
+                  - proj = calc.calculate_10k_projection(10000)
+                  - Writes : COST_AND_SCALING_REPORT.md
+          - def test_clean_clone_handover_readiness():
+                  - [CRITERION 11] Testing Clean-Clone UI & Batch Pipeline Readiness...
+                  - app_path = Path(__file__).resolve().parent / "streamlit_app.py"
+                  - cli_path = Path(__file__).resolve().parent / "batch_pipeline.py"
+                  - # Verify code imports without errors
+                  - batch_pipeline.py , cost_calculator.py
+
+============================================================================================================================================================================================================
+12. verify_day5.py → main()
+Step 1: Calls test_batch_pipeline_corrupt_file_survival():
+Constructs a batch containing doc_069_corrupt.pdf placed in the middle of valid files.
+Runs runner.run_batch() and asserts 1 failure, 4 successes, and that doc_003.pdf processed after the corrupt file.
+Verifies the checkpoint file contains all 5 records.
+Step 2: Calls test_cost_per_doc_and_10k_projection() → asserts unit cost $< $0.01$, volume $= 10,000$, savings $\ge 80%$, and checks that COST_AND_SCALING_REPORT.md exists.
+Step 3: Calls test_clean_clone_handover_readiness() → verifies all Day 5 modules import cleanly.
+============================================================================================================================================================================================================
+
+Step 13 : verify_week5_all.py
+          - Master End-to-End Verification Runner for Week 5 Document Extraction Pipeline.
+          - """ Executes all 5 verification suites in sequence:
+                - Day 1: Documents, Field Specification & Ground Truth (Criteria 1 & 2)
+                - Day 2: Parsing & The Extraction Schema (Criteria 3 & 4)
+                - Day 3: Field-Level Accuracy & Granular Benchmarking (Criteria 5 & 6)
+                - Day 4: Confidence Scoring & The Human Review Queue (Criteria 7 & 8)
+                - Day 5: Batch Pipeline, Cost Scaling & Handover (Criteria 9, 10 & 11)
+                Validates all 11 Acceptance Criteria and returns exit code 0."""
+         - def main():
+               - VERIFICATION_STEPS = [..]
+               - def run_command(script_path: Path):            
+============================================================================================================================================================================================================
+13. verify_week5_all.py → main()
+Step 1: Defines VERIFICATION_STEPS covering Days 1 through 5.
+Step 2: Iterates through each day's verification script, invoking it as a subprocess via run_command().
+Step 3: Formats Python paths and captures stdout/stderr.
+Step 4: Prints a consolidated compliance audit table showing all 11 criteria marked MET (Y).
+Step 5: Exits with status code 0 if all pass, or 1 if any fail.
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
