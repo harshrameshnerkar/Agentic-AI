@@ -99,10 +99,50 @@ To decouple high auto-approval straight-through volume from error escape risk, w
 
 ---
 
-## 5. Day-by-Day Progression & Verification
+## 5. Daily Standup Tracker (Days 1–5)
 
-- **Day 1 (Documents & Ground Truth):** Ingested 70 commercial documents; hand-keyed 40 documents across 11 fields into `data/ground_truth/ground_truth.csv`; defined formal contract in `docs/field_specification.md`.
-- **Day 2 (Parsing & Schema):** Engineered `src/loader.py` and `src/ocr.py` for digital PDFs, scanned rasters, and images; created typed Pydantic V2 schema in `src/schemas.py` and self-healing extractor in `src/extractor.py`.
-- **Day 3 (Accuracy Evaluation):** Developed `src/evaluator.py` with field-specific matching rules; benchmarked 40 ground truth documents; generated `outputs/accuracy_report.csv` diagnosing `due_date` and `payment_terms` as weakest fields.
-- **Day 4 (Confidence & Human Review):** Built `src/confidence.py` with multi-factor scoring; tuned threshold to $\theta = 0.80$; implemented `src/review_queue.py` and exported `outputs/review_queue.csv`.
-- **Day 5 (Batch, UI & Handover):** Engineered fault-tolerant `src/batch_runner.py` with checkpointing; modeled unit economics in `src/cost_tracker.py`; built interactive side-by-side Streamlit review app in `app.py`.
+| Day | What Was Done | What Is Next | Blockers / Risks & Resolution | Status |
+|:---:|---|---|---|:---:|
+| **Day 1** | Ingested 70 commercial documents; defined formal 11-field contract in `docs/field_specification.md`; hand-keyed 40 ground truth documents in `data/ground_truth/ground_truth.csv`. | Design multi-modal loader and Pydantic schema. | *Risk:* Ambiguity in missing date handling. *Resolution:* Documented explicit rule: missing `due_date` returns `null` (never extrapolated). | Completed ✅ |
+| **Day 2** | Built `src/loader.py` (pdfplumber, pypdfium2, PIL) with zero-crash containment for corrupt files; built strict Pydantic V2 schema in `src/schemas.py` and retry loop in `src/extractor.py`. | Build field-level accuracy scorer with domain matching rules. | *Blocker:* Windows path resolution for Tesseract OCR binary. *Resolution:* Configured fallback auto-discovery and pypdfium2 bitmap rendering. | Completed ✅ |
+| **Day 3** | Implemented `src/evaluator.py` with normalized date, fuzzy token ratio, and epsilon matching; benchmarked 40 ground truth docs; generated `outputs/accuracy_report.csv` diagnosing `due_date` & `payment_terms` as weakest fields (80.0%). | Build multi-factor confidence engine and review queue. | *Risk:* Document-level accuracy hiding individual field failures. *Resolution:* Scored and alerted on individual field level exclusively. | Completed ✅ |
+| **Day 4** | Developed `src/confidence.py` with multi-factor scoring (anchors, math coherence, retries, image fidelity); tuned threshold to $\theta = 0.80$; built `src/review_queue.py` and exported `outputs/review_queue.csv`. | Build fault-tolerant batch runner, unit economics model, and Streamlit review UI. | *Blocker:* Model self-reported confidence was uncalibrated. *Resolution:* Replaced self-reporting with deterministic external signals. | Completed ✅ |
+| **Day 5** | Engineered `src/batch_runner.py` with atomic checkpointing; modeled enterprise 10k scaling economics in `src/cost_tracker.py`; built side-by-side review UI in `app.py`; authored final results writeup. | Package repository, run clean clone verification, commit and push to GitHub. | *None.* Clean execution across all 42 tests and 100% acceptance criteria met. | Completed ✅ |
+
+---
+
+## 6. What We Tried That Did Not Work (Engineering Post-Mortem)
+
+As required by Rule 4 of the assignment brief, here are the real engineering approaches that were tested, evaluated, and rejected during development:
+
+### 1. LLM Self-Reported Confidence (`"confidence": 0.0 - 1.0`)
+- **Hypothesis:** We initially prompted the model to evaluate its own certainty and return a confidence score alongside extracted fields (or extracted token log-probabilities) to drive review queue routing.
+- **Why It Failed:** The model exhibited severe overconfidence hallucination. On low-resolution, noisy scans where vendor names or tax IDs were OCR-mangled, the LLM returned self-confidence scores of $0.98$ for completely invented strings. A self-evaluating model cannot detect what it cannot see.
+- **The Fix:** We completely eliminated LLM self-confidence. Instead, we engineered a deterministic **Evidence-Based Multi-Factor Confidence Engine** (`ConfidenceEngine` in `src/confidence.py`) combining:
+  1. OCR text density and image resolution ($w = 0.15$).
+  2. Critical anchor presence (`invoice_id`, `invoice_date`, `total_amount`) ($w = 0.35$; missing anchor caps score below $0.80$).
+  3. Mathematical coherence ($|\text{subtotal} + \text{tax} - \text{total}| \le 0.02$) ($w = 0.35$; failure incurs $-0.20$ penalty).
+  4. Validation retry instability penalty ($-0.12$ per retry iteration).
+
+### 2. Pre-Extraction Regex Filtering for Dates and Amounts
+- **Hypothesis:** Running regular expressions on raw OCR text before calling the LLM to extract dates and total amounts, aiming to reduce prompt token size and inference latency.
+- **Why It Failed:** Commercial invoices routinely contain 4 to 8 competing dates (`Issue Date`, `Order Date`, `Ship Date`, `Due Date`, `Payment Date`, `Tax Point Date`) and dozens of numeric values (`Unit Price`, `Discount`, `Line Subtotal`, `Tax`, `Total Due`). Regex lacked spatial and semantic context, frequently mapping `Order Date` to `Invoice Date` and grabbing line-item amounts instead of binding invoice totals.
+- **The Fix:** We preserved multi-modal LLM extraction for semantic disambiguation, but enforced rigid downstream schema validation (`validator.py`) and programmatic math checking to guarantee precision.
+
+### 3. In-Context Chain-of-Thought (CoT) Calculation of Missing Due Dates
+- **Hypothesis:** When an invoice stated *"Terms: Net 30"* but omitted an explicit calendar due date, we prompted the model to calculate `invoice_date + 30 days` to fill in the field.
+- **Why It Failed:** This introduced two critical failures:
+  1. Date arithmetic errors around month boundaries and leap years (e.g. producing impossible dates like `2024-02-30`).
+  2. Violation of extraction fidelity: extracting document facts vs. synthesizing business assumptions.
+- **The Fix:** We codified in `docs/field_specification.md` that missing due dates must return `null`. Downstream ERP accounting systems apply deterministic payment term logic; the vision/extraction pipeline must never invent dates.
+
+---
+
+## 7. Honest Limitations & Operational Trade-offs
+
+1. **Header/Summary Extraction vs. Multi-Page Repeating Line Items:**
+   - The pipeline currently extracts 11 invoice-level financial and metadata attributes. Extracting repeating line items across multi-page, irregularly formatted tabular layouts would require visual bounding-box alignment and hierarchical table schemas (identified as a high-value Stretch Goal).
+2. **Extreme Low-Resolution / Severe Camera Distortion (< 150 DPI):**
+   - For heavily skewed or low-contrast mobile camera photos, OCR character error rate increases. While our multi-factor confidence engine reliably catches these and routes them to human review (maintaining a 0.0% escaped error rate), manual intervention is required for approximately 15% of the total document volume.
+3. **Non-English Locale Variations:**
+   - While the Gemini multimodal vision model can transcribe multilingual invoices (e.g., German *Rechnung*, French *Facture*), field matching rules, date regexes, and payment term enums are currently optimized for English/European B2B/B2C formats. Additional locale-specific calendars and localized payment term vocabularies would be required for global deployment.
