@@ -85,13 +85,12 @@ To decouple high auto-approval straight-through volume from error escape risk, w
 
 ### 10,000 Invoices/Month Operational Comparison
 
-| Cost Category | 100% Manual Baseline | Automated HITL Pipeline | Net Variance |
-|---|:---:|:---:|:---:|
-| **LLM Inference Tokens** | $0.00 | **$1.28** | +$1.28 |
-| **Cloud Hosting & Storage** | $0.00 | **$6.00** | +$6.00 |
-| **Human Labor Hours** (at 3.5 min/doc manual vs 1.5 min/doc review) | 583.3 hrs | **37.5 hrs** | **-545.8 hrs** |
-| **Human Labor Spend** ($25.00/hour) | $14,582.50 | **$937.50** | **-$13,645.00** |
-| **TOTAL MONTHLY COST** | **$14,582.50** | **$944.78** | **-$13,637.72 (-93.5%)** |
+    | Cost Category | 100% Manual Baseline | Automated HITL Pipeline | Net Variance |
+    | **LLM Inference Tokens** | $0.00 | **$1.28** | +$1.28 |
+    | **Cloud Hosting & Storage** | $0.00 | **$6.00** | +$6.00 |
+    | **Human Labor Hours** (at 3.5 min/doc manual vs 1.5 min/doc review) | 583.3 hrs | **37.5 hrs** | **-545.8 hrs** |
+    | **Human Labor Spend** ($25.00/hour) | $14,582.50 | **$937.50** | **-$13,645.00** |
+    | **TOTAL MONTHLY COST** | **$14,582.50** | **$944.78** | **-$13,637.72 (-93.5%)** |
 
 - **Annual Net Savings:** **$163,652.64 USD**
 - **Payback Period:** Immediate (< 1 week)
