@@ -1516,5 +1516,74 @@
       "output_tokens": 139,
       "raw_response": "{\n  \"invoice_id\": \"35712\",\n  \"invoice_date\": \"2012-11-28\",\n  \"due_date\": null,\n  \"vendor_name\": \"SuperStore\",\n  \"vendor_tax_id\": null,\n  \"customer_name\": \"Alan Hwang\",\n  \"currency\": \"USD\",\n  \"subtotal\": 1151.84,\n  \"tax_amount\": 0.00,\n  \"total_amount\": 939.35,\n  \"payment_terms\": \"UNKNOWN\"\n}"
     }
+  },
+  "doc_058": {
+    "extracted_data": {
+      "invoice_id": "22343",
+      "invoice_date": "2012-12-20",
+      "due_date": null,
+      "vendor_name": "SuperStore",
+      "vendor_tax_id": null,
+      "customer_name": "Alan Haines",
+      "currency": "USD",
+      "subtotal": 735.36,
+      "tax_amount": 68.59,
+      "total_amount": 803.95,
+      "payment_terms": "UNKNOWN"
+    },
+    "metadata": {
+      "model": "gemini-3.1-flash-lite",
+      "latency_ms": 4202.82,
+      "retries_used": 2,
+      "input_tokens": 2508,
+      "output_tokens": 415,
+      "raw_response": "{\n  \"invoice_id\": \"22343\",\n  \"invoice_date\": \"2012-12-20\",\n  \"due_date\": null,\n  \"vendor_name\": \"SuperStore\",\n  \"vendor_tax_id\": null,\n  \"customer_name\": \"Alan Haines\",\n  \"currency\": \"USD\",\n  \"subtotal\": 735.36,\n  \"tax_amount\": 68.59,\n  \"total_amount\": 803.95,\n  \"payment_terms\": \"UNKNOWN\"\n}"
+    }
+  },
+  "doc_059": {
+    "extracted_data": {
+      "invoice_id": "29721",
+      "invoice_date": "2012-11-24",
+      "due_date": null,
+      "vendor_name": "SuperStore",
+      "vendor_tax_id": null,
+      "customer_name": "Alan Haines",
+      "currency": "USD",
+      "subtotal": 9162.23,
+      "tax_amount": 0.0,
+      "total_amount": 9162.23,
+      "payment_terms": "UNKNOWN"
+    },
+    "metadata": {
+      "model": "gemini-3.1-flash-lite",
+      "latency_ms": 5460.52,
+      "retries_used": 2,
+      "input_tokens": 2619,
+      "output_tokens": 422,
+      "raw_response": "{\n  \"invoice_id\": \"29721\",\n  \"invoice_date\": \"2012-11-24\",\n  \"due_date\": null,\n  \"vendor_name\": \"SuperStore\",\n  \"vendor_tax_id\": null,\n  \"customer_name\": \"Alan Haines\",\n  \"currency\": \"USD\",\n  \"subtotal\": 9162.23,\n  \"tax_amount\": 0.00,\n  \"total_amount\": 9162.23,\n  \"payment_terms\": \"UNKNOWN\"\n}"
+    }
+  },
+  "doc_060": {
+    "extracted_data": {
+      "invoice_id": "36551",
+      "invoice_date": "2013-03-05",
+      "due_date": null,
+      "vendor_name": "SuperStore",
+      "vendor_tax_id": null,
+      "customer_name": "Alan Haines",
+      "currency": "USD",
+      "subtotal": 139.12,
+      "tax_amount": 10.79,
+      "total_amount": 149.91,
+      "payment_terms": "UNKNOWN"
+    },
+    "metadata": {
+      "model": "gemini-3.1-flash-lite",
+      "latency_ms": 54641.04,
+      "retries_used": 2,
+      "input_tokens": 2589,
+      "output_tokens": 415,
+      "raw_response": "{\n  \"invoice_id\": \"36551\",\n  \"invoice_date\": \"2013-03-05\",\n  \"due_date\": null,\n  \"vendor_name\": \"SuperStore\",\n  \"vendor_tax_id\": null,\n  \"customer_name\": \"Alan Haines\",\n  \"currency\": \"USD\",\n  \"subtotal\": 139.12,\n  \"tax_amount\": 10.79,\n  \"total_amount\": 149.91,\n  \"payment_terms\": \"UNKNOWN\"\n}"
+    }
   }
 }

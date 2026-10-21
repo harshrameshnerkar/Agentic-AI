@@ -1,0 +1,15 @@
+# Document Extraction Pipeline Dependencies
+pydantic>=2.0.0
+pydantic-core>=2.0.0
+pypdf>=4.0.0
+pdfplumber>=0.10.0
+pypdfium2>=4.20.0
+pillow>=10.0.0
+pytesseract>=0.3.10
+rapidfuzz>=3.0.0
+streamlit>=1.30.0
+pandas>=2.0.0
+openai>=1.0.0
+google-genai>=0.1.0
+python-dotenv>=1.0.0
+reportlab>=4.0.0

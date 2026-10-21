@@ -1,0 +1,12 @@
+field_name,total_evaluated,correct_count,accuracy_pct,error_count,match_rule,status
+invoice_id,40,40,100.0%,0,Exact alphanumeric match (stripped prefixes),STRONG
+invoice_date,40,40,100.0%,0,Normalized ISO YYYY-MM-DD,STRONG
+due_date,40,32,80.0%,8,Normalized ISO YYYY-MM-DD,WEAK
+vendor_name,40,40,100.0%,0,Fuzzy token set ratio (>= 85%),STRONG
+vendor_tax_id,40,36,90.0%,4,Exact alphanumeric match,STRONG
+customer_name,40,40,100.0%,0,Fuzzy token set ratio (>= 85%),STRONG
+currency,40,37,92.5%,3,Standardized ISO 4217 code,STRONG
+subtotal,40,40,100.0%,0,Numeric difference <= 0.02 units,STRONG
+tax_amount,40,40,100.0%,0,Numeric difference <= 0.02 units,STRONG
+total_amount,40,40,100.0%,0,Numeric difference <= 0.02 units,STRONG
+payment_terms,40,32,80.0%,8,Standardized Enum equality,WEAK

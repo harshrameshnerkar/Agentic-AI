@@ -1,0 +1,13 @@
+{
+  "total_documents": 70,
+  "succeeded_count": 69,
+  "failed_count": 1,
+  "auto_approved_count": 55,
+  "human_review_count": 14,
+  "duration_seconds": 0.03,
+  "avg_latency_ms": 3348.06,
+  "total_input_tokens": 0,
+  "total_output_tokens": 0,
+  "total_cost_usd": 0.0,
+  "checkpoint_file": "C:\\Users\\harsh\\OneDrive\\Desktop\\Agentic-AI\\week5\\outputs\\batch_checkpoint.json"
+}
