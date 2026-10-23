@@ -1,0 +1,18 @@
+# ==============================================================================
+# Unified Business Assistant - Role B (Data Service) Dependencies
+# ==============================================================================
+
+# Core API & Data Validation
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.0.0
+
+# SQL Safety & AST Parsing
+sqlglot>=25.0.0
+
+# Environment & HTTP Clients
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Optional PostgreSQL driver for remote database connections
+# psycopg2-binary>=2.9.9

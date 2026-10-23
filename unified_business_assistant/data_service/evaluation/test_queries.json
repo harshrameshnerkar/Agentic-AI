@@ -1,0 +1,282 @@
+[
+  {
+    "id": "Q001",
+    "question": "Which 5 customers have the most invoices?",
+    "category": "multi_table_join",
+    "expected_answerable": true,
+    "description": "Standard 2-table join between customers and orders"
+  },
+  {
+    "id": "Q002",
+    "question": "What is the average employee salary by department?",
+    "category": "aggregation_group_by",
+    "expected_answerable": true,
+    "description": "Group by department name with AVG salary aggregation"
+  },
+  {
+    "id": "Q003",
+    "question": "What are our top 3 best-selling products by quantity?",
+    "category": "multi_table_join",
+    "expected_answerable": true,
+    "description": "Join products and order_items with SUM of quantity"
+  },
+  {
+    "id": "Q004",
+    "question": "What is the total revenue from completed orders?",
+    "category": "aggregation",
+    "expected_answerable": true,
+    "description": "Scalar SUM on orders with order_status = 'Completed'"
+  },
+  {
+    "id": "Q005",
+    "question": "How many active employees work in the Engineering department?",
+    "category": "filter_join",
+    "expected_answerable": true,
+    "description": "Count employees filtered by department_name and status = 'Active'"
+  },
+  {
+    "id": "Q006",
+    "question": "List all customers located in Europe.",
+    "category": "filter",
+    "expected_answerable": true,
+    "description": "Filter customers by region = 'Europe'"
+  },
+  {
+    "id": "Q007",
+    "question": "Which sales representative closed the most completed orders?",
+    "category": "multi_table_join",
+    "expected_answerable": true,
+    "description": "Join employees and orders grouped by sales rep"
+  },
+  {
+    "id": "Q008",
+    "question": "What is the total budget allocated across all departments?",
+    "category": "aggregation",
+    "expected_answerable": true,
+    "description": "Scalar SUM of budget column in departments"
+  },
+  {
+    "id": "Q009",
+    "question": "List all discontinued products in our catalogue.",
+    "category": "filter",
+    "expected_answerable": true,
+    "description": "Filter products table by status = 'Discontinued'"
+  },
+  {
+    "id": "Q010",
+    "question": "Which customer tier has the highest average order value?",
+    "category": "aggregation_group_by",
+    "expected_answerable": true,
+    "description": "Group by customers.tier with AVG(orders.total_amount)"
+  },
+  {
+    "id": "Q011",
+    "question": "Show the number of customers by industry in descending order.",
+    "category": "aggregation_group_by",
+    "expected_answerable": true,
+    "description": "Group by industry with count"
+  },
+  {
+    "id": "Q012",
+    "question": "What are the 5 most expensive products by unit price?",
+    "category": "sorting_limit",
+    "expected_answerable": true,
+    "description": "Order by unit_price DESC with LIMIT 5"
+  },
+  {
+    "id": "Q013",
+    "question": "How many orders were placed through the Online Portal channel?",
+    "category": "filter",
+    "expected_answerable": true,
+    "description": "Filter orders by channel = 'Online Portal'"
+  },
+  {
+    "id": "Q014",
+    "question": "Which department has the highest average employee salary?",
+    "category": "aggregation_sorting",
+    "expected_answerable": true,
+    "description": "Join departments and employees, order by AVG(salary) DESC LIMIT 1"
+  },
+  {
+    "id": "Q015",
+    "question": "List the total revenue generated per product category.",
+    "category": "multi_table_join",
+    "expected_answerable": true,
+    "description": "3-table join (products, order_items, orders) group by category"
+  },
+  {
+    "id": "Q016",
+    "question": "How many orders have a payment status of Pending?",
+    "category": "filter",
+    "expected_answerable": true,
+    "description": "Filter orders by payment_status = 'Pending'"
+  },
+  {
+    "id": "Q017",
+    "question": "What is the total discount amount given across all order items?",
+    "category": "aggregation",
+    "expected_answerable": true,
+    "description": "SUM calculation over order_items discount"
+  },
+  {
+    "id": "Q018",
+    "question": "Which employee has the highest base salary in the company?",
+    "category": "sorting_limit",
+    "expected_answerable": true,
+    "description": "Order employees by salary DESC LIMIT 1"
+  },
+  {
+    "id": "Q019",
+    "question": "Count the number of orders per order status.",
+    "category": "aggregation_group_by",
+    "expected_answerable": true,
+    "description": "Group by order_status with COUNT(*)"
+  },
+  {
+    "id": "Q020",
+    "question": "List all Enterprise tier customers in the Technology industry.",
+    "category": "filter",
+    "expected_answerable": true,
+    "description": "Dual filter on customers tier and industry"
+  },
+  {
+    "id": "Q021",
+    "question": "What is the total quantity of Software Licenses sold?",
+    "category": "multi_table_join",
+    "expected_answerable": true,
+    "description": "Join products and order_items where category = 'Software Licenses'"
+  },
+  {
+    "id": "Q022",
+    "question": "Which department has the lowest annual budget?",
+    "category": "sorting_limit",
+    "expected_answerable": true,
+    "description": "Order departments by budget ASC LIMIT 1"
+  },
+  {
+    "id": "Q023",
+    "question": "Show the top 5 largest orders by total amount.",
+    "category": "sorting_limit",
+    "expected_answerable": true,
+    "description": "Order orders by total_amount DESC LIMIT 5"
+  },
+  {
+    "id": "Q024",
+    "question": "How many employees are currently on leave?",
+    "category": "filter",
+    "expected_answerable": true,
+    "description": "Filter employees by status = 'On Leave'"
+  },
+  {
+    "id": "Q025",
+    "question": "What is the average discount percentage applied across orders?",
+    "category": "aggregation",
+    "expected_answerable": true,
+    "description": "AVG of discount_pct in order_items"
+  },
+  {
+    "id": "Q026",
+    "question": "List all customers who have placed at least one completed order.",
+    "category": "multi_table_join",
+    "expected_answerable": true,
+    "description": "Distinct join between customers and completed orders"
+  },
+  {
+    "id": "Q027",
+    "question": "What is the total number of hardware units currently in stock?",
+    "category": "filter_aggregation",
+    "expected_answerable": true,
+    "description": "SUM stock_quantity where category = 'Hardware'"
+  },
+  {
+    "id": "Q028",
+    "question": "Show the count of employees hired per year.",
+    "category": "aggregation_group_by",
+    "expected_answerable": true,
+    "description": "Group by SUBSTR(hire_date, 1, 4)"
+  },
+  {
+    "id": "Q029",
+    "question": "Which channel brought in the highest total sales volume?",
+    "category": "aggregation_sorting",
+    "expected_answerable": true,
+    "description": "Group by channel order by SUM(total_amount) DESC LIMIT 1"
+  },
+  {
+    "id": "Q030",
+    "question": "What is the gross margin for each product category?",
+    "category": "aggregation_group_by",
+    "expected_answerable": true,
+    "description": "Calculate difference between unit_price and cost_price"
+  },
+  {
+    "id": "Q031",
+    "question": "What is the company maternity leave duration in weeks?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "Knowledge document policy question, NOT in structured database"
+  },
+  {
+    "id": "Q032",
+    "question": "What is the current NASDAQ stock ticker price for Apple Inc?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "External financial market data not in company schema"
+  },
+  {
+    "id": "Q033",
+    "question": "What is the office Wi-Fi password for guests on floor 3?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "Network security credentials not in structured database"
+  },
+  {
+    "id": "Q034",
+    "question": "What are the company cafeteria lunch specials for this Friday?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "Cafeteria dining information not stored in schema"
+  },
+  {
+    "id": "Q035",
+    "question": "What is the procedure for reporting workplace harassment under POSH?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "HR governance policy document, belongs to Role A /search"
+  },
+  {
+    "id": "Q036",
+    "question": "Show medical prescription records for employee 10.",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "HIPAA/medical records not in business ERP schema"
+  },
+  {
+    "id": "Q037",
+    "question": "What will be the weather in London tomorrow?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "Atmospheric weather domain outside enterprise schema"
+  },
+  {
+    "id": "Q038",
+    "question": "What are the top 3 movies at the box office this weekend?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "Entertainment box office data outside business schema"
+  },
+  {
+    "id": "Q039",
+    "question": "What is our company's remote work and home office equipment policy?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "HR policy document, belongs to Role A Knowledge Service"
+  },
+  {
+    "id": "Q040",
+    "question": "What are the confidential credit card numbers of our customers?",
+    "category": "unanswerable",
+    "expected_answerable": false,
+    "description": "Confidential financial credentials not stored in schema"
+  }
+]
