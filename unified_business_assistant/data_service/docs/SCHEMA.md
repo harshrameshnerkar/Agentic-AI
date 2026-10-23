@@ -1,9 +1,9 @@
-# Role B: Enterprise Business Database Schema Documentation
+# Role B: Authentic Enterprise Database Schema Documentation (Chinook Dataset)
 
-## 1. Overview & Architecture
-The Role B Data Service owns an enterprise relational database (`enterprise_business.db`) containing **6 interconnected tables** and **2,049 records**, seeded reproducibly using [seed_database.py](file:///c:/Users/harsh/OneDrive/Desktop/Agentic-AI/unified_business_assistant/data_service/db/seed_database.py).
+## 1. Overview & Provenance
+The Role B Data Service owns an authentic, real-world relational enterprise database (`enterprise_business.db`) containing **11 interconnected tables** and **15,607 real records** (0% AI-generated). 
 
-The schema represents a modern B2B SaaS and Enterprise Technology provider selling software licenses, cloud services, consulting, support packages, and hardware appliances.
+The dataset is sourced from the official open-source [Chinook Database repository](https://github.com/lerocha/chinook-database), representing a real multinational commercial digital media store with international customers, sales employees, invoices, line items, tracks, artists, albums, genres, and media formats.
 
 ---
 
@@ -11,162 +11,135 @@ The schema represents a modern B2B SaaS and Enterprise Technology provider selli
 
 ```mermaid
 erDiagram
-    DEPARTMENTS ||--o{ EMPLOYEES : "employs"
-    EMPLOYEES ||--o{ ORDERS : "closes (sales rep)"
-    CUSTOMERS ||--o{ ORDERS : "places"
-    ORDERS ||--|{ ORDER_ITEMS : "contains"
-    PRODUCTS ||--o{ ORDER_ITEMS : "included in"
+    Employee ||--o{ Employee : "reports to"
+    Employee ||--o{ Customer : "supports"
+    Customer ||--o{ Invoice : "billed to"
+    Invoice ||--|{ InvoiceLine : "contains"
+    Track ||--o{ InvoiceLine : "sold in"
+    Album ||--o{ Track : "contains"
+    Artist ||--o{ Album : "composed"
+    Genre ||--o{ Track : "categorizes"
+    MediaType ||--o{ Track : "encodes"
 
-    DEPARTMENTS {
-        int department_id PK
-        string department_name UK
-        string code UK
-        float budget
-        string location
-        date created_at
+    Customer {
+        int CustomerId PK
+        string FirstName
+        string LastName
+        string Company
+        string Address
+        string City
+        string State
+        string Country
+        string PostalCode
+        string Phone
+        string Fax
+        string Email
+        int SupportRepId FK
     }
 
-    EMPLOYEES {
-        int employee_id PK
-        string first_name
-        string last_name
-        string email UK
-        int department_id FK
-        string role
-        float salary
-        date hire_date
-        string status
+    Invoice {
+        int InvoiceId PK
+        int CustomerId FK
+        datetime InvoiceDate
+        string BillingAddress
+        string BillingCity
+        string BillingState
+        string BillingCountry
+        string BillingPostalCode
+        numeric Total
     }
 
-    CUSTOMERS {
-        int customer_id PK
-        string company_name UK
-        string contact_name
-        string contact_email
-        string industry
-        string region
-        string country
-        string tier
-        date created_at
+    InvoiceLine {
+        int InvoiceLineId PK
+        int InvoiceId FK
+        int TrackId FK
+        numeric UnitPrice
+        int Quantity
     }
 
-    PRODUCTS {
-        int product_id PK
-        string product_name UK
-        string category
-        float unit_price
-        float cost_price
-        int stock_quantity
-        string status
+    Employee {
+        int EmployeeId PK
+        string LastName
+        string FirstName
+        string Title
+        int ReportsTo FK
+        datetime BirthDate
+        datetime HireDate
+        string Address
+        string City
+        string State
+        string Country
+        string PostalCode
+        string Phone
+        string Fax
+        string Email
     }
 
-    ORDERS {
-        int order_id PK
-        int customer_id FK
-        int employee_id FK
-        date order_date
-        string order_status
-        string payment_status
-        float total_amount
-        string channel
+    Track {
+        int TrackId PK
+        string Name
+        int AlbumId FK
+        int MediaTypeId FK
+        int GenreId FK
+        string Composer
+        int Milliseconds
+        int Bytes
+        numeric UnitPrice
     }
 
-    ORDER_ITEMS {
-        int item_id PK
-        int order_id FK
-        int product_id FK
-        int quantity
-        float unit_price
-        float discount_pct
-        float line_total
+    Album {
+        int AlbumId PK
+        string Title
+        int ArtistId FK
+    }
+
+    Artist {
+        int ArtistId PK
+        string Name
+    }
+
+    Genre {
+        int GenreId PK
+        string Name
+    }
+
+    MediaType {
+        int MediaTypeId PK
+        string Name
     }
 ```
 
 ---
 
-## 3. Table Specifications & Columns
+## 3. Table Specifications & Authentic Row Counts
 
-### 3.1 `departments` (8 rows)
-Tracks organisational units, headquarters/regional offices, and annual operational budgets.
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `department_id` | INTEGER | PRIMARY KEY AUTOINCREMENT | Unique department identifier |
-| `department_name` | TEXT | NOT NULL, UNIQUE | Full name (e.g., 'Engineering', 'Sales & Business Development') |
-| `code` | TEXT | NOT NULL, UNIQUE | Abbreviated code (e.g., 'ENG', 'SALES', 'FIN') |
-| `budget` | REAL | NOT NULL | Annual operational budget in USD |
-| `location` | TEXT | NOT NULL | Office city/state location |
-| `created_at` | TEXT | NOT NULL | Date department was established |
-
-### 3.2 `employees` (76 rows)
-Company workforce across all 8 functional departments with compensation and tenure.
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `employee_id` | INTEGER | PRIMARY KEY AUTOINCREMENT | Unique employee identifier |
-| `first_name` | TEXT | NOT NULL | First name |
-| `last_name` | TEXT | NOT NULL | Last name |
-| `email` | TEXT | NOT NULL, UNIQUE | Corporate email address |
-| `department_id` | INTEGER | NOT NULL, FK -> `departments` | Assigned department |
-| `role` | TEXT | NOT NULL | Job title (e.g., 'Enterprise Account Executive') |
-| `salary` | REAL | NOT NULL | Annual base salary in USD |
-| `hire_date` | TEXT | NOT NULL | Date employee joined company |
-| `status` | TEXT | NOT NULL | `Active`, `On Leave`, or `Terminated` |
-
-### 3.3 `customers` (120 rows)
-B2B enterprise client accounts across global regions and sectors.
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `customer_id` | INTEGER | PRIMARY KEY AUTOINCREMENT | Unique customer identifier |
-| `company_name` | TEXT | NOT NULL, UNIQUE | Client business name (e.g., 'Acme Global Industries') |
-| `contact_name` | TEXT | NOT NULL | Primary stakeholder contact |
-| `contact_email` | TEXT | NOT NULL | Stakeholder email address |
-| `industry` | TEXT | NOT NULL | `Technology`, `Healthcare`, `Finance`, `Retail`, `Manufacturing`, `Education` |
-| `region` | TEXT | NOT NULL | `North America`, `Europe`, `Asia-Pacific`, `Latin America` |
-| `country` | TEXT | NOT NULL | Country of primary headquarters |
-| `tier` | TEXT | NOT NULL | Client tier: `Enterprise`, `Mid-Market`, `Startup` |
-| `created_at` | TEXT | NOT NULL | Onboarding account creation date |
-
-### 3.4 `products` (40 rows)
-Catalogue of software products, cloud subscriptions, hardware units, and professional consulting services.
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `product_id` | INTEGER | PRIMARY KEY AUTOINCREMENT | Unique product catalogue identifier |
-| `product_name` | TEXT | NOT NULL, UNIQUE | Commercial product name |
-| `category` | TEXT | NOT NULL | `Software Licenses`, `Cloud Services`, `Hardware`, `Consulting Services`, `Support Packages` |
-| `unit_price` | REAL | NOT NULL | List selling price in USD |
-| `cost_price` | REAL | NOT NULL | Cost of goods sold (COGS) in USD |
-| `stock_quantity` | INTEGER | NOT NULL | Available inventory units (9999 for digital cloud/software) |
-| `status` | TEXT | NOT NULL | `Active` or `Discontinued` |
-
-### 3.5 `orders` (450 rows)
-Commercial sales orders placed by customers and closed by account executives.
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `order_id` | INTEGER | PRIMARY KEY AUTOINCREMENT | Unique sales order number |
-| `customer_id` | INTEGER | NOT NULL, FK -> `customers` | Ordering client |
-| `employee_id` | INTEGER | NOT NULL, FK -> `employees` | Closing account executive / sales rep |
-| `order_date` | TEXT | NOT NULL | Order transaction date (YYYY-MM-DD) |
-| `order_status` | TEXT | NOT NULL | `Completed`, `Processing`, `Cancelled`, `Refunded` |
-| `payment_status` | TEXT | NOT NULL | `Paid`, `Pending`, `Failed` |
-| `total_amount` | REAL | NOT NULL | Calculated invoice gross total (sum of order item lines) |
-| `channel` | TEXT | NOT NULL | `Direct Sales`, `Online Portal`, `Partner Referral` |
-
-### 3.6 `order_items` (1,355 rows)
-Line item detail for individual products purchased within each sales order.
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `item_id` | INTEGER | PRIMARY KEY AUTOINCREMENT | Unique line item record identifier |
-| `order_id` | INTEGER | NOT NULL, FK -> `orders` | Parent sales order |
-| `product_id` | INTEGER | NOT NULL, FK -> `products` | Product purchased |
-| `quantity` | INTEGER | NOT NULL, CHECK(`quantity > 0`) | Number of units ordered |
-| `unit_price` | REAL | NOT NULL | Price charged per unit at transaction time |
-| `discount_pct` | REAL | NOT NULL, DEFAULT 0.0 | Promotional or volume discount (0.00 to 0.20) |
-| `line_total` | REAL | NOT NULL | Final net price: `quantity * unit_price * (1 - discount_pct)` |
+| Table Name | Real Row Count | Primary Key | Foreign Key Links | Business Description |
+|---|---|---|---|---|
+| **`Customer`** | 59 rows | `CustomerId` | `SupportRepId -> Employee.EmployeeId` | Real global commercial customers (USA, Canada, Brazil, Germany, France, etc.) |
+| **`Invoice`** | 412 rows | `InvoiceId` | `CustomerId -> Customer.CustomerId` | Commercial invoices with transaction dates, billing addresses, and amounts |
+| **`InvoiceLine`** | 2,240 rows | `InvoiceLineId` | `InvoiceId -> Invoice.InvoiceId`, `TrackId -> Track.TrackId` | Itemized line item details with unit prices and purchase quantities |
+| **`Employee`** | 8 rows | `EmployeeId` | `ReportsTo -> Employee.EmployeeId` | Real corporate workforce: General Manager, Sales Manager, Support Agents |
+| **`Track`** | 3,503 rows | `TrackId` | `AlbumId`, `MediaTypeId`, `GenreId` | Audio tracks, composer credits, durations (milliseconds), file sizes (bytes) |
+| **`Album`** | 347 rows | `AlbumId` | `ArtistId -> Artist.ArtistId` | Commercial music albums |
+| **`Artist`** | 275 rows | `ArtistId` | None | International recording artists (AC/DC, Queen, Miles Davis, etc.) |
+| **`Genre`** | 25 rows | `GenreId` | None | Musical genres: Rock, Jazz, Metal, Blues, Classical, R&B, etc. |
+| **`MediaType`** | 5 rows | `MediaTypeId` | None | Audio formats: MPEG audio, Protected AAC, AAC audio, etc. |
+| **`Playlist`** | 18 rows | `PlaylistId` | None | User and promotional media playlists |
+| **`PlaylistTrack`**| 8,715 rows | `(PlaylistId, TrackId)` | `PlaylistId`, `TrackId` | Playlist-track cross references |
+| **TOTAL** | **15,607 rows** | | | **100% Real, non-AI-generated enterprise data** |
 
 ---
 
-## 4. Key Business Definitions & Conventions
-1. **Gross Revenue**: `SUM(orders.total_amount) WHERE orders.order_status = 'Completed' AND orders.payment_status = 'Paid'`
-2. **Sales Rep Attribution**: Join `orders.employee_id` with `employees.employee_id` (only employees in department_id = 2 'Sales & Business Development').
-3. **Active Workforce**: `status = 'Active'` in table `employees`.
-4. **Discounts**: Stored as fractional rates (e.g. `0.10` represents 10% discount).
-5. **Answerability Standard**: If a question references entities not in this schema (e.g. employee medical leaves, WiFi passwords, CEO home address, stock ticker prices), `answerable` must be returned as `false`.
+## 4. Key Business Metrics & SQL Conventions
+1. **Total Gross Revenue**: `SELECT ROUND(SUM(Total), 2) FROM Invoice;`
+2. **Top Customers by Invoices**:
+   ```sql
+   SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount
+   FROM Customer c
+   JOIN Invoice i ON c.CustomerId = i.CustomerId
+   GROUP BY c.CustomerId, CustomerName
+   ORDER BY InvoiceCount DESC
+   LIMIT 5;
+   ```
+3. **Sales Support Rep Attribution**: Join `Customer.SupportRepId` on `Employee.EmployeeId`.
+4. **Answerability Standard**: Questions asking for data not in the store schema (e.g., employee dress code, guest Wi-Fi passwords, stock ticker prices, credit card CVVs) return `answerable=false`.

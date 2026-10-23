@@ -1,5 +1,5 @@
 """
-Safety Gate Tests for Role B (Data Service).
+Safety Gate Tests for Role B (Data Service) on Real Chinook Database.
 Verifies Acceptance Criterion 3:
 - Destructive SQL provably blocked at validation, BEFORE execution.
 - Multi-statements, table drops, deletes, updates, and schema alterations rejected.
@@ -27,7 +27,7 @@ class TestSQLSafetyValidation(unittest.TestCase):
 
     def test_drop_table_blocked_at_validation(self):
         """Criterion 3: Asking to drop a table is blocked at validation prior to execution."""
-        sql = "DROP TABLE customers;"
+        sql = "DROP TABLE Customer;"
         with self.assertRaises(DestructiveSQLBlockedException) as ctx:
             SQLSafetyValidator.validate(sql)
 
@@ -36,7 +36,7 @@ class TestSQLSafetyValidation(unittest.TestCase):
 
     def test_delete_blocked_at_validation(self):
         """DELETE queries must be blocked at validation."""
-        sql = "DELETE FROM employees WHERE employee_id = 1;"
+        sql = "DELETE FROM Employee WHERE EmployeeId = 1;"
         with self.assertRaises(DestructiveSQLBlockedException) as ctx:
             SQLSafetyValidator.validate(sql)
 
@@ -44,7 +44,7 @@ class TestSQLSafetyValidation(unittest.TestCase):
 
     def test_update_blocked_at_validation(self):
         """UPDATE queries must be blocked at validation."""
-        sql = "UPDATE orders SET total_amount = 0.0;"
+        sql = "UPDATE Invoice SET Total = 0.0;"
         with self.assertRaises(DestructiveSQLBlockedException) as ctx:
             SQLSafetyValidator.validate(sql)
 
@@ -52,7 +52,7 @@ class TestSQLSafetyValidation(unittest.TestCase):
 
     def test_insert_blocked_at_validation(self):
         """INSERT queries must be blocked at validation."""
-        sql = "INSERT INTO products (product_name, unit_price) VALUES ('Malware', 999.0);"
+        sql = "INSERT INTO Track (Name, UnitPrice) VALUES ('Malware', 999.0);"
         with self.assertRaises(DestructiveSQLBlockedException) as ctx:
             SQLSafetyValidator.validate(sql)
 
@@ -60,7 +60,7 @@ class TestSQLSafetyValidation(unittest.TestCase):
 
     def test_alter_table_blocked_at_validation(self):
         """ALTER TABLE queries must be blocked at validation."""
-        sql = "ALTER TABLE departments DROP COLUMN budget;"
+        sql = "ALTER TABLE Customer DROP COLUMN Phone;"
         with self.assertRaises(DestructiveSQLBlockedException) as ctx:
             SQLSafetyValidator.validate(sql)
 
@@ -68,7 +68,7 @@ class TestSQLSafetyValidation(unittest.TestCase):
 
     def test_multiple_statements_blocked(self):
         """Chained multi-statement queries must be blocked at validation."""
-        sql = "SELECT * FROM customers; DROP TABLE orders;"
+        sql = "SELECT * FROM Customer; DROP TABLE Invoice;"
         with self.assertRaises((DestructiveSQLBlockedException, MultipleStatementsBlockedException)):
             SQLSafetyValidator.validate(sql)
 
@@ -81,10 +81,10 @@ class TestSQLSafetyValidation(unittest.TestCase):
     def test_valid_select_queries_pass_validation(self):
         """Legitimate business SELECT and JOIN queries must pass cleanly."""
         valid_queries = [
-            "SELECT customer_id, company_name FROM customers LIMIT 10;",
-            "SELECT c.company_name, COUNT(o.order_id) FROM customers c JOIN orders o ON c.customer_id = o.customer_id GROUP BY c.company_name;",
-            "SELECT d.department_name, AVG(e.salary) FROM departments d JOIN employees e ON d.department_id = e.department_id GROUP BY d.department_name;",
-            "SELECT * FROM products WHERE status = 'Active' ORDER BY unit_price DESC;",
+            "SELECT CustomerId, FirstName, LastName FROM Customer LIMIT 10;",
+            "SELECT c.FirstName, COUNT(i.InvoiceId) FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.CustomerId;",
+            "SELECT g.Name, COUNT(t.TrackId) FROM Genre g JOIN Track t ON g.GenreId = t.GenreId GROUP BY g.GenreId;",
+            "SELECT * FROM Track ORDER BY UnitPrice DESC LIMIT 5;",
         ]
         for q in valid_queries:
             is_valid, canonical_sql, err = SQLSafetyValidator.validate(q)
@@ -97,9 +97,9 @@ class TestSQLSafetyValidation(unittest.TestCase):
         counts_before = db_manager.get_table_counts()
 
         attacks = [
-            "DROP TABLE customers;",
-            "DELETE FROM orders;",
-            "UPDATE employees SET salary = 999999;",
+            "DROP TABLE Customer;",
+            "DELETE FROM Invoice;",
+            "UPDATE Track SET UnitPrice = 0.0;",
         ]
         for attack in attacks:
             try:

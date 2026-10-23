@@ -38,7 +38,7 @@ class TestInterfaceContract(unittest.TestCase):
         self.assertTrue(validated.answerable)
         self.assertIsNotNone(validated.sql)
         self.assertIn("SELECT", validated.sql.upper())
-        self.assertEqual(validated.columns, ["customer_name", "invoice_count"])
+        self.assertEqual(validated.columns, ["CustomerName", "InvoiceCount"])
         self.assertIsNone(validated.error)
 
     def test_mock_query_triggers(self):

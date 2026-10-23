@@ -4,210 +4,210 @@
     "question": "Which 5 customers have the most invoices?",
     "category": "multi_table_join",
     "expected_answerable": true,
-    "description": "Standard 2-table join between customers and orders"
+    "description": "Standard 2-table join between Customer and Invoice"
   },
   {
     "id": "Q002",
-    "question": "What is the average employee salary by department?",
-    "category": "aggregation_group_by",
+    "question": "What is the total revenue from all invoices?",
+    "category": "aggregation",
     "expected_answerable": true,
-    "description": "Group by department name with AVG salary aggregation"
+    "description": "Scalar SUM of Total on Invoice"
   },
   {
     "id": "Q003",
-    "question": "What are our top 3 best-selling products by quantity?",
+    "question": "What are our top 3 best-selling tracks by quantity?",
     "category": "multi_table_join",
     "expected_answerable": true,
-    "description": "Join products and order_items with SUM of quantity"
+    "description": "Join Track and InvoiceLine with SUM of Quantity"
   },
   {
     "id": "Q004",
-    "question": "What is the total revenue from completed orders?",
+    "question": "How many total customers are registered in the database?",
     "category": "aggregation",
     "expected_answerable": true,
-    "description": "Scalar SUM on orders with order_status = 'Completed'"
+    "description": "Count on Customer table"
   },
   {
     "id": "Q005",
-    "question": "How many active employees work in the Engineering department?",
-    "category": "filter_join",
+    "question": "List all customers located in Brazil.",
+    "category": "filter",
     "expected_answerable": true,
-    "description": "Count employees filtered by department_name and status = 'Active'"
+    "description": "Filter Customer by Country = 'Brazil'"
   },
   {
     "id": "Q006",
-    "question": "List all customers located in Europe.",
-    "category": "filter",
+    "question": "Show the number of customers by country in descending order.",
+    "category": "aggregation_group_by",
     "expected_answerable": true,
-    "description": "Filter customers by region = 'Europe'"
+    "description": "Group by Country with count"
   },
   {
     "id": "Q007",
-    "question": "Which sales representative closed the most completed orders?",
-    "category": "multi_table_join",
+    "question": "List all employees and their job titles.",
+    "category": "projection",
     "expected_answerable": true,
-    "description": "Join employees and orders grouped by sales rep"
+    "description": "Select Employee full name and Title"
   },
   {
     "id": "Q008",
-    "question": "What is the total budget allocated across all departments?",
-    "category": "aggregation",
+    "question": "What are the 5 longest tracks by duration in milliseconds?",
+    "category": "sorting_limit",
     "expected_answerable": true,
-    "description": "Scalar SUM of budget column in departments"
+    "description": "Order Track by Milliseconds DESC LIMIT 5"
   },
   {
     "id": "Q009",
-    "question": "List all discontinued products in our catalogue.",
-    "category": "filter",
+    "question": "How many total tracks are in the database?",
+    "category": "aggregation",
     "expected_answerable": true,
-    "description": "Filter products table by status = 'Discontinued'"
+    "description": "Count on Track table"
   },
   {
     "id": "Q010",
-    "question": "Which customer tier has the highest average order value?",
-    "category": "aggregation_group_by",
+    "question": "Which genre has the highest number of tracks?",
+    "category": "aggregation_sorting",
     "expected_answerable": true,
-    "description": "Group by customers.tier with AVG(orders.total_amount)"
+    "description": "Join Genre and Track, group by Genre Name, order by count DESC LIMIT 1"
   },
   {
     "id": "Q011",
-    "question": "Show the number of customers by industry in descending order.",
-    "category": "aggregation_group_by",
+    "question": "What is the total revenue generated from customers in the USA?",
+    "category": "filter_aggregation",
     "expected_answerable": true,
-    "description": "Group by industry with count"
+    "description": "SUM(Total) on Invoice where BillingCountry = 'USA'"
   },
   {
     "id": "Q012",
-    "question": "What are the 5 most expensive products by unit price?",
-    "category": "sorting_limit",
+    "question": "Which 5 artists have the most albums?",
+    "category": "multi_table_join",
     "expected_answerable": true,
-    "description": "Order by unit_price DESC with LIMIT 5"
+    "description": "Join Artist and Album, group by Artist Name, count albums"
   },
   {
     "id": "Q013",
-    "question": "How many orders were placed through the Online Portal channel?",
-    "category": "filter",
+    "question": "What is the average invoice total across all customer invoices?",
+    "category": "aggregation",
     "expected_answerable": true,
-    "description": "Filter orders by channel = 'Online Portal'"
+    "description": "AVG of Total on Invoice"
   },
   {
     "id": "Q014",
-    "question": "Which department has the highest average employee salary?",
-    "category": "aggregation_sorting",
+    "question": "List all customers supported by sales rep Jane Peacock.",
+    "category": "multi_table_join",
     "expected_answerable": true,
-    "description": "Join departments and employees, order by AVG(salary) DESC LIMIT 1"
+    "description": "Join Customer and Employee where Employee LastName = 'Peacock'"
   },
   {
     "id": "Q015",
-    "question": "List the total revenue generated per product category.",
-    "category": "multi_table_join",
+    "question": "How many albums does artist Iron Maiden have?",
+    "category": "filter_join",
     "expected_answerable": true,
-    "description": "3-table join (products, order_items, orders) group by category"
+    "description": "Join Artist and Album where Artist Name = 'Iron Maiden'"
   },
   {
     "id": "Q016",
-    "question": "How many orders have a payment status of Pending?",
-    "category": "filter",
+    "question": "What are the distinct media types available in our store?",
+    "category": "projection",
     "expected_answerable": true,
-    "description": "Filter orders by payment_status = 'Pending'"
+    "description": "Select distinct Name from MediaType"
   },
   {
     "id": "Q017",
-    "question": "What is the total discount amount given across all order items?",
-    "category": "aggregation",
+    "question": "Which customer spent the highest total amount across all invoices?",
+    "category": "multi_table_join",
     "expected_answerable": true,
-    "description": "SUM calculation over order_items discount"
+    "description": "Join Customer and Invoice, group by Customer, order by SUM(Total) DESC LIMIT 1"
   },
   {
     "id": "Q018",
-    "question": "Which employee has the highest base salary in the company?",
-    "category": "sorting_limit",
+    "question": "Count the number of invoices billed to Canada.",
+    "category": "filter_aggregation",
     "expected_answerable": true,
-    "description": "Order employees by salary DESC LIMIT 1"
+    "description": "Count on Invoice where BillingCountry = 'Canada'"
   },
   {
     "id": "Q019",
-    "question": "Count the number of orders per order status.",
-    "category": "aggregation_group_by",
+    "question": "List the top 5 most expensive tracks by unit price.",
+    "category": "sorting_limit",
     "expected_answerable": true,
-    "description": "Group by order_status with COUNT(*)"
+    "description": "Order Track by UnitPrice DESC LIMIT 5"
   },
   {
     "id": "Q020",
-    "question": "List all Enterprise tier customers in the Technology industry.",
+    "question": "How many employees report to General Manager Andrew Fuller?",
     "category": "filter",
     "expected_answerable": true,
-    "description": "Dual filter on customers tier and industry"
+    "description": "Count Employee where ReportsTo = 1"
   },
   {
     "id": "Q021",
-    "question": "What is the total quantity of Software Licenses sold?",
-    "category": "multi_table_join",
+    "question": "What is the total quantity of items sold across all invoice lines?",
+    "category": "aggregation",
     "expected_answerable": true,
-    "description": "Join products and order_items where category = 'Software Licenses'"
+    "description": "SUM(Quantity) on InvoiceLine"
   },
   {
     "id": "Q022",
-    "question": "Which department has the lowest annual budget?",
-    "category": "sorting_limit",
+    "question": "List all customers who have a company name listed.",
+    "category": "filter",
     "expected_answerable": true,
-    "description": "Order departments by budget ASC LIMIT 1"
+    "description": "Filter Customer where Company IS NOT NULL"
   },
   {
     "id": "Q023",
-    "question": "Show the top 5 largest orders by total amount.",
+    "question": "Show the top 5 largest invoices by total amount.",
     "category": "sorting_limit",
     "expected_answerable": true,
-    "description": "Order orders by total_amount DESC LIMIT 5"
+    "description": "Order Invoice by Total DESC LIMIT 5"
   },
   {
     "id": "Q024",
-    "question": "How many employees are currently on leave?",
-    "category": "filter",
+    "question": "Which artist recorded the album 'Let There Be Rock'?",
+    "category": "multi_table_join",
     "expected_answerable": true,
-    "description": "Filter employees by status = 'On Leave'"
+    "description": "Join Artist and Album where Title = 'Let There Be Rock'"
   },
   {
     "id": "Q025",
-    "question": "What is the average discount percentage applied across orders?",
+    "question": "How many total genres exist in the music store?",
     "category": "aggregation",
     "expected_answerable": true,
-    "description": "AVG of discount_pct in order_items"
+    "description": "Count on Genre table"
   },
   {
     "id": "Q026",
-    "question": "List all customers who have placed at least one completed order.",
-    "category": "multi_table_join",
+    "question": "List all customers located in Germany.",
+    "category": "filter",
     "expected_answerable": true,
-    "description": "Distinct join between customers and completed orders"
+    "description": "Filter Customer by Country = 'Germany'"
   },
   {
     "id": "Q027",
-    "question": "What is the total number of hardware units currently in stock?",
-    "category": "filter_aggregation",
+    "question": "What is the total file size in bytes for all tracks?",
+    "category": "aggregation",
     "expected_answerable": true,
-    "description": "SUM stock_quantity where category = 'Hardware'"
+    "description": "SUM(Bytes) on Track"
   },
   {
     "id": "Q028",
-    "question": "Show the count of employees hired per year.",
-    "category": "aggregation_group_by",
+    "question": "How many invoices were billed to the city of Paris?",
+    "category": "filter_aggregation",
     "expected_answerable": true,
-    "description": "Group by SUBSTR(hire_date, 1, 4)"
+    "description": "Count on Invoice where BillingCity = 'Paris'"
   },
   {
     "id": "Q029",
-    "question": "Which channel brought in the highest total sales volume?",
-    "category": "aggregation_sorting",
+    "question": "Which employee has the title Sales Support Agent?",
+    "category": "filter",
     "expected_answerable": true,
-    "description": "Group by channel order by SUM(total_amount) DESC LIMIT 1"
+    "description": "Filter Employee where Title = 'Sales Support Agent'"
   },
   {
     "id": "Q030",
-    "question": "What is the gross margin for each product category?",
-    "category": "aggregation_group_by",
+    "question": "What is the unit price of track 1?",
+    "category": "filter",
     "expected_answerable": true,
-    "description": "Calculate difference between unit_price and cost_price"
+    "description": "Select UnitPrice from Track where TrackId = 1"
   },
   {
     "id": "Q031",

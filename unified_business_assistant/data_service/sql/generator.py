@@ -1,8 +1,8 @@
 """
 Multi-Provider Text-to-SQL Generator for Role B (Data Service).
 
-Translates natural language questions into valid SQL with multi-provider LLM
-support (Groq, Gemini, OpenAI) and an offline heuristic fallback engine.
+Translates natural language questions into valid SQL for the authentic Chinook
+database with multi-provider LLM support (Groq, Gemini, OpenAI) and an offline fallback engine.
 """
 import os
 import re
@@ -207,121 +207,102 @@ class TextToSQLGenerator:
         return None
 
     # --------------------------------------------------------------------------
-    # Offline Heuristic & Fallback Generation
+    # Offline Heuristic & Fallback Generation for Chinook
     # --------------------------------------------------------------------------
     def _generate_offline_heuristic(self, question: str) -> Tuple[Optional[str], bool, Optional[str]]:
-        """Rule-based pattern matcher for standard enterprise questions."""
+        """Rule-based pattern matcher for standard Chinook real enterprise questions."""
         q = question.lower()
 
-        # 1. Top customers by invoices / orders
-        if "customer" in q and ("most" in q or "top" in q) and ("invoice" in q or "order" in q):
+        # 1. Top customers by invoices
+        if "customer" in q and ("invoice" in q or "order" in q or "most" in q or "top" in q):
             limit_match = re.search(r"\b(\d+)\b", q)
             k = limit_match.group(1) if limit_match else "5"
             return (
-                f"SELECT c.company_name AS customer_name, COUNT(o.order_id) AS invoice_count "
-                f"FROM customers c JOIN orders o ON c.customer_id = o.customer_id "
-                f"GROUP BY c.customer_id, c.company_name ORDER BY invoice_count DESC LIMIT {k};",
+                f"SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount "
+                f"FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId "
+                f"GROUP BY c.CustomerId, CustomerName ORDER BY InvoiceCount DESC LIMIT {k};",
                 True, None
             )
 
-        # 2. Average salary by department
-        if "salary" in q and "department" in q:
+        # 2. Total revenue from all invoices
+        if "total revenue" in q or "gross sales" in q or ("total" in q and ("invoice" in q or "sale" in q)):
             return (
-                "SELECT d.department_name, ROUND(AVG(e.salary), 2) AS average_salary, COUNT(e.employee_id) AS employee_count "
-                "FROM departments d JOIN employees e ON d.department_id = e.department_id "
-                "WHERE e.status = 'Active' GROUP BY d.department_id, d.department_name ORDER BY average_salary DESC;",
+                "SELECT ROUND(SUM(Total), 2) AS TotalRevenue FROM Invoice;",
                 True, None
             )
 
-        # 3. Top selling products
-        if "product" in q and ("top" in q or "best" in q or "selling" in q):
+        # 3. Top selling tracks / songs
+        if ("track" in q or "song" in q or "music" in q) and ("top" in q or "best" in q or "selling" in q):
             limit_match = re.search(r"\b(\d+)\b", q)
             k = limit_match.group(1) if limit_match else "5"
             return (
-                f"SELECT p.product_name, p.category, SUM(oi.quantity) AS total_units_sold "
-                f"FROM products p JOIN order_items oi ON p.product_id = oi.product_id "
-                f"JOIN orders o ON oi.order_id = o.order_id "
-                f"WHERE o.order_status = 'Completed' "
-                f"GROUP BY p.product_id, p.product_name, p.category ORDER BY total_units_sold DESC LIMIT {k};",
+                f"SELECT t.Name AS TrackName, SUM(il.Quantity) AS UnitsSold "
+                f"FROM Track t JOIN InvoiceLine il ON t.TrackId = il.TrackId "
+                f"GROUP BY t.TrackId, TrackName ORDER BY UnitsSold DESC LIMIT {k};",
                 True, None
             )
 
-        # 4. Total revenue
-        if "total revenue" in q or "gross sales" in q:
+        # 4. Customers by country
+        if "customer" in q and "country" in q:
             return (
-                "SELECT ROUND(SUM(total_amount), 2) AS total_revenue "
-                "FROM orders WHERE order_status = 'Completed' AND payment_status = 'Paid';",
+                "SELECT Country, COUNT(CustomerId) AS CustomerCount "
+                "FROM Customer GROUP BY Country ORDER BY CustomerCount DESC;",
                 True, None
             )
 
-        # 5. Customer count by region or industry
-        if "customer" in q and "region" in q:
+        # 5. Top artists by track count
+        if "artist" in q and ("most" in q or "track" in q or "song" in q or "album" in q):
             return (
-                "SELECT region, COUNT(customer_id) AS customer_count "
-                "FROM customers GROUP BY region ORDER BY customer_count DESC;",
+                "SELECT ar.Name AS ArtistName, COUNT(t.TrackId) AS TrackCount "
+                "FROM Artist ar JOIN Album al ON ar.ArtistId = al.ArtistId "
+                "JOIN Track t ON al.AlbumId = t.AlbumId "
+                "GROUP BY ar.ArtistId, ar.Name ORDER BY TrackCount DESC LIMIT 5;",
                 True, None
             )
 
-        # 6. Sales reps performance
-        if ("sales rep" in q or "salesperson" in q or "employee" in q) and ("order" in q or "revenue" in q):
+        # 6. Employees / sales support reps
+        if "employee" in q or "support rep" in q or "sales rep" in q or "staff" in q:
             return (
-                "SELECT e.first_name || ' ' || e.last_name AS sales_rep_name, "
-                "COUNT(o.order_id) AS orders_closed, ROUND(SUM(o.total_amount), 2) AS total_sales "
-                "FROM employees e JOIN orders o ON e.employee_id = o.employee_id "
-                "WHERE o.order_status = 'Completed' "
-                "GROUP BY e.employee_id, sales_rep_name ORDER BY total_sales DESC LIMIT 5;",
+                "SELECT FirstName || ' ' || LastName AS EmployeeName, Title, City, Country "
+                "FROM Employee;",
                 True, None
             )
 
-        # 7. Channel performance
-        if "channel" in q:
+        # 7. Genres breakdown
+        if "genre" in q:
             return (
-                "SELECT channel, COUNT(order_id) AS order_count, ROUND(SUM(total_amount), 2) AS total_sales "
-                "FROM orders GROUP BY channel ORDER BY total_sales DESC LIMIT 1;",
+                "SELECT g.Name AS GenreName, COUNT(t.TrackId) AS TrackCount "
+                "FROM Genre g JOIN Track t ON g.GenreId = t.GenreId "
+                "GROUP BY g.GenreId, g.Name ORDER BY TrackCount DESC;",
                 True, None
             )
 
-        # 8. Category-specific queries (Software Licenses, Hardware)
-        if "software license" in q or "license" in q:
-            return (
-                "SELECT SUM(oi.quantity) AS total_units_sold "
-                "FROM order_items oi JOIN products p ON oi.product_id = p.product_id "
-                "WHERE p.category = 'Software Licenses';",
-                True, None
-            )
-
-        if "hardware" in q:
-            return (
-                "SELECT SUM(stock_quantity) AS total_hardware_stock "
-                "FROM products WHERE category = 'Hardware';",
-                True, None
-            )
+        # 8. Media Types
+        if "media" in q:
+            return "SELECT DISTINCT Name AS MediaTypeName FROM MediaType;", True, None
 
         # Default fallback: safe count query on most relevant table
-        for tbl in ["orders", "customers", "employees", "products", "departments"]:
-            if tbl[:-1] in q or tbl in q:
-                return f"SELECT COUNT(*) AS total_count FROM {tbl};", True, None
+        for tbl in ["Invoice", "Customer", "Employee", "Track", "Album", "Artist", "Genre", "MediaType"]:
+            if tbl.lower() in q:
+                return f"SELECT COUNT(*) AS TotalCount FROM {tbl};", True, None
 
         return None, False, "Question is ambiguous or cannot be mapped to the enterprise database schema."
 
     def _heuristic_error_repair(self, failed_sql: str, db_error: str) -> Optional[str]:
         """Repairs common column or table naming mistakes deterministically."""
         fixed_sql = failed_sql
+        err = db_error.lower()
+
         # Fix column hallucinations:
-        # e.g. "no such column: name" -> first_name / company_name
-        if "no such column: name" in db_error.lower():
-            if "customer" in failed_sql.lower():
-                fixed_sql = re.sub(r"\bname\b", "company_name", fixed_sql, flags=re.IGNORECASE)
-            elif "employee" in failed_sql.lower():
-                fixed_sql = re.sub(r"\bname\b", "first_name", fixed_sql, flags=re.IGNORECASE)
-            elif "department" in failed_sql.lower():
-                fixed_sql = re.sub(r"\bname\b", "department_name", fixed_sql, flags=re.IGNORECASE)
+        # e.g. "no such column: name" on Customer -> FirstName || ' ' || LastName
+        if "no such column: name" in err and "customer" in failed_sql.lower():
+            fixed_sql = re.sub(r"\bname\b", "FirstName || ' ' || LastName", fixed_sql, flags=re.IGNORECASE)
 
-        if "no such column: total_revenue" in db_error.lower() or "no such column: revenue" in db_error.lower():
-            fixed_sql = re.sub(r"\b(?:total_revenue|revenue)\b", "total_amount", fixed_sql, flags=re.IGNORECASE)
+        if "totalrevenue" in err or "total_revenue" in err or "revenue" in err:
+            fixed_sql = re.sub(r"\b(?:totalrevenue|total_revenue|revenue)\b", "Total", fixed_sql, flags=re.IGNORECASE)
 
-        if "no such column: price" in db_error.lower():
-            fixed_sql = re.sub(r"\bprice\b", "unit_price", fixed_sql, flags=re.IGNORECASE)
+        if "no such column: price" in err:
+            fixed_sql = re.sub(r"\bprice\b", "UnitPrice", fixed_sql, flags=re.IGNORECASE)
 
         if fixed_sql != failed_sql:
             return fixed_sql
@@ -334,7 +315,6 @@ class TextToSQLGenerator:
             s = re.sub(r"^```(?:sql)?\n?", "", s, flags=re.IGNORECASE)
             s = re.sub(r"\n?```$", "", s)
             s = s.strip()
-        # Remove trailing semicolon for clean AST parsing
         if s.endswith(";"):
             s = s[:-1].strip()
         return s

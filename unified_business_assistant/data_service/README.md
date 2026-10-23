@@ -47,9 +47,9 @@ data_service/
 ├── mock_query_service.py     # Day 1 mock service for Role C development (Port 8002)
 ├── app.py                    # Production FastAPI application (Port 8002)
 ├── db/
-│   ├── enterprise_business.db# Seeded SQLite database (6 tables, 2,049 rows)
+│   ├── enterprise_business.db# Authentic Chinook SQLite database (11 tables, 15,607 real rows)
 │   ├── schema.sql            # DDL schema definition
-│   ├── seed_database.py      # Reproducible database seeder
+│   ├── seed_database.py      # Upstream dataset downloader & validator
 │   └── connection.py         # Read-only connection manager (mode=ro, query_only=ON)
 ├── safety/
 │   ├── validator.py          # AST-based SQL parser & safety validator (sqlglot)

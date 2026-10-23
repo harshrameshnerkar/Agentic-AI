@@ -1,16 +1,12 @@
 """
 Day 1 deliverable: Mock POST /query endpoint for Role B (Data Service).
 
-Returns TWO HARDCODED rows plus a fake SQL string in the exact contracted shape (contracts.py),
-allowing Role C (Orchestrator) to integrate and test immediately without needing the full database.
+Returns TWO REAL ROWS from the authentic database plus a real SQL string
+in the exact contracted shape (contracts.py), allowing Role C (orchestrator)
+to develop without dependencies.
 
 Run:
     uvicorn mock_query_service:app --port 8002
-
-Contract Behavior:
-    - Default question -> 2 hardcoded rows, mock SQL, answerable=True
-    - Question containing 'unanswerable' or 'out-of-scope' -> answerable=False, empty rows, sql=None
-    - Question containing 'error' -> HTTP 503 simulated service error (for Role C error tests)
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,17 +27,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MOCK_COLUMNS = ["customer_name", "invoice_count"]
+MOCK_COLUMNS = ["CustomerName", "InvoiceCount"]
 MOCK_ROWS = [
-    ["Acme Global Industries", 12],
-    ["Starlight Logistics Ltd", 10],
+    ["Luís Gonçalves", 7],
+    ["Leonie Köhler", 7],
 ]
 MOCK_SQL = (
-    "SELECT c.company_name AS customer_name, COUNT(o.order_id) AS invoice_count "
-    "FROM customers c "
-    "JOIN orders o ON c.customer_id = o.customer_id "
-    "GROUP BY c.company_name "
-    "ORDER BY invoice_count DESC "
+    "SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount "
+    "FROM Customer c "
+    "JOIN Invoice i ON c.CustomerId = i.CustomerId "
+    "GROUP BY c.CustomerId, CustomerName "
+    "ORDER BY InvoiceCount DESC "
     "LIMIT 2;"
 )
 
@@ -68,7 +64,7 @@ def mock_query(payload: QueryRequest) -> QueryResponse:
             execution_time_ms=1.2,
         )
 
-    # Standard contracted mock response (2 rows + SQL + answerable=True)
+    # Standard contracted mock response (2 real rows + SQL + answerable=True)
     return QueryResponse(
         columns=MOCK_COLUMNS,
         rows=MOCK_ROWS[: payload.limit],

@@ -1,99 +1,170 @@
 -- ==============================================================================
 -- UNIFIED BUSINESS ASSISTANT - ROLE B: DATA SERVICE
--- Enterprise Relational Business Schema (SQLite & PostgreSQL Compatible)
--- 6 Interconnected Tables, Strict Foreign Keys, Check Constraints & Indexes
+-- Real World Enterprise Database Schema (Chinook Official Open-Source Dataset)
+-- 11 Interconnected Tables, 15,607 Records (Zero AI-Generated Rows)
 -- ==============================================================================
 
 PRAGMA foreign_keys = ON;
 
--- 1. DEPARTMENTS
-DROP TABLE IF EXISTS order_items;
-DROP TABLE IF EXISTS orders;
-DROP TABLE IF EXISTS products;
-DROP TABLE IF EXISTS customers;
-DROP TABLE IF EXISTS employees;
-DROP TABLE IF EXISTS departments;
-
-CREATE TABLE departments (
-    department_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    department_name TEXT NOT NULL UNIQUE,
-    code TEXT NOT NULL UNIQUE,
-    budget REAL NOT NULL,
-    location TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (DATE('now'))
+CREATE TABLE [Album]
+(
+    [AlbumId] INTEGER  NOT NULL,
+    [Title] NVARCHAR(160)  NOT NULL,
+    [ArtistId] INTEGER  NOT NULL,
+    CONSTRAINT [PK_Album] PRIMARY KEY  ([AlbumId]),
+    FOREIGN KEY ([ArtistId]) REFERENCES [Artist] ([ArtistId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
--- 2. EMPLOYEES
-CREATE TABLE employees (
-    employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    department_id INTEGER NOT NULL,
-    role TEXT NOT NULL,
-    salary REAL NOT NULL,
-    hire_date TEXT NOT NULL,
-    status TEXT NOT NULL CHECK(status IN ('Active', 'On Leave', 'Terminated')),
-    FOREIGN KEY (department_id) REFERENCES departments(department_id)
+CREATE TABLE [Artist]
+(
+    [ArtistId] INTEGER  NOT NULL,
+    [Name] NVARCHAR(120),
+    CONSTRAINT [PK_Artist] PRIMARY KEY  ([ArtistId])
 );
 
--- 3. CUSTOMERS
-CREATE TABLE customers (
-    customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    company_name TEXT NOT NULL UNIQUE,
-    contact_name TEXT NOT NULL,
-    contact_email TEXT NOT NULL,
-    industry TEXT NOT NULL,
-    region TEXT NOT NULL,
-    country TEXT NOT NULL,
-    tier TEXT NOT NULL CHECK(tier IN ('Enterprise', 'Mid-Market', 'Startup')),
-    created_at TEXT NOT NULL DEFAULT (DATE('now'))
+CREATE TABLE [Customer]
+(
+    [CustomerId] INTEGER  NOT NULL,
+    [FirstName] NVARCHAR(40)  NOT NULL,
+    [LastName] NVARCHAR(20)  NOT NULL,
+    [Company] NVARCHAR(80),
+    [Address] NVARCHAR(70),
+    [City] NVARCHAR(40),
+    [State] NVARCHAR(40),
+    [Country] NVARCHAR(40),
+    [PostalCode] NVARCHAR(10),
+    [Phone] NVARCHAR(24),
+    [Fax] NVARCHAR(24),
+    [Email] NVARCHAR(60)  NOT NULL,
+    [SupportRepId] INTEGER,
+    CONSTRAINT [PK_Customer] PRIMARY KEY  ([CustomerId]),
+    FOREIGN KEY ([SupportRepId]) REFERENCES [Employee] ([EmployeeId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
--- 4. PRODUCTS
-CREATE TABLE products (
-    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_name TEXT NOT NULL UNIQUE,
-    category TEXT NOT NULL,
-    unit_price REAL NOT NULL,
-    cost_price REAL NOT NULL,
-    stock_quantity INTEGER NOT NULL,
-    status TEXT NOT NULL CHECK(status IN ('Active', 'Discontinued'))
+CREATE TABLE [Employee]
+(
+    [EmployeeId] INTEGER  NOT NULL,
+    [LastName] NVARCHAR(20)  NOT NULL,
+    [FirstName] NVARCHAR(20)  NOT NULL,
+    [Title] NVARCHAR(30),
+    [ReportsTo] INTEGER,
+    [BirthDate] DATETIME,
+    [HireDate] DATETIME,
+    [Address] NVARCHAR(70),
+    [City] NVARCHAR(40),
+    [State] NVARCHAR(40),
+    [Country] NVARCHAR(40),
+    [PostalCode] NVARCHAR(10),
+    [Phone] NVARCHAR(24),
+    [Fax] NVARCHAR(24),
+    [Email] NVARCHAR(60),
+    CONSTRAINT [PK_Employee] PRIMARY KEY  ([EmployeeId]),
+    FOREIGN KEY ([ReportsTo]) REFERENCES [Employee] ([EmployeeId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
--- 5. ORDERS
-CREATE TABLE orders (
-    order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer_id INTEGER NOT NULL,
-    employee_id INTEGER NOT NULL,
-    order_date TEXT NOT NULL,
-    order_status TEXT NOT NULL CHECK(order_status IN ('Completed', 'Processing', 'Cancelled', 'Refunded')),
-    payment_status TEXT NOT NULL CHECK(payment_status IN ('Paid', 'Pending', 'Failed')),
-    total_amount REAL NOT NULL DEFAULT 0.0,
-    channel TEXT NOT NULL CHECK(channel IN ('Direct Sales', 'Online Portal', 'Partner Referral')),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
-    FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
+CREATE TABLE [Genre]
+(
+    [GenreId] INTEGER  NOT NULL,
+    [Name] NVARCHAR(120),
+    CONSTRAINT [PK_Genre] PRIMARY KEY  ([GenreId])
 );
 
--- 6. ORDER ITEMS
-CREATE TABLE order_items (
-    item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id INTEGER NOT NULL,
-    product_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL CHECK(quantity > 0),
-    unit_price REAL NOT NULL,
-    discount_pct REAL NOT NULL DEFAULT 0.0,
-    line_total REAL NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+CREATE TABLE [Invoice]
+(
+    [InvoiceId] INTEGER  NOT NULL,
+    [CustomerId] INTEGER  NOT NULL,
+    [InvoiceDate] DATETIME  NOT NULL,
+    [BillingAddress] NVARCHAR(70),
+    [BillingCity] NVARCHAR(40),
+    [BillingState] NVARCHAR(40),
+    [BillingCountry] NVARCHAR(40),
+    [BillingPostalCode] NVARCHAR(10),
+    [Total] NUMERIC(10,2)  NOT NULL,
+    CONSTRAINT [PK_Invoice] PRIMARY KEY  ([InvoiceId]),
+    FOREIGN KEY ([CustomerId]) REFERENCES [Customer] ([CustomerId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
--- INDEXES FOR PERFORMANCE & QUERY ACCELERATION
-CREATE INDEX idx_employees_department ON employees(department_id);
-CREATE INDEX idx_customers_region ON customers(region);
-CREATE INDEX idx_customers_industry ON customers(industry);
-CREATE INDEX idx_orders_customer ON orders(customer_id);
-CREATE INDEX idx_orders_employee ON orders(employee_id);
-CREATE INDEX idx_orders_date ON orders(order_date);
-CREATE INDEX idx_order_items_order ON order_items(order_id);
-CREATE INDEX idx_order_items_product ON order_items(product_id);
+CREATE TABLE [InvoiceLine]
+(
+    [InvoiceLineId] INTEGER  NOT NULL,
+    [InvoiceId] INTEGER  NOT NULL,
+    [TrackId] INTEGER  NOT NULL,
+    [UnitPrice] NUMERIC(10,2)  NOT NULL,
+    [Quantity] INTEGER  NOT NULL,
+    CONSTRAINT [PK_InvoiceLine] PRIMARY KEY  ([InvoiceLineId]),
+    FOREIGN KEY ([InvoiceId]) REFERENCES [Invoice] ([InvoiceId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE [MediaType]
+(
+    [MediaTypeId] INTEGER  NOT NULL,
+    [Name] NVARCHAR(120),
+    CONSTRAINT [PK_MediaType] PRIMARY KEY  ([MediaTypeId])
+);
+
+CREATE TABLE [Playlist]
+(
+    [PlaylistId] INTEGER  NOT NULL,
+    [Name] NVARCHAR(120),
+    CONSTRAINT [PK_Playlist] PRIMARY KEY  ([PlaylistId])
+);
+
+CREATE TABLE [PlaylistTrack]
+(
+    [PlaylistId] INTEGER  NOT NULL,
+    [TrackId] INTEGER  NOT NULL,
+    CONSTRAINT [PK_PlaylistTrack] PRIMARY KEY  ([PlaylistId], [TrackId]),
+    FOREIGN KEY ([PlaylistId]) REFERENCES [Playlist] ([PlaylistId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE [Track]
+(
+    [TrackId] INTEGER  NOT NULL,
+    [Name] NVARCHAR(200)  NOT NULL,
+    [AlbumId] INTEGER,
+    [MediaTypeId] INTEGER  NOT NULL,
+    [GenreId] INTEGER,
+    [Composer] NVARCHAR(220),
+    [Milliseconds] INTEGER  NOT NULL,
+    [Bytes] INTEGER,
+    [UnitPrice] NUMERIC(10,2)  NOT NULL,
+    CONSTRAINT [PK_Track] PRIMARY KEY  ([TrackId]),
+    FOREIGN KEY ([AlbumId]) REFERENCES [Album] ([AlbumId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY ([GenreId]) REFERENCES [Genre] ([GenreId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY ([MediaTypeId]) REFERENCES [MediaType] ([MediaTypeId]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE INDEX [IFK_AlbumArtistId] ON [Album] ([ArtistId]);
+
+CREATE INDEX [IFK_CustomerSupportRepId] ON [Customer] ([SupportRepId]);
+
+CREATE INDEX [IFK_EmployeeReportsTo] ON [Employee] ([ReportsTo]);
+
+CREATE INDEX [IFK_InvoiceCustomerId] ON [Invoice] ([CustomerId]);
+
+CREATE INDEX [IFK_InvoiceLineInvoiceId] ON [InvoiceLine] ([InvoiceId]);
+
+CREATE INDEX [IFK_InvoiceLineTrackId] ON [InvoiceLine] ([TrackId]);
+
+CREATE INDEX [IFK_PlaylistTrackPlaylistId] ON [PlaylistTrack] ([PlaylistId]);
+
+CREATE INDEX [IFK_PlaylistTrackTrackId] ON [PlaylistTrack] ([TrackId]);
+
+CREATE INDEX [IFK_TrackAlbumId] ON [Track] ([AlbumId]);
+
+CREATE INDEX [IFK_TrackGenreId] ON [Track] ([GenreId]);
+
+CREATE INDEX [IFK_TrackMediaTypeId] ON [Track] ([MediaTypeId]);

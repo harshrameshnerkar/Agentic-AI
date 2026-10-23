@@ -1,8 +1,8 @@
 """
-Database Integrity and Seeding Tests for Role B (Data Service).
+Database Integrity and Seeding Tests for Role B on Real Chinook Database.
 Verifies:
-- 5+ interconnected tables exist.
-- Over 1,000 total rows seeded.
+- Authentic real tables exist.
+- Over 1,000 total real rows exist (actual: 15,607 rows, 0% AI-generated).
 - Strict foreign key constraints valid.
 - Read-only connection blocks write operations at the database engine level.
 """
@@ -26,15 +26,15 @@ class TestDatabaseIntegrity(unittest.TestCase):
         self.assertTrue(os.path.exists(db_manager.db_path))
 
     def test_table_presence_and_row_counts(self):
-        """Database must have >= 5 tables and >= 1000 total rows."""
+        """Database must have >= 5 tables and >= 1000 total real rows."""
         counts = db_manager.get_table_counts()
-        expected_tables = {"departments", "employees", "customers", "products", "orders", "order_items"}
+        expected_tables = {"Customer", "Invoice", "InvoiceLine", "Employee", "Track", "Album", "Artist", "Genre"}
         for t in expected_tables:
             self.assertIn(t, counts, f"Table {t} missing from database.")
             self.assertGreater(counts[t], 0, f"Table {t} is empty.")
 
         total_rows = sum(counts.values())
-        print(f"\n[TestDatabaseIntegrity] Total row count: {total_rows}")
+        print(f"\n[TestDatabaseIntegrity] Total real row count: {total_rows}")
         self.assertGreaterEqual(total_rows, 1000, "Database must contain at least 1,000 rows.")
 
     def test_foreign_key_integrity(self):
@@ -54,10 +54,10 @@ class TestDatabaseIntegrity(unittest.TestCase):
         try:
             cursor = conn.cursor()
             with self.assertRaises(sqlite3.OperationalError):
-                cursor.execute("INSERT INTO departments (department_name, code, budget, location) VALUES ('Test', 'TST', 100, 'Nowhere');")
+                cursor.execute("INSERT INTO Genre (Name) VALUES ('Malicious');")
 
             with self.assertRaises(sqlite3.OperationalError):
-                cursor.execute("DROP TABLE customers;")
+                cursor.execute("DROP TABLE Customer;")
         finally:
             conn.close()
 
