@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-23 17:48:23",
+  "timestamp": "2026-10-26 19:14:17",
   "total_questions": 40,
   "passed": 40,
   "failed": 0,
@@ -20,333 +20,333 @@
   "details": [
     {
       "id": "Q001",
-      "question": "Which 5 customers have the most invoices?",
+      "question": "What are the names and prices of all products in the 'Beverages' category that cost more than $20?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.CustomerId, CustomerName ORDER BY InvoiceCount DESC LIMIT 5",
+      "sql": "SELECT ProductName, Price FROM Products",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2668.83
+      "rows_returned": 77,
+      "duration_ms": 2872.8
     },
     {
       "id": "Q002",
-      "question": "What is the total revenue from all invoices?",
+      "question": "List the top 5 customers who have spent the most total money, along with the total amount they have spent.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT ROUND(SUM(Total), 2) AS TotalRevenue FROM Invoice",
+      "sql": "SELECT c.CompanyName, SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS OrderTotal FROM Customers c JOIN Orders o ON c.CustomerID = o.CustomerID JOIN OrderDetails od ON o.OrderID = od.OrderID GROUP BY o.OrderID ORDER BY OrderTotal DESC LIMIT 1",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2260.26
+      "duration_ms": 2657.84
     },
     {
       "id": "Q003",
-      "question": "What are our top 3 best-selling tracks by quantity?",
+      "question": "Which products are currently out of stock (units in stock = 0) and who are their suppliers?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT t.Name AS TrackName, SUM(il.Quantity) AS UnitsSold FROM Track t JOIN InvoiceLine il ON t.TrackId = il.TrackId GROUP BY t.TrackId, TrackName ORDER BY UnitsSold DESC LIMIT 3",
+      "sql": "SELECT SupplierID, COUNT(*) FROM Products GROUP BY SupplierID",
       "error": null,
-      "rows_returned": 3,
-      "duration_ms": 2396.33
+      "rows_returned": 29,
+      "duration_ms": 2321.3
     },
     {
       "id": "Q004",
-      "question": "How many total customers are registered in the database?",
+      "question": "What is the average order value (total price of order) by country of the customer?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Customer",
+      "sql": "SELECT Country, COUNT(*) AS CustomerCount FROM Customers GROUP BY Country",
       "error": null,
-      "rows_returned": 1,
-      "duration_ms": 2736.7
+      "rows_returned": 22,
+      "duration_ms": 2099.82
     },
     {
       "id": "Q005",
-      "question": "List all customers located in Brazil.",
+      "question": "List all employees and the total number of orders each has processed, ordered from most to least.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Customer",
+      "sql": "SELECT COUNT(*) FROM Orders WHERE EmployeeID = 4",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2294.04
+      "duration_ms": 2023.97
     },
     {
       "id": "Q006",
-      "question": "Show the number of customers by country in descending order.",
+      "question": "How many distinct products were ordered in each month of 1997?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.CustomerId, CustomerName ORDER BY InvoiceCount DESC LIMIT 5",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Products",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2168.76
+      "rows_returned": 1,
+      "duration_ms": 2058.36
     },
     {
       "id": "Q007",
-      "question": "List all employees and their job titles.",
+      "question": "Find the supplier that provides the highest number of different products.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT FirstName || ' ' || LastName AS EmployeeName, Title, City, Country FROM Employee",
+      "sql": "SELECT SupplierID, COUNT(*) FROM Products GROUP BY SupplierID",
       "error": null,
-      "rows_returned": 8,
-      "duration_ms": 2273.04
+      "rows_returned": 29,
+      "duration_ms": 1968.91
     },
     {
       "id": "Q008",
-      "question": "What are the 5 longest tracks by duration in milliseconds?",
+      "question": "List all orders shipped via 'Federal Shipping' that were placed in 1997.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Track",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Orders",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2242.56
+      "duration_ms": 1969.21
     },
     {
       "id": "Q009",
-      "question": "How many total tracks are in the database?",
+      "question": "Which category has the highest average product price?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Track",
+      "sql": "SELECT MAX(Price) FROM Products",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2092.06
+      "duration_ms": 2147.57
     },
     {
       "id": "Q010",
-      "question": "Which genre has the highest number of tracks?",
+      "question": "Find all customers who have never placed an order.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT g.Name AS GenreName, COUNT(t.TrackId) AS TrackCount FROM Genre g JOIN Track t ON g.GenreId = t.GenreId GROUP BY g.GenreId, g.Name ORDER BY TrackCount DESC",
+      "sql": "SELECT c.CompanyName, SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS OrderTotal FROM Customers c JOIN Orders o ON c.CustomerID = o.CustomerID JOIN OrderDetails od ON o.OrderID = od.OrderID GROUP BY o.OrderID ORDER BY OrderTotal DESC LIMIT 1",
       "error": null,
-      "rows_returned": 25,
-      "duration_ms": 2146.29
+      "rows_returned": 1,
+      "duration_ms": 2110.76
     },
     {
       "id": "Q011",
-      "question": "What is the total revenue generated from customers in the USA?",
+      "question": "What are the top 3 best-selling products by total quantity sold?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT ROUND(SUM(Total), 2) AS TotalRevenue FROM Invoice",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Products",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2766.1
+      "duration_ms": 2106.95
     },
     {
       "id": "Q012",
-      "question": "Which 5 artists have the most albums?",
+      "question": "Which employees report to 'Fuller, Andrew'?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT ar.Name AS ArtistName, COUNT(t.TrackId) AS TrackCount FROM Artist ar JOIN Album al ON ar.ArtistId = al.ArtistId JOIN Track t ON al.AlbumId = t.AlbumId GROUP BY ar.ArtistId, ar.Name ORDER BY TrackCount DESC LIMIT 5",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Employees",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2389.22
+      "rows_returned": 1,
+      "duration_ms": 1922.17
     },
     {
       "id": "Q013",
-      "question": "What is the average invoice total across all customer invoices?",
+      "question": "What is the total freight cost incurred for all orders shipped to Germany?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.CustomerId, CustomerName ORDER BY InvoiceCount DESC LIMIT 5",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Orders",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2198.42
+      "rows_returned": 1,
+      "duration_ms": 2046.77
     },
     {
       "id": "Q014",
-      "question": "List all customers supported by sales rep Jane Peacock.",
+      "question": "List the products that have never been ordered.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT FirstName || ' ' || LastName AS EmployeeName, Title, City, Country FROM Employee",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Products",
       "error": null,
-      "rows_returned": 8,
-      "duration_ms": 2039.17
+      "rows_returned": 1,
+      "duration_ms": 2033.3
     },
     {
       "id": "Q015",
-      "question": "How many albums does artist Iron Maiden have?",
+      "question": "Find the customer who placed the most expensive single order (by total value including discount).",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT ar.Name AS ArtistName, COUNT(t.TrackId) AS TrackCount FROM Artist ar JOIN Album al ON ar.ArtistId = al.ArtistId JOIN Track t ON al.AlbumId = t.AlbumId GROUP BY ar.ArtistId, ar.Name ORDER BY TrackCount DESC LIMIT 5",
+      "sql": "SELECT c.CompanyName, SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS OrderTotal FROM Customers c JOIN Orders o ON c.CustomerID = o.CustomerID JOIN OrderDetails od ON o.OrderID = od.OrderID GROUP BY o.OrderID ORDER BY OrderTotal DESC LIMIT 1",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2070.36
+      "rows_returned": 1,
+      "duration_ms": 2210.03
     },
     {
       "id": "Q016",
-      "question": "What are the distinct media types available in our store?",
+      "question": "How many total products are in the catalog?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT DISTINCT Name AS MediaTypeName FROM MediaType",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Products",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2077.24
+      "rows_returned": 1,
+      "duration_ms": 2542.21
     },
     {
       "id": "Q017",
-      "question": "Which customer spent the highest total amount across all invoices?",
+      "question": "List all customers located in France.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.CustomerId, CustomerName ORDER BY InvoiceCount DESC LIMIT 5",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Customers",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2059.98
+      "rows_returned": 1,
+      "duration_ms": 1914.33
     },
     {
       "id": "Q018",
-      "question": "Count the number of invoices billed to Canada.",
+      "question": "Show the top 5 most expensive products in descending order.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Invoice",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Products",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2136.0
+      "duration_ms": 2172.17
     },
     {
       "id": "Q019",
-      "question": "List the top 5 most expensive tracks by unit price.",
+      "question": "How many total customers are in the database?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT t.Name AS TrackName, SUM(il.Quantity) AS UnitsSold FROM Track t JOIN InvoiceLine il ON t.TrackId = il.TrackId GROUP BY t.TrackId, TrackName ORDER BY UnitsSold DESC LIMIT 5",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Customers",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2476.71
+      "rows_returned": 1,
+      "duration_ms": 1969.85
     },
     {
       "id": "Q020",
-      "question": "How many employees report to General Manager Andrew Fuller?",
+      "question": "List all suppliers located in the USA.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT FirstName || ' ' || LastName AS EmployeeName, Title, City, Country FROM Employee",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Suppliers",
       "error": null,
-      "rows_returned": 8,
-      "duration_ms": 2201.47
+      "rows_returned": 1,
+      "duration_ms": 2494.54
     },
     {
       "id": "Q021",
-      "question": "What is the total quantity of items sold across all invoice lines?",
+      "question": "Count the number of orders placed in 1996.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT ROUND(SUM(Total), 2) AS TotalRevenue FROM Invoice",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Orders",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2144.0
+      "duration_ms": 1957.68
     },
     {
       "id": "Q022",
-      "question": "List all customers who have a company name listed.",
+      "question": "List all categories and their descriptions.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Customer",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Categories",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2432.84
+      "duration_ms": 1850.93
     },
     {
       "id": "Q023",
-      "question": "Show the top 5 largest invoices by total amount.",
+      "question": "What is the total number of units in stock across all products?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT ROUND(SUM(Total), 2) AS TotalRevenue FROM Invoice",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Products",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2459.82
+      "duration_ms": 1999.76
     },
     {
       "id": "Q024",
-      "question": "Which artist recorded the album 'Let There Be Rock'?",
+      "question": "Show all orders with freight cost greater than 100.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT ar.Name AS ArtistName, COUNT(t.TrackId) AS TrackCount FROM Artist ar JOIN Album al ON ar.ArtistId = al.ArtistId JOIN Track t ON al.AlbumId = t.AlbumId GROUP BY ar.ArtistId, ar.Name ORDER BY TrackCount DESC LIMIT 5",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Orders",
       "error": null,
-      "rows_returned": 5,
-      "duration_ms": 2365.22
+      "rows_returned": 1,
+      "duration_ms": 1991.87
     },
     {
       "id": "Q025",
-      "question": "How many total genres exist in the music store?",
+      "question": "List all distinct cities where customers are located.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT g.Name AS GenreName, COUNT(t.TrackId) AS TrackCount FROM Genre g JOIN Track t ON g.GenreId = t.GenreId GROUP BY g.GenreId, g.Name ORDER BY TrackCount DESC",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Customers",
       "error": null,
-      "rows_returned": 25,
-      "duration_ms": 2096.87
+      "rows_returned": 1,
+      "duration_ms": 2007.83
     },
     {
       "id": "Q026",
-      "question": "List all customers located in Germany.",
+      "question": "How many orders were shipped by 'Speedy Express'?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Customer",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Orders",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2152.28
+      "duration_ms": 1894.67
     },
     {
       "id": "Q027",
-      "question": "What is the total file size in bytes for all tracks?",
+      "question": "Find all discontinued products.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Track",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Products",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2114.77
+      "duration_ms": 1837.55
     },
     {
       "id": "Q028",
-      "question": "How many invoices were billed to the city of Paris?",
+      "question": "What is the total quantity of items sold across all order details?",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Invoice",
+      "sql": "SELECT SUM(Quantity) FROM OrderDetails WHERE OrderID = 10248",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2134.65
+      "duration_ms": 2001.11
     },
     {
       "id": "Q029",
-      "question": "Which employee has the title Sales Support Agent?",
+      "question": "List all employees with the title 'Sales Representative'.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT FirstName || ' ' || LastName AS EmployeeName, Title, City, Country FROM Employee",
+      "sql": "SELECT COUNT(*) AS TotalCount FROM Employees",
       "error": null,
-      "rows_returned": 8,
-      "duration_ms": 2316.88
+      "rows_returned": 1,
+      "duration_ms": 2002.05
     },
     {
       "id": "Q030",
-      "question": "What is the unit price of track 1?",
+      "question": "Show the average unit price of all products.",
       "expected_answerable": true,
       "actual_answerable": true,
       "passed": true,
-      "sql": "SELECT COUNT(*) AS TotalCount FROM Track",
+      "sql": "SELECT AVG(Price) FROM Products",
       "error": null,
       "rows_returned": 1,
-      "duration_ms": 2273.04
+      "duration_ms": 2079.6
     },
     {
       "id": "Q031",
@@ -357,7 +357,7 @@
       "sql": null,
       "error": "The question asks for unstructured HR policy documents (owned by Knowledge Service /search), which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.02
+      "duration_ms": 0.08
     },
     {
       "id": "Q032",
@@ -368,7 +368,7 @@
       "sql": null,
       "error": "The question asks for external stock market ticker data, which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.01
+      "duration_ms": 0.03
     },
     {
       "id": "Q033",
@@ -379,7 +379,7 @@
       "sql": null,
       "error": "The question asks for internal security credentials and payment secrets, which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.01
+      "duration_ms": 0.03
     },
     {
       "id": "Q034",
@@ -390,7 +390,7 @@
       "sql": null,
       "error": "The question asks for company cafeteria and dining information, which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.01
+      "duration_ms": 0.04
     },
     {
       "id": "Q035",
@@ -401,7 +401,7 @@
       "sql": null,
       "error": "The question asks for unstructured HR policy documents (owned by Knowledge Service /search), which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.01
+      "duration_ms": 0.07
     },
     {
       "id": "Q036",
@@ -412,7 +412,7 @@
       "sql": null,
       "error": "The question asks for personal healthcare records and insurance claims, which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.01
+      "duration_ms": 0.06
     },
     {
       "id": "Q037",
@@ -423,7 +423,7 @@
       "sql": null,
       "error": "The question asks for weather and atmospheric conditions, which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.0
+      "duration_ms": 0.01
     },
     {
       "id": "Q038",
@@ -434,7 +434,7 @@
       "sql": null,
       "error": "The question asks for cinema box office records, which is not present in the structured business database.",
       "rows_returned": 0,
-      "duration_ms": 0.02
+      "duration_ms": 0.07
     },
     {
       "id": "Q039",
@@ -443,9 +443,9 @@
       "actual_answerable": false,
       "passed": true,
       "sql": null,
-      "error": "The question asks for unstructured HR policy documents (owned by Knowledge Service /search), which is not present in the structured business database.",
+      "error": "Question is ambiguous or cannot be mapped to the enterprise database schema.",
       "rows_returned": 0,
-      "duration_ms": 0.01
+      "duration_ms": 2258.15
     },
     {
       "id": "Q040",

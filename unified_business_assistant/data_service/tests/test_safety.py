@@ -1,5 +1,5 @@
 """
-Safety Gate Tests for Role B (Data Service) on Real Chinook Database.
+Safety Gate Tests for Role B (Data Service) on Real Northwind Database.
 Verifies Acceptance Criterion 3:
 - Destructive SQL provably blocked at validation, BEFORE execution.
 - Multi-statements, table drops, deletes, updates, and schema alterations rejected.

@@ -29,8 +29,8 @@ flowchart TD
 
 ## 2. Individual Acceptance Criteria Status
 
-| # | Acceptance Criterion | Verification Method | Status |
-|---|---|---|:---:|
+| #     | Acceptance Criterion | Verification Method | Status |
+|-------|----------------------|---------------------|--------|
 | **1** | Mock endpoint published on Day 1 morning | `mock_query_service.py` on port 8002 returns 2 hardcoded rows + fake SQL | **MET** |
 | **2** | Real `/query` matches contract exactly | Role C consumes with zero schema drift (`contracts.py`) | **MET** |
 | **3** | Destructive SQL blocked at validation before execution | Tested in `tests/test_safety.py`: `DROP TABLE` blocked prior to execution | **MET** |
@@ -47,7 +47,7 @@ data_service/
 ├── mock_query_service.py     # Day 1 mock service for Role C development (Port 8002)
 ├── app.py                    # Production FastAPI application (Port 8002)
 ├── db/
-│   ├── enterprise_business.db# Authentic Chinook SQLite database (11 tables, 15,607 real rows)
+│   ├── enterprise_business.db# Authentic Northwind SQLite database (12 tables, 625,890 real rows)
 │   ├── schema.sql            # DDL schema definition
 │   ├── seed_database.py      # Upstream dataset downloader & validator
 │   └── connection.py         # Read-only connection manager (mode=ro, query_only=ON)
@@ -97,7 +97,7 @@ uvicorn app:app --host 127.0.0.1 --port 8002 --reload
 ```bash
 curl http://127.0.0.1:8002/health
 ```
-
+ 
 ### 4.4 Running Automated Tests
 ```bash
 python -m unittest discover -s tests -p "test_*.py"

@@ -1,0 +1,701 @@
+================================================================================
+           UNIFIED BUSINESS ASSISTANT - ROLE A: KNOWLEDGE SERVICE
+                     COMPLETE ARCHITECTURE & CODE FLOW GUIDE
+================================================================================
+Target Audience : Engineers, Data Scientists, & New Contributors
+System Role     : Enterprise Document Retrieval & Policy Assistant (Role A)
+Specification   : UNIFIED-BUSINESS-ASSISTAN.md (§1, §2, §3)
+Status          : Production-Ready
+================================================================================
+
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. SYSTEM OVERVIEW & CORE MISSION
+2. HIGH-LEVEL ARCHITECTURE & TECHNOLOGY STACK
+3. REPOSITORY DIRECTORY & FILE INVENTORY
+4. DATABASE & DATA SCHEMAS
+5. PROCESS FLOW 1: DOCUMENT INGESTION & DUAL-STORE SYNCHRONIZATION
+6. PROCESS FLOW 2: FORMAL ROLE A SEARCH API (POST /search)
+7. PROCESS FLOW 3: CONVERSATIONAL RAG & CHATBOT API (POST /chat)
+8. PROCESS FLOW 4: STANDALONE DIAGNOSTIC & TEST PIPELINES
+9. PROCESS FLOW 5: E2E AUTOMATED EVALUATION & BENCHMARKING
+10. DETAILED FUNCTION-BY-FUNCTION CALL TREES
+11. FIRST-TIME DEVELOPER ONBOARDING CHEAT SHEET
+--------------------------------------------------------------------------------
+
+
+================================================================================
+1. SYSTEM OVERVIEW & CORE MISSION
+================================================================================
+
+The Knowledge Service (Role A) is an enterprise-grade Retrieval-Augmented 
+Generation (RAG) platform. Its core responsibilities are:
+
+  1. INGESTION & OCR:
+     Automatically discover, parse, extract, and OCR (for scanned pages) 50 real
+     corporate policy PDFs from 5 major enterprise organizations:
+     - Susan Electricals
+     - Jayaswal Neco Industries
+     - Reckitt Benckiser
+     - Google / Alphabet
+     - GitLab
+
+  2. DUAL-STORAGE SYSTEM:
+     - Cloud SQL Store (Neon Serverless PostgreSQL): Stores text chunks with 
+       gapless serial numbers (sr_no 1..N), page-level provenance, content 
+       hashes for idempotent re-runs, and full audit chat telemetry.
+     - Local Vector Store (ChromaDB): Stores dense vector embeddings using local
+       ONNX models (all-MiniLM-L6-v2) for sub-second offline vector similarity.
+
+  3. RETRIEVAL & RANK FUSION:
+     Implements domain-aware multi-query expansion across 6 enterprise domains
+     (HR, Governance, Supply Chain, POSH, CSR, IT) combined with Reciprocal Rank
+     Fusion (RRF) and a calibrated 75%+ relevance threshold barrier.
+
+  4. ANSWER SYNTHESIS & AUDIT:
+     Synthesizes structured answers with exact source document and page citations.
+     Uses a 3-tier model strategy:
+       Tier 1: Google Gemini 2.0 Flash (Free API)
+       Tier 2: Groq Cloud LLM (qwen/qwen3.8-27b / Llama-3.3)
+       Tier 3: Local Offline Extractive Synthesizer (Zero external dependencies)
+     Every interaction is asynchronously audited to Neon PostgreSQL.
+
+
+================================================================================
+2. HIGH-LEVEL ARCHITECTURE & TECHNOLOGY STACK
+================================================================================
+
+                              [ 50 Policy PDFs ]
+                                      |
+                                      v
+                 +------------------------------------------+
+                 | 1_ingestion_pipeline.py                  |
+                 | - extraction.py (pypdf + RapidOCR ONNX)  |
+                 | - chunk_pages (500 chars / 75 overlap)   |
+                 +--------------------+---------------------+
+                                      |
+                 +--------------------+---------------------+
+                 |                                          |
+                 v                                          v
+      +----------------------+                   +--------------------+
+      |  Neon PostgreSQL     |                   |  ChromaDB (Local)  |
+      |  (HTTP SQL Endpoint) |                   |  (ONNX Embeddings) |
+      |  Table: rag_documents|                   |  Collection:       |
+      |  - Chunk text        |                   |    rag_documents   |
+      |  - Stable chunk_id   |                   |  - Vector index    |
+      |  - Gapless sr_no     |                   |  - Metadata        |
+      |  - Page provenance   |                   +---------+----------+
+      +----------+-----------+                             |
+                 |                                         |
+                 |             +---------------------------+
+                 |             |
+                 v             v
+       +----------------------------------------------------+
+       |  rag_engine.py (UnifiedRAGEngine)                  |
+       |  - Multi-query expansion (6 domains)               |
+       |  - Vector cosine similarity + RRF fusion           |
+       |  - Calibrated score confidence (75%+ barrier)      |
+       |  - Conversational history contextualization        |
+       |  - 3-Tier Answer Synthesis (Gemini / Groq / Local) |
+       +-----------------------+----------------------------+
+                               |
+                               v
+       +----------------------------------------------------+
+       |  app.py (FastAPI Web Server, Port 8000)            |
+       |  ├── POST /search   (Role A Canonical Endpoint)    |
+       |  ├── POST /chat     (Conversational RAG Chatbot)   |
+       |  ├── GET  /documents (50-Doc Policy Catalog)       |
+       |  ├── GET  /stats    (Live Neon & Chroma Telemetry) |
+       |  ├── GET  /health   (Liveness Probe)               |
+       |  └── GET  /         (Interactive Glassmorphic UI)  |
+       +----------------------------------------------------+
+
+
+TECHNOLOGY COMPONENTS:
+- Web Framework        : FastAPI + Uvicorn (ASGI)
+- Schema Validation    : Pydantic v2 (Strict contracts in contracts.py)
+- Vector Database      : ChromaDB (HNSW index, cosine distance space)
+- Relational Database  : Neon Serverless PostgreSQL (Direct HTTP SQL API)
+- Embeddings           : all-MiniLM-L6-v2 via Chroma ONNX (Offline, CPU-friendly)
+- PDF Extraction       : pypdf (Text layer) + pypdfium2 (Rasterizer)
+- OCR Fallback         : RapidOCR ONNX (Scanned pages, 0 system binary dependencies)
+- Text Chunking        : LangChain RecursiveCharacterTextSplitter
+- Generative Models    : Google Gemini 2.0 Flash / Groq Cloud / Local Extractive
+
+
+================================================================================
+3. REPOSITORY DIRECTORY & FILE INVENTORY
+================================================================================
+
+Directory: unified_business_assistant/knowledge_service/
+
+File / Folder               Role & Purpose in the System
+--------------------------------------------------------------------------------
+contracts.py                CANONICAL API CONTRACTS
+                            Declares shared Pydantic models (SearchRequest,
+                            PassageResult, SearchResponse). Used by app.py and
+                            external orchestrators (Role C).
+
+app.py                      FASTAPI WEB APPLICATION ENTRYPOINT
+                            Mounts REST endpoints (/search, /chat, /documents,
+                            /stats, /health) and serves the Web Dashboard.
+
+rag_engine.py               CORE RAG ORCHESTRATION ENGINE
+                            Houses UnifiedRAGEngine: handles multi-query expansion,
+                            RRF rank fusion, score calibration, conversational query
+                            reformulation, multi-tier LLM generation, and logging.
+
+neon_client.py              NEON POSTGRESQL HTTP CLIENT
+                            Wrapper around Neon Serverless PostgreSQL REST /sql API.
+                            Handles DDL creation, idempotent synchronization, MD5
+                            diffing, gapless serial numbering, and chat logs.
+
+extraction.py               PDF PARSING & OCR EXTRACTION ENGINE
+                            Extracts text with pypdf, falls back to RapidOCR ONNX
+                            for scanned pages, maintains disk-based ocr_cache.json,
+                            and generates page-bounded Chunk objects.
+
+1_ingestion_pipeline.py     OFFLINE DOCUMENT INGESTION CLI (ingestion_pipeline.py)
+                            End-to-end batch script that extracts all 50 PDFs,
+                            generates 500-char chunks, syncs to Neon DB, and indexes
+                            vectors in ChromaDB.
+
+2_retrieval_pipeline.py     STANDALONE RETRIEVAL TESTER CLI (retrieval_pipeline.py)
+                            Fast diagnostic script for querying ChromaDB directly
+                            and verifying similarity scores without launching the API.
+
+3_answer_generation.py      STANDALONE ANSWER GENERATION TESTER CLI (answer_generation.py)
+                            Diagnostic script that retrieves chunks, formats context,
+                            and executes the 3-tier generation pipeline in terminal.
+
+evaluate_e2e.py             AUTOMATED COMPLIANCE & EVALUATION SUITE
+                            Self-contained tester that boots probes against the API:
+                            health, telemetry consistency, retrieval, and chat.
+
+requirements.txt            PYTHON DEPENDENCY SPECIFICATION
+                            List of pinned libraries required for the service.
+
+.env                        ENVIRONMENT CONFIGURATION
+                            Contains DATABASE_URL, GEMINI_API_KEY, GROQ_API_KEY, etc.
+
+data/                       DOCUMENT ASSETS & CACHES
+  ├── documents/            Folder containing exactly 50 policy PDF files.
+  ├── documents_metadata.json Master catalog with metadata (title, company, category).
+  ├── ingestion_report.json Extraction statistics (pages, OCR count, parse errors).
+  ├── ocr_cache.json        Persistent cache of OCR results to prevent re-OCR.
+  └── test_questions.json   Evaluation benchmark questions.
+
+db/chroma_db/               LOCAL VECTOR STORE
+                            Persistent ChromaDB directory storing vector index files.
+
+eval/EVAL_REPORT.md         OFFICIAL BENCHMARK EVALUATION REPORT
+                            Documents chunking experiments, score thresholds, and metrics.
+
+static/index.html           INTERACTIVE GLASSMORPHIC WEB DASHBOARD
+                            Single-page modern UI for chatting and inspecting policies.
+
+
+================================================================================
+4. DATABASE & DATA SCHEMAS
+================================================================================
+
+4.1 NEON POSTGRESQL: TABLE `rag_documents`
+--------------------------------------------------------------------------------
+Stores all ingested text chunks with guaranteed sequential numbering and provenance.
+
+Column Name       Type           Constraints     Description
+--------------------------------------------------------------------------------
+sr_no             SERIAL         PRIMARY KEY     Strictly sequential 1..N (gapless)
+chunk_id          VARCHAR(100)   UNIQUE NOT NULL E.g., 'doc_001_p1_c01'
+chunk_text        TEXT           NOT NULL        Full text excerpt of the chunk
+source_name       VARCHAR(255)   NOT NULL        Filename (e.g. 'posh_policy.pdf')
+page_number       INT            NOT NULL        1-based page number in the PDF
+score_confidence  FLOAT          DEFAULT NULL    Calibrated score if precomputed
+embedding_model   VARCHAR(100)   NOT NULL        E.g., 'all-MiniLM-L6-v2'
+created_at        TIMESTAMPTZ    CURRENT_TIMESTAMP Insertion timestamp
+
+Indexes:
+- idx_rag_docs_source   ON rag_documents(source_name)
+- idx_rag_docs_chunk_id ON rag_documents(chunk_id)
+
+
+4.2 NEON POSTGRESQL: TABLE `rag_chat_logs`
+--------------------------------------------------------------------------------
+Maintains conversational telemetry, audit trail, and multi-turn session history.
+
+Column Name       Type           Constraints     Description
+--------------------------------------------------------------------------------
+id                SERIAL         PRIMARY KEY     Auto-incrementing log ID
+session_id        VARCHAR(100)   NOT NULL        Conversation identifier
+user_query        TEXT           NOT NULL        User input question
+bot_response      TEXT           NOT NULL        Synthesized assistant answer
+sources_cited     TEXT           DEFAULT ''      E.g., 'posh.pdf:p3, ethics.pdf:p7'
+confidence_score  FLOAT          DEFAULT NULL    Average confidence (0.0 to 1.0)
+created_at        TIMESTAMPTZ    CURRENT_TIMESTAMP Timestamp of turn
+
+Indexes:
+- idx_chat_session      ON rag_chat_logs(session_id)
+
+
+4.3 CHROMADB VECTOR STORE: COLLECTION `rag_documents`
+--------------------------------------------------------------------------------
+- Distance Metric : Cosine Distance (metadata: {"hnsw:space": "cosine"})
+- Documents       : Chunk text string
+- Embeddings      : 384-dimensional dense vectors (all-MiniLM-L6-v2)
+- Metadatas:
+    {
+      "doc_id": "doc_001",
+      "source": "posh_policy.pdf",
+      "page": 1,
+      "title": "Prevention of Sexual Harassment Policy",
+      "company": "Susan Electricals",
+      "category": "HR, Workplace Conduct & POSH",
+      "chunk_id": "doc_001_p1_c01",
+      "chunk_index": 1,
+      "extraction_method": "text_layer"
+    }
+
+
+4.4 PYDANTIC CONTRACT SCHEMAS (contracts.py & app.py)
+--------------------------------------------------------------------------------
+SearchRequest:
+  - question        : str   (min_length=1)
+  - top_k           : int   (default=5, 1..20)
+  - score_threshold : float (default=0.75, calibrated confidence)
+
+PassageResult:
+  - text            : str
+  - source_file     : str
+  - page            : int   (1-based)
+  - score           : float (calibrated 0.0 to 1.0)
+  - chunk_id        : str
+  - title           : Optional[str]
+  - company         : Optional[str]
+
+SearchResponse:
+  - results         : List[PassageResult]
+  - no_match        : bool
+  - embedding_model : Optional[str]
+
+ChatRequest:
+  - message         : str
+  - session_id      : Optional[str] (default="default_session")
+  - top_k           : Optional[int] (default=4)
+  - score_threshold : Optional[float] (default=0.75)
+
+ChatResponse:
+  - session_id          : str
+  - question            : str
+  - standalone_question : str
+  - answer              : str
+  - citations           : List[dict]
+  - model_used          : str
+  - no_match            : bool
+
+
+================================================================================
+5. PROCESS FLOW 1: DOCUMENT INGESTION & DUAL-STORE SYNCHRONIZATION
+================================================================================
+
+Trigger : Executing `python 1_ingestion_pipeline.py`
+Goal    : Turn 50 raw PDFs into clean, searchable, synchronized records in Neon & Chroma.
+
+Step 1: Path Resolution & Environment Load
+  File     : 1_ingestion_pipeline.py
+  Function : get_paths()
+  Action   : Locates data/documents, data/documents_metadata.json, and db/chroma_db.
+
+Step 2: PDF Parsing and OCR Extraction
+  File     : extraction.py
+  Function : extract_all(docs_dir, meta_path, enable_ocr=True, write_report=True)
+  Detailed Logic:
+    1. Reads metadata catalog via load_metadata().
+    2. Iterates over all 50 PDFs in alphanumeric order.
+    3. Attempts text extraction page-by-page using pypdf.PdfReader.
+    4. If extracted text is fewer than MIN_TEXT_CHARS (20 characters):
+       a. Computes cache key using _cache_key(path, page) [hash of size + mtime].
+       b. Checks data/ocr_cache.json.
+       c. If miss, calls _ocr_page(pdf_path, page_idx):
+          - Uses pypdfium2 to render PDF page bitmap at OCR_RENDER_SCALE (2.5x).
+          - Converts bitmap to RGB numpy array.
+          - Passes array to RapidOCR ONNX engine (_get_ocr()).
+          - Extracts ordered text lines.
+          - Caches result in ocr_cache.json.
+    5. Returns List[PageText] where each item represents 1 page with metadata.
+    6. Writes extraction_report.json summarizing page counts and OCR stats.
+
+Step 3: Page-Aware Chunking
+  File     : extraction.py
+  Function : chunk_pages(pages, chunk_size=500, chunk_overlap=75)
+  Detailed Logic:
+    1. Uses LangChain RecursiveCharacterTextSplitter with separators:
+       ["\n\n", "\n", ". ", " ", ""].
+    2. Chunks each page independently (NEVER crosses page boundaries, preserving
+       strict page provenance).
+    3. Assigns deterministic Chunk ID: f"{doc_id}_p{page}_c{chunk_index:02d}".
+    4. Returns List[Chunk] objects (~1,500 - 2,000 total policy chunks).
+
+Step 4: Embedding Model Selection
+  File     : 1_ingestion_pipeline.py
+  Function : get_embedding_function()
+  Action   : Probes for valid OPENAI_API_KEY. If absent, initializes local
+             all-MiniLM-L6-v2 via chromadb.utils.embedding_functions.DefaultEmbeddingFunction.
+
+Step 5: Cloud PostgreSQL Synchronization (Neon)
+  File     : 1_ingestion_pipeline.py -> neon_client.py
+  Functions: sync_to_neon(chunks, embedding_model_name)
+             NeonDBClient.sync_chunks(chunks, embedding_model_name)
+  Detailed Logic:
+    1. Calls NeonDBClient.create_table_if_not_exists() to ensure DDL exists.
+    2. Fetches existing chunk IDs and MD5 hashes:
+       "SELECT chunk_id, md5(chunk_text) AS h FROM rag_documents;"
+    3. Identifies:
+       - stale chunks   (in DB but no longer in source) -> deleted via _delete_chunk_ids()
+       - changed chunks (content hash mismatch)         -> deleted and re-inserted
+       - new chunks     (not present in DB)             -> batched for insertion
+       - unchanged      -> skipped (idempotent, 0 cost)
+    4. Batches inserts into rag_documents (50-100 chunks/batch) via HTTP SQL API.
+    5. Calls resequence_serial_numbers():
+       Uses SQL CTE with ROW_NUMBER() OVER (ORDER BY source_name, page_number, chunk_id)
+       to guarantee gapless sequential sr_no (1, 2, 3... N).
+
+Step 6: Vector Store Indexing (ChromaDB)
+  File     : 1_ingestion_pipeline.py
+  Function : update_vector_store(chunks, embedding_func, db_path)
+  Detailed Logic:
+    1. Initializes chromadb.PersistentClient at db/chroma_db/.
+    2. Gets or creates collection "rag_documents" with cosine distance.
+    3. Identifies unindexed chunk IDs.
+    4. Batches vector upserts: collection.upsert(ids, documents, metadatas).
+
+
+================================================================================
+6. PROCESS FLOW 2: FORMAL ROLE A SEARCH API (POST /search)
+================================================================================
+
+Trigger : HTTP Client calls POST http://127.0.0.1:8000/search
+Payload : {"question": "What is the POSH grievance procedure?", "top_k": 5}
+Contract: Defined in contracts.py & UNIFIED-BUSINESS-ASSISTAN.md §3.4
+
+Step 1: API Endpoint Handling & Validation
+  File     : app.py
+  Function : search_documents(payload: SearchRequest)
+  Action   : Validates input with Pydantic; delegates to engine.search().
+
+Step 2: Multi-Query Domain Expansion
+  File     : rag_engine.py
+  Function : UnifiedRAGEngine.expand_queries(query: str)
+  Action   : Inspects keywords and generates synthetic expansion queries across
+             the 6 corporate policy domains (e.g., adding "Prevention of Sexual
+             Harassment workplace policy internal complaints committee redressal").
+
+Step 3: Vector Similarity Search
+  File     : rag_engine.py
+  Function : UnifiedRAGEngine.search(question, top_k, score_threshold)
+  Action   :
+    1. Executes self.collection.query() across all expanded queries.
+    2. Requests top_k * 3 candidate chunks for each variation.
+    3. Computes raw cosine similarity: raw_similarity = 1.0 - distance.
+
+Step 4: Score Calibration & Reciprocal Rank Fusion (RRF)
+  File     : rag_engine.py
+  Function : UnifiedRAGEngine.calibrate_score(raw_score: float)
+  Action   :
+    - Raw MiniLM cosine similarities range between 0.30 and 0.70.
+    - calibrate_score() maps raw values to an intuitive 0.0 - 1.0 confidence:
+        calibrated = (raw_score - 0.28) / (0.68 - 0.28)
+    - Applies Reciprocal Rank Fusion: rrf = 1.0 / (60 + rank).
+    - Aggregates multiple hits for the same chunk by taking max confidence and summing RRF.
+
+Step 5: Threshold Filtering & Deduplication
+  File     : rag_engine.py
+  Action   :
+    - Enforces calibrated score_threshold barrier (default 0.75, i.e. 75%+ relevance).
+    - Deduplicates snippets by hashing the first 100 normalized characters.
+    - Limits final list to requested top_k passages.
+
+Step 6: Return Response
+  File     : app.py
+  Output   : SearchResponse(results=[PassageResult(...)], no_match=bool, embedding_model=str)
+
+
+================================================================================
+7. PROCESS FLOW 3: CONVERSATIONAL RAG & CHATBOT API (POST /chat)
+================================================================================
+
+Trigger : User sends a message via Web Dashboard (static/index.html) or REST API
+Payload : {"message": "What about paternity leave?", "session_id": "sess_123"}
+
+Step 1: API Route Entry
+  File     : app.py
+  Function : conversational_chat(payload: ChatRequest)
+  Action   : Calls engine.chat().
+
+Step 2: Small Talk & Conversational Guard
+  File     : rag_engine.py
+  Function : UnifiedRAGEngine.chat(...)
+  Action   :
+    - Checks for greetings ("hi", "hello", "who are you") or thank-yous ("thanks", "got it").
+    - If detected: logs to Neon and immediately returns self-introduction or appreciation
+      response WITHOUT wasting vector search or LLM compute.
+
+Step 3: Chat History Retrieval
+  File     : neon_client.py
+  Function : NeonDBClient.get_chat_history(session_id, limit=4)
+  Action   : Queries Neon SQL for previous user queries and bot responses in this session.
+
+Step 4: History-Aware Query Reformulation
+  File     : rag_engine.py
+  Function : UnifiedRAGEngine.contextualize_question(question, history)
+  Action   :
+    - If question is dependent (e.g. contains "what about", "it", "they", or < 4 words):
+      Option A (Cloud LLM): Calls free Gemini/Groq prompt to re-write query into standalone query.
+      Option B (Rule-based): Extracts keywords from last user query and appends context:
+                             "What about paternity leave? regarding parental leave policy".
+    - Resolves standalone query for downstream retrieval.
+
+Step 5: Document Retrieval with 75%+ Barrier
+  File     : rag_engine.py
+  Function : UnifiedRAGEngine.search(standalone_question, top_k, score_threshold=0.75)
+  Action   :
+    - If no passages pass the 75%+ threshold:
+      Returns standard out-of-scope response:
+      "I do not have sufficient information meeting the 75%+ confidence matching threshold..."
+      Logs to Neon and exits early.
+
+Step 6: Structured Prompt Assembly
+  File     : rag_engine.py
+  Action   : Formats retrieved passages into clean context blocks with source, page,
+             company, and confidence rating.
+
+Step 7: 3-Tier Multi-Model Answer Generation
+  File     : rag_engine.py
+  Function : UnifiedRAGEngine._call_llm_free(user_prompt, system_prompt)
+  Tier Sequence:
+    1. Google Gemini 2.0 Flash:
+       Calls Google Generative Language REST API (zero extra dependencies).
+    2. Groq Cloud (Fallback):
+       Uses Groq OpenAI-compatible client with model 'qwen/qwen3.8-27b' or 'llama-3.3'.
+    3. Local Free Extractive Engine (Offline Fallback):
+       No API keys required! Scans passages for direct policy definitions ("means",
+       "is defined as", "shall include") or extracts high-salience excerpt sentences.
+
+Step 8: Citation Construction & Audit Telemetry
+  File     : rag_engine.py -> neon_client.py
+  Function : NeonDBClient.log_chat_interaction(...)
+  Action   :
+    1. Formats clean citations list with source file, page, chunk_id, company, and score.
+    2. Computes average confidence score.
+    3. Writes session_id, user_query, bot_response, sources_cited, and score to Neon
+       PostgreSQL table `rag_chat_logs`.
+
+Step 9: Return Chat Response
+  File     : app.py
+  Output   : ChatResponse(session_id, question, standalone_question, answer, citations, model_used, no_match)
+
+
+================================================================================
+8. PROCESS FLOW 4: STANDALONE DIAGNOSTIC & TEST PIPELINES
+================================================================================
+
+8.1 RETRIEVAL TESTER: `2_retrieval_pipeline.py`
+--------------------------------------------------------------------------------
+Purpose : Test retrieval latency, scores, and chunk recall directly from CLI.
+Usage   :
+  python 2_retrieval_pipeline.py "What is the parental leave duration?"
+Key Functions:
+  - get_embedding_function()  : Caches embedding function instance for instant queries.
+  - get_vector_store()        : Caches ChromaDB collection reference.
+  - retrieve()                : Executes raw vector query against ChromaDB.
+  - print_retrieval_output()  : Pretty-prints ranked results with score and page.
+  - main()                    : Runs a 5-question test benchmark suite if no arg passed.
+
+
+8.2 ANSWER GENERATION TESTER: `3_answer_generation.py`
+--------------------------------------------------------------------------------
+Purpose : Test end-to-end RAG answer synthesis in isolation.
+Usage   :
+  python 3_answer_generation.py "What are the rules regarding gifts and anti-bribery?"
+Key Functions:
+  - build_rag_context()       : Converts retrieved chunks to text blocks.
+  - call_gemini_free()        : Direct HTTP REST call to Gemini 2.0 Flash.
+  - call_groq_free()          : Groq API client execution.
+  - generate_answer()         : Orchestrates retrieval -> LLM -> citations.
+  - print_rag_result()        : Outputs formatted markdown answer and citations in CLI.
+
+
+================================================================================
+9. PROCESS FLOW 5: E2E AUTOMATED EVALUATION & BENCHMARKING
+================================================================================
+
+Script  : `evaluate_e2e.py`
+Purpose : Automated compliance test suite ensuring zero regressions.
+Usage   : `python evaluate_e2e.py` (requires `python app.py` running on port 8000).
+
+Executed Test Probes:
+  [TEST 1] Health Probe (/health)
+           Verifies HTTP 200, status="healthy", neon_connected=True.
+  [TEST 2] Telemetry Stats (/stats) & Catalog (/documents)
+           Verifies >= 1,500 Chroma chunks, >= 1,500 Neon chunks, and exactly 50 documents.
+  [TEST 3] Semantic Search Retrieval (/search)
+           Tests canonical contract on POSH, leave, and whistleblower queries;
+           checks provenance schema (source_file, page, score, chunk_id).
+  [TEST 4] Multi-Turn Conversational Chat (/chat)
+           Tests conversation memory: Turn 1 ("maternity leave") followed by Turn 2
+           ("What about paternity?"). Checks query reformulation.
+  [TEST 5] Out-of-Scope Guardrail Check (/chat)
+           Tests unanswerable questions (e.g. quantum physics, pizza recipe);
+           verifies no_match=True and proper fallback response.
+
+
+================================================================================
+10. DETAILED FUNCTION-BY-FUNCTION CALL TREES
+================================================================================
+
+10.1 INGESTION CALL TREE:
+--------------------------------------------------------------------------------
+1_ingestion_pipeline.py::main()
+  │
+  ├──> 1_ingestion_pipeline.py::get_paths()
+  │
+  ├──> extraction.py::extract_all(docs_dir, meta_path, enable_ocr=True)
+  │      ├──> extraction.py::load_metadata(meta_path)
+  │      ├──> extraction.py::_load_cache()  [reads ocr_cache.json]
+  │      │
+  │      ├──> [For each of 50 PDFs]:
+  │      │      ├──> pypdf.PdfReader(path).pages[p].extract_text()
+  │      │      └──> [If text < 20 chars]:
+  │      │             ├──> extraction.py::_cache_key(path, page)
+  │      │             ├──> extraction.py::_ocr_page(path, page_idx)
+  │      │             │      ├──> pypdfium2.PdfDocument(path)[page].render()
+  │      │             │      └──> extraction.py::_get_ocr()(image)  [RapidOCR]
+  │      │             └──> extraction.py::_save_cache()
+  │      │
+  │      └──> [Writes data/ingestion_report.json]
+  │
+  ├──> extraction.py::chunk_pages(pages, chunk_size=500, chunk_overlap=75)
+  │      └──> langchain.RecursiveCharacterTextSplitter::split_text()
+  │             └──> Creates Chunk(chunk_id="doc_XXX_pY_cZZ", text, metadata)
+  │
+  ├──> 1_ingestion_pipeline.py::get_embedding_function()
+  │      └──> chromadb.utils.embedding_functions.DefaultEmbeddingFunction()
+  │
+  ├──> 1_ingestion_pipeline.py::sync_to_neon(chunks, model_name)
+  │      ├──> neon_client.py::NeonDBClient.test_connection()
+  │      └──> neon_client.py::NeonDBClient.sync_chunks(chunks, model_name)
+  │             ├──> neon_client.py::NeonDBClient.create_table_if_not_exists()
+  │             ├──> neon_client.py::NeonDBClient.execute_query("SELECT chunk_id, md5...")
+  │             ├──> neon_client.py::NeonDBClient._delete_chunk_ids(stale + changed)
+  │             ├──> neon_client.py::NeonDBClient.insert_chunks(new_chunks)
+  │             └──> neon_client.py::NeonDBClient.resequence_serial_numbers()
+  │
+  └──> 1_ingestion_pipeline.py::update_vector_store(chunks, ef, db_path)
+         ├──> chromadb.PersistentClient(path).get_or_create_collection("rag_documents")
+         └──> collection.upsert(ids, documents, metadatas)
+
+
+10.2 SEARCH REQUEST CALL TREE (POST /search):
+--------------------------------------------------------------------------------
+app.py::search_documents(payload: SearchRequest)
+  │
+  └──> rag_engine.py::UnifiedRAGEngine.search(question, top_k, score_threshold)
+         │
+         ├──> rag_engine.py::UnifiedRAGEngine.expand_queries(question)
+         │      └──> Generates domain-specific query variations
+         │
+         ├──> [For each query variation]:
+         │      └──> chromadb.Collection.query(query_texts=[q], n_results=top_k*3)
+         │             └──> Returns documents, metadatas, distances
+         │
+         ├──> [For each candidate chunk]:
+         │      ├──> raw_similarity = 1.0 - distance
+         │      ├──> rag_engine.py::UnifiedRAGEngine.calibrate_score(raw_similarity)
+         │      └──> rrf_score = 1.0 / (60 + rank)
+         │
+         ├──> Sort candidates by (score >= threshold, score, rrf) DESC
+         ├──> Deduplicate chunks (100-character snippet hash)
+         └──> Return {"results": filtered_results, "no_match": bool, ...}
+
+
+10.3 CHAT REQUEST CALL TREE (POST /chat):
+--------------------------------------------------------------------------------
+app.py::conversational_chat(payload: ChatRequest)
+  │
+  └──> rag_engine.py::UnifiedRAGEngine.chat(user_message, session_id, top_k, score_threshold)
+         │
+         ├──> [Check: Greeting or Appreciation]:
+         │      └──> If True: log to Neon & return canned persona response immediately
+         │
+         ├──> neon_client.py::NeonDBClient.get_chat_history(session_id, limit=4)
+         │
+         ├──> rag_engine.py::UnifiedRAGEngine.contextualize_question(user_message, history)
+         │      ├──> Check if query is dependent or pronoun-based
+         │      └──> Rewrite into standalone query (via LLM or keyword topic anchor)
+         │
+         ├──> rag_engine.py::UnifiedRAGEngine.search(standalone_question, top_k, score_threshold)
+         │      └──> [If no match >= 0.75]:
+         │             ├──> Log out-of-scope turn to Neon
+         │             └──> Return graceful boundary explanation
+         │
+         ├──> [Build structured RAG prompt with numbered passages & citations]
+         │
+         ├──> rag_engine.py::UnifiedRAGEngine._call_llm_free(user_prompt, system_prompt)
+         │      ├──> Attempt Tier 1: requests.post(Gemini API)
+         │      ├──> Attempt Tier 2: Groq OpenAI client
+         │      └──> Fallback Tier 3: Local Extractive Definition & Excerpt Synthesizer
+         │
+         ├──> Build citation objects (source, page, chunk_id, company, score)
+         │
+         ├──> neon_client.py::NeonDBClient.log_chat_interaction(session_id, q, ans, sources, score)
+         │
+         └──> Return ChatResponse(...)
+
+
+================================================================================
+11. FIRST-TIME DEVELOPER ONBOARDING CHEAT SHEET
+================================================================================
+
+Q1: "How do I run the whole service locally?"
+  1. Install dependencies:
+     pip install -r requirements.txt
+  2. Verify .env contains:
+     DATABASE_URL=postgresql://user:password@endpoint.neon.tech/neondb?sslmode=require
+  3. Start the server:
+     python app.py
+  4. Open in browser:
+     http://127.0.0.1:8000 (Interactive Chatbot UI)
+     http://127.0.0.1:8000/docs (Interactive Swagger API documentation)
+
+Q2: "How do I add or update a policy document?"
+  1. Place the new PDF into: `data/documents/<new_policy>.pdf`
+  2. Add an entry with metadata to: `data/documents_metadata.json`
+  3. Run the ingestion pipeline:
+     python 1_ingestion_pipeline.py
+  * The pipeline is idempotent: it will only extract and embed the NEW document!
+    Existing documents are preserved and serial numbers are cleanly updated.
+
+Q3: "Where are embeddings stored and how do they work?"
+  - Stored in local directory: `db/chroma_db/`
+  - Computed using `all-MiniLM-L6-v2` via Chroma's built-in ONNX runtime.
+  - Requires NO GPUs, NO external API calls, NO costs, and runs completely offline.
+
+Q4: "Where are database records and chat logs stored?"
+  - Stored in Neon Serverless PostgreSQL.
+  - Chunks live in table: `rag_documents`
+  - Chat conversations live in table: `rag_chat_logs`
+  - Access is executed via HTTPS SQL endpoint (no persistent connection pool exhaustion).
+
+Q5: "How do I test a query without running the web server?"
+  - Quick retrieval check:
+    python retrieval_pipeline.py "What is the POSH committee procedure?"
+  - Full answer generation check:
+    python answer_generation.py "What is the parental leave duration?"
+
+Q6: "How do I verify the system meets all requirements?"
+  - Run the automated test suite:
+    python evaluate_e2e.py
+
+================================================================================
+                         END OF FLOW SPECIFICATION
+================================================================================

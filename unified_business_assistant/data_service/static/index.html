@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Data Service (Role B) | Northwind Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0F19;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #162033;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(59, 130, 246, 0.35);
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --text-dim: #6B7280;
+      --primary: #3B82F6;
+      --primary-hover: #2563EB;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --accent-emerald: #10B981;
+      --accent-cyan: #06B6D4;
+      --accent-purple: #8B5CF6;
+      --accent-amber: #F59E0B;
+      --accent-rose: #EF4444;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Ambient lighting effects */
+    .ambient-glow-top {
+      position: fixed;
+      top: -150px;
+      right: 10%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glow-bottom {
+      position: fixed;
+      bottom: -150px;
+      left: 5%;
+      width: 550px;
+      height: 550px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.10) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(20px);
+      background: rgba(11, 15, 25, 0.85);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563EB, #06B6D4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+      box-shadow: 0 0 24px rgba(37, 99, 235, 0.45);
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .role-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60A5FA;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .brand-text p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #34D399;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 10px #10B981;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .btn-nav {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+
+    .btn-nav:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-nav.accent {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2));
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #93C5FD;
+    }
+
+    .btn-nav.accent:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(6, 182, 212, 0.35));
+    }
+
+    /* Main Container */
+    .app-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      z-index: 1;
+    }
+
+    /* Left: Query & Results */
+    .main-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Query Box Card */
+    .card-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      position: relative;
+    }
+
+    .card-panel-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .query-input-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .query-textarea {
+      width: 100%;
+      min-height: 90px;
+      background: rgba(11, 15, 25, 0.75);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1.1rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .query-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .query-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .limit-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .limit-select {
+      background: rgba(11, 15, 25, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 0.35rem 0.6rem;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-clear:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-execute {
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #FFFFFF;
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-execute:hover {
+      background: linear-gradient(135deg, #1D4ED8, #1E40AF);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+    }
+
+    .btn-execute:active {
+      transform: translateY(0);
+    }
+
+    .btn-execute:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Preset Questions Carousel */
+    .preset-section {
+      margin-top: 1rem;
+    }
+
+    .preset-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      user-select: none;
+    }
+
+    .chip:hover {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #93C5FD;
+      transform: translateY(-1px);
+    }
+
+    .chip.danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #FCA5A5;
+    }
+
+    .chip.warning:hover {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #FCD34D;
+    }
+
+    /* Meta & Badges */
+    .meta-metrics-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .metric-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    .metric-badge.green {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #34D399;
+    }
+
+    .metric-badge.blue {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #60A5FA;
+    }
+
+    .metric-badge.red {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #F87171;
+    }
+
+    .metric-badge.amber {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #FBBF24;
+    }
+
+    /* SQL Block Card */
+    .sql-card {
+      background: #090D16;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+
+    .sql-card-header {
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.55rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sql-card-header span {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-copy-sql {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: color 0.2s;
+    }
+
+    .btn-copy-sql:hover {
+      color: var(--text-main);
+    }
+
+    .sql-content {
+      padding: 1rem 1.2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #93C5FD;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Alert / Error Box */
+    .alert-panel {
+      padding: 1.1rem 1.25rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .alert-panel.danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #FCA5A5;
+    }
+
+    .alert-panel.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #FDE68A;
+    }
+
+    .alert-icon {
+      font-size: 1.2rem;
+      line-height: 1;
+      margin-top: 0.1rem;
+    }
+
+    .alert-body h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .alert-body p {
+      font-size: 0.84rem;
+      opacity: 0.9;
+    }
+
+    /* Table Container */
+    .table-container {
+      width: 100%;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #090D16;
+    }
+
+    .table-toolbar {
+      padding: 0.65rem 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .table-filter-input {
+      background: rgba(11, 15, 25, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      outline: none;
+      width: 200px;
+    }
+
+    .table-filter-input:focus {
+      border-color: var(--primary);
+    }
+
+    .export-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-export {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+
+    .btn-export:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    .table-scroll {
+      max-height: 480px;
+      overflow: auto;
+    }
+
+    table.data-grid {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    table.data-grid thead th {
+      position: sticky;
+      top: 0;
+      background: #111827;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+      z-index: 2;
+    }
+
+    table.data-grid tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      transition: background 0.15s ease;
+    }
+
+    table.data-grid tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    table.data-grid tbody tr:hover {
+      background: rgba(59, 130, 246, 0.06);
+    }
+
+    table.data-grid tbody td {
+      padding: 0.65rem 1rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+    }
+
+    table.data-grid tbody td.index-col {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      width: 40px;
+      text-align: center;
+    }
+
+    /* Right Sidebar: Schema Explorer & History */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .sidebar-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      max-height: 440px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-scroll {
+      overflow-y: auto;
+      padding-right: 0.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .table-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .table-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .table-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .table-row-count {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    .table-columns-list {
+      display: none;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .table-item.expanded .table-columns-list {
+      display: block;
+    }
+
+    .history-item {
+      padding: 0.5rem 0.7rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item:hover {
+      background: rgba(59, 130, 246, 0.1);
+      color: #93C5FD;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .empty-state-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1080px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Light Gradients -->
+  <div class="ambient-glow-top"></div>
+  <div class="ambient-glow-bottom"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-text">
+        <h1>
+          Northwind Intelligence
+          <span class="role-badge">Role B: Data Service</span>
+        </h1>
+        <p>AST-Validated Text-to-SQL Engine with Self-Correction</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="status-pill" id="healthPill">
+        <span class="status-dot"></span>
+        <span id="healthText">Connecting...</span>
+      </div>
+      <a href="http://127.0.0.1:8000" target="_blank" class="btn-nav accent">
+        📖 Open Knowledge Service (8000)
+      </a>
+      <a href="/docs" target="_blank" class="btn-nav">
+        📑 Swagger API
+      </a>
+    </div>
+  </header>
+
+  <!-- App Layout -->
+  <main class="app-layout">
+
+    <!-- Left: Main Workspace -->
+    <section class="main-workspace">
+
+      <!-- Query Box -->
+      <div class="card-panel">
+        <div class="card-panel-title">
+          <span>Ask Business Question (Natural Language)</span>
+          <span style="font-size: 0.75rem; font-weight: normal; color: var(--text-dim);">Press Ctrl + Enter to Run</span>
+        </div>
+
+        <div class="query-input-wrapper">
+          <textarea
+            id="questionInput"
+            class="query-textarea"
+            placeholder="e.g. What are the names and prices of all products in the 'Beverages' category that cost more than $20?"
+          ></textarea>
+
+          <div class="query-controls">
+            <div class="limit-control">
+              <label for="limitSelect">Max Rows:</label>
+              <select id="limitSelect" class="limit-select">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+              </select>
+            </div>
+
+            <div class="action-group">
+              <button id="btnClear" class="btn-clear" type="button">Clear</button>
+              <button id="btnExecute" class="btn-execute" type="button">
+                <span>⚡ Execute Query</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Presets -->
+        <div class="preset-section">
+          <div class="preset-label">Quick Benchmark Examples (Northwind Dataset):</div>
+          <div class="preset-chips">
+            <div class="chip" data-q="What are the names and prices of all products in the 'Beverages' category that cost more than $20?">
+              🍷 Beverages &gt; $20
+            </div>
+            <div class="chip" data-q="List the top 5 customers who have spent the most total money, along with the total amount they have spent.">
+              🏆 Top 5 Spending Customers
+            </div>
+            <div class="chip" data-q="Which products are currently out of stock (units in stock = 0) and who are their suppliers?">
+              📦 Out of Stock Products &amp; Suppliers
+            </div>
+            <div class="chip" data-q="List all orders shipped via 'Federal Shipping' that were placed in 1997.">
+              🚚 1997 Federal Shipping Orders
+            </div>
+            <div class="chip" data-q="Which employees report to 'Fuller, Andrew'?">
+              👥 Fuller's Direct Reports
+            </div>
+            <div class="chip" data-q="What is the average order value (total price of order) by country of the customer?">
+              🌍 Avg Order Value by Country
+            </div>
+            <div class="chip warning" data-q="What is the company maternity leave duration in weeks?">
+              🚫 HR Policy (Domain Gating Test)
+            </div>
+            <div class="chip danger" data-q="DROP TABLE Customers; SELECT * FROM Orders;">
+              🛑 Destructive SQL (AST Block Test)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Area -->
+      <div id="resultsCard" class="card-panel" style="display: none;">
+        <div class="card-panel-title">
+          <span>Execution Results</span>
+          <span id="execTimestamp" style="font-size: 0.75rem; font-weight: normal; color: var(--text-dim);"></span>
+        </div>
+
+        <!-- Metrics Badges Bar -->
+        <div class="meta-metrics-bar" id="metricsBar"></div>
+
+        <!-- Security / Rejection Alert Box -->
+        <div id="alertBox" class="alert-panel" style="display: none;">
+          <div class="alert-icon" id="alertIcon">⚠️</div>
+          <div class="alert-body">
+            <h4 id="alertTitle">Notice</h4>
+            <p id="alertMessage"></p>
+          </div>
+        </div>
+
+        <!-- Generated SQL Card -->
+        <div id="sqlCard" class="sql-card" style="display: none;">
+          <div class="sql-card-header">
+            <span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+              Generated &amp; Validated SQL
+            </span>
+            <button class="btn-copy-sql" id="btnCopySql">
+              <span>📋 Copy SQL</span>
+            </button>
+          </div>
+          <div class="sql-content" id="sqlDisplay"></div>
+        </div>
+
+        <!-- Data Table Container -->
+        <div id="tableWrapper" class="table-container" style="display: none;">
+          <div class="table-toolbar">
+            <input
+              type="text"
+              id="tableFilter"
+              class="table-filter-input"
+              placeholder="🔍 Filter rows..."
+            />
+            <div class="export-buttons">
+              <button class="btn-export" id="btnExportCsv">📥 CSV</button>
+              <button class="btn-export" id="btnExportJson">📥 JSON</button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="data-grid" id="dataTable">
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Initial Empty State -->
+      <div id="initialState" class="card-panel empty-state">
+        <div class="empty-state-icon">📊</div>
+        <p>Enter a natural language business question or select a preset example above.</p>
+        <p style="font-size: 0.8rem; margin-top: 0.4rem; color: var(--text-dim);">
+          Queries are automatically translated to ANSI SQL, verified with AST safety gates, and bounded to read-only execution.
+        </p>
+      </div>
+
+    </section>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Schema Explorer Card -->
+      <div class="sidebar-card">
+        <div class="sidebar-header">
+          <span>Database Schema</span>
+          <span class="table-row-count" id="totalDbRows">625,890 Rows</span>
+        </div>
+        <div class="sidebar-scroll" id="schemaList">
+          <div style="font-size: 0.78rem; color: var(--text-dim); text-align: center; padding: 1rem;">
+            Loading Northwind tables...
+          </div>
+        </div>
+      </div>
+
+      <!-- Query History Card -->
+      <div class="sidebar-card">
+        <div class="sidebar-header">
+          <span>Session Query History</span>
+          <span style="font-size: 0.72rem; color: var(--text-dim);" id="historyCount">0</span>
+        </div>
+        <div class="sidebar-scroll" id="historyList">
+          <div style="font-size: 0.78rem; color: var(--text-dim); text-align: center; padding: 1rem;">
+            No queries executed yet.
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- Script -->
+  <script>
+    const API_BASE = window.location.origin;
+    let queryHistory = [];
+    let currentResultData = null;
+
+    // Elements
+    const questionInput = document.getElementById('questionInput');
+    const limitSelect = document.getElementById('limitSelect');
+    const btnExecute = document.getElementById('btnExecute');
+    const btnClear = document.getElementById('btnClear');
+    const resultsCard = document.getElementById('resultsCard');
+    const initialState = document.getElementById('initialState');
+    const metricsBar = document.getElementById('metricsBar');
+    const alertBox = document.getElementById('alertBox');
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertIcon = document.getElementById('alertIcon');
+    const sqlCard = document.getElementById('sqlCard');
+    const sqlDisplay = document.getElementById('sqlDisplay');
+    const btnCopySql = document.getElementById('btnCopySql');
+    const tableWrapper = document.getElementById('tableWrapper');
+    const tableHead = document.getElementById('tableHead');
+    const tableBody = document.getElementById('tableBody');
+    const tableFilter = document.getElementById('tableFilter');
+    const btnExportCsv = document.getElementById('btnExportCsv');
+    const btnExportJson = document.getElementById('btnExportJson');
+    const healthText = document.getElementById('healthText');
+    const schemaList = document.getElementById('schemaList');
+    const historyList = document.getElementById('historyList');
+    const historyCount = document.getElementById('historyCount');
+    const execTimestamp = document.getElementById('execTimestamp');
+
+    // 1. Initial Health & Schema Load
+    async function loadHealthAndSchema() {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        const data = await res.json();
+        if (data.status === 'healthy') {
+          healthText.innerText = `Online • ${data.total_records.toLocaleString()} Records`;
+          renderSchema(data.tables);
+        } else {
+          healthText.innerText = 'Unhealthy';
+        }
+      } catch (err) {
+        healthText.innerText = 'Offline';
+      }
+    }
+
+    function renderSchema(tables) {
+      if (!tables) return;
+      schemaList.innerHTML = '';
+      
+      const tableDescriptions = {
+        'Customers': '91 Commercial client accounts across 21 countries',
+        'Orders': '16,282 Historical business purchase transactions',
+        'Order Details': '609,283 Itemized order line items with discounts',
+        'Products': '77 Food & beverage product catalog items',
+        'Suppliers': '29 Global enterprise food vendors',
+        'Categories': '8 Food product classification categories',
+        'Employees': '9 Internal sales & management staff',
+        'Shippers': '3 Contracted logistics freight carriers',
+        'Regions': '4 Sales operating territories',
+        'Territories': '53 Geographic market sales territories'
+      };
+
+      for (const [tName, count] of Object.entries(tables)) {
+        if (tName.startsWith('CustomerCustomer') || tName.startsWith('CustomerDemo')) continue;
+        const item = document.createElement('div');
+        item.className = 'table-item';
+        item.innerHTML = `
+          <div class="table-item-header">
+            <span>📊 ${tName}</span>
+            <span class="table-row-count">${count.toLocaleString()}</span>
+          </div>
+          <div class="table-columns-list">
+            ${tableDescriptions[tName] || 'Enterprise database table'}
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          item.classList.toggle('expanded');
+        });
+        schemaList.appendChild(item);
+      }
+    }
+
+    // 2. Execute Business Query
+    async function executeQuery() {
+      const q = questionInput.value.trim();
+      if (!q) return;
+
+      btnExecute.disabled = true;
+      btnExecute.innerHTML = '<span class="spinner"></span> Running...';
+      initialState.style.display = 'none';
+      resultsCard.style.display = 'block';
+      alertBox.style.display = 'none';
+      sqlCard.style.display = 'none';
+      tableWrapper.style.display = 'none';
+      metricsBar.innerHTML = '';
+      execTimestamp.innerText = new Date().toLocaleTimeString();
+
+      try {
+        const payload = {
+          question: q,
+          limit: parseInt(limitSelect.value, 10)
+        };
+
+        const res = await fetch(`${API_BASE}/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        currentResultData = data;
+        renderResults(q, data);
+        addToHistory(q, data.answerable);
+      } catch (err) {
+        showAlert('danger', 'Network Error', `Could not reach Data Service API: ${err.message}`);
+      } finally {
+        btnExecute.disabled = false;
+        btnExecute.innerHTML = '<span>⚡ Execute Query</span>';
+      }
+    }
+
+    function renderResults(question, data) {
+      // Metrics Bar
+      metricsBar.innerHTML = `
+        <span class="metric-badge ${data.answerable ? 'green' : 'red'}">
+          ${data.answerable ? '✓ Answerable' : '✕ Unanswerable / Blocked'}
+        </span>
+        <span class="metric-badge blue">
+          ⏱ ${data.execution_time_ms ? data.execution_time_ms.toFixed(1) : 0} ms
+        </span>
+        <span class="metric-badge ${data.rows && data.rows.length > 0 ? 'green' : 'amber'}">
+          📄 ${data.rows ? data.rows.length : 0} Rows Returned
+        </span>
+        <span class="metric-badge ${data.answerable ? 'green' : 'red'}">
+          🛡 AST Safety: ${data.answerable ? 'Passed' : 'Blocked / Out of Scope'}
+        </span>
+      `;
+
+      // SQL Display
+      if (data.sql) {
+        sqlCard.style.display = 'block';
+        sqlDisplay.textContent = formatSql(data.sql);
+      } else {
+        sqlCard.style.display = 'none';
+      }
+
+      // Check for Rejection / Error
+      if (!data.answerable || data.error) {
+        if (data.error && data.error.includes('AST') || data.error.includes('Destructive')) {
+          showAlert('danger', 'Security Gate Blocked Execution', data.error);
+        } else {
+          showAlert('warning', 'Question Out of Scope', data.error || 'This question cannot be mapped to the structured database schema.');
+        }
+      }
+
+      // Render Table
+      if (data.rows && data.rows.length > 0 && data.columns && data.columns.length > 0) {
+        tableWrapper.style.display = 'block';
+        renderTable(data.columns, data.rows);
+      } else if (data.answerable) {
+        showAlert('warning', 'Query Executed (Zero Rows)', 'The query executed safely against the Northwind database, but returned 0 matching records.');
+      }
+    }
+
+    function formatSql(rawSql) {
+      return rawSql.trim();
+    }
+
+    function showAlert(type, title, msg) {
+      alertBox.style.display = 'flex';
+      alertBox.className = `alert-panel ${type}`;
+      alertIcon.textContent = type === 'danger' ? '🛑' : '⚠️';
+      alertTitle.textContent = title;
+      alertMessage.textContent = msg;
+    }
+
+    function renderTable(columns, rows) {
+      // Header
+      tableHead.innerHTML = `
+        <tr>
+          <th style="width: 40px; text-align: center;">#</th>
+          ${columns.map(c => `<th>${escapeHtml(c)}</th>`).join('')}
+        </tr>
+      `;
+
+      // Filter state
+      const filterText = tableFilter.value.toLowerCase().trim();
+      const filteredRows = filterText
+        ? rows.filter(r => r.some(cell => String(cell).toLowerCase().includes(filterText)))
+        : rows;
+
+      // Body
+      tableBody.innerHTML = filteredRows.map((r, idx) => `
+        <tr>
+          <td class="index-col">${idx + 1}</td>
+          ${r.map(cell => `<td>${formatCell(cell)}</td>`).join('')}
+        </tr>
+      `).join('');
+    }
+
+    function formatCell(val) {
+      if (val === null || val === undefined) return '<span style="color: var(--text-dim);">NULL</span>';
+      if (typeof val === 'number') {
+        return Number.isInteger(val) ? val.toLocaleString() : val.toFixed(2);
+      }
+      return escapeHtml(String(val));
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // 3. Query History
+    function addToHistory(q, ok) {
+      queryHistory.unshift({ question: q, ok, time: new Date().toLocaleTimeString() });
+      if (queryHistory.length > 10) queryHistory.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      historyCount.textContent = queryHistory.length;
+      if (queryHistory.length === 0) return;
+      historyList.innerHTML = queryHistory.map(h => `
+        <div class="history-item" title="${escapeHtml(h.question)}">
+          ${h.ok ? '✓' : '✕'} ${escapeHtml(h.question)}
+        </div>
+      `).join('');
+
+      // Click to populate
+      document.querySelectorAll('.history-item').forEach((elem, i) => {
+        elem.addEventListener('click', () => {
+          questionInput.value = queryHistory[i].question;
+          executeQuery();
+        });
+      });
+    }
+
+    // 4. Copy SQL
+    btnCopySql.addEventListener('click', () => {
+      const sqlText = sqlDisplay.textContent;
+      navigator.clipboard.writeText(sqlText).then(() => {
+        btnCopySql.innerHTML = '<span>✓ Copied!</span>';
+        setTimeout(() => {
+          btnCopySql.innerHTML = '<span>📋 Copy SQL</span>';
+        }, 1800);
+      });
+    });
+
+    // 5. Exports
+    btnExportCsv.addEventListener('click', () => {
+      if (!currentResultData || !currentResultData.rows) return;
+      const { columns, rows } = currentResultData;
+      let csv = columns.map(c => `"${c}"`).join(',') + '\n';
+      rows.forEach(r => {
+        csv += r.map(v => `"${v !== null ? String(v).replace(/"/g, '""') : ''}"`).join(',') + '\n';
+      });
+      downloadFile(csv, 'query_results.csv', 'text/csv');
+    });
+
+    btnExportJson.addEventListener('click', () => {
+      if (!currentResultData || !currentResultData.rows) return;
+      const { columns, rows } = currentResultData;
+      const jsonRows = rows.map(r => {
+        const obj = {};
+        columns.forEach((c, i) => { obj[c] = r[i]; });
+        return obj;
+      });
+      downloadFile(JSON.stringify(jsonRows, null, 2), 'query_results.json', 'application/json');
+    });
+
+    function downloadFile(content, fileName, contentType) {
+      const a = document.createElement('a');
+      const file = new Blob([content], { type: contentType });
+      a.href = URL.createObjectURL(file);
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // 6. Event Listeners
+    btnExecute.addEventListener('click', executeQuery);
+    btnClear.addEventListener('click', () => {
+      questionInput.value = '';
+      questionInput.focus();
+    });
+
+    questionInput.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        executeQuery();
+      }
+    });
+
+    // Preset Chips
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        questionInput.value = chip.getAttribute('data-q');
+        executeQuery();
+      });
+    });
+
+    // Table Filter Input
+    tableFilter.addEventListener('input', () => {
+      if (currentResultData && currentResultData.columns && currentResultData.rows) {
+        renderTable(currentResultData.columns, currentResultData.rows);
+      }
+    });
+
+    // Initialize
+    loadHealthAndSchema();
+  </script>
+</body>
+</html>

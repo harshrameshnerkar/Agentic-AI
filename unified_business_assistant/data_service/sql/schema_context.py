@@ -1,214 +1,180 @@
-"""
-Compact Schema Context Builder for Role B (Data Service).
-
-Extracts and formats a token-efficient representation of the authentic Chinook
-database schema for text-to-SQL LLM prompts (UNIFIED-BUSINESS-ASSISTAN.md §4.3).
-"""
 import re
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional, Tuple
 
-# Schema definition for the authentic Chinook enterprise relational database (15,607 real rows)
 SCHEMA_METADATA = {
-    "Customer": {
+    "Customers": {
         "columns": [
-            ("CustomerId", "INTEGER PK"),
-            ("FirstName", "NVARCHAR(40)"),
-            ("LastName", "NVARCHAR(20)"),
-            ("Company", "NVARCHAR(80)"),
-            ("Address", "NVARCHAR(70)"),
-            ("City", "NVARCHAR(40)"),
-            ("State", "NVARCHAR(40)"),
-            ("Country", "NVARCHAR(40)"),
-            ("PostalCode", "NVARCHAR(10)"),
-            ("Phone", "NVARCHAR(24)"),
-            ("Email", "NVARCHAR(60)"),
-            ("SupportRepId", "INTEGER FK -> Employee.EmployeeId"),
+            ("CustomerID", "TEXT PK"),
+            ("CustomerName", "TEXT"),
+            ("CompanyName", "TEXT"),
+            ("ContactName", "TEXT"),
+            ("ContactTitle", "TEXT"),
+            ("Address", "TEXT"),
+            ("City", "TEXT"),
+            ("Region", "TEXT"),
+            ("PostalCode", "TEXT"),
+            ("Country", "TEXT"),
+            ("Phone", "TEXT"),
+        ],
+        "relationships": ["1-to-many Orders (via Orders.CustomerID)"],
+    },
+    "Products": {
+        "columns": [
+            ("ProductID", "INTEGER PK"),
+            ("ProductName", "TEXT"),
+            ("SupplierID", "INTEGER FK -> Suppliers.SupplierID"),
+            ("CategoryID", "INTEGER FK -> Categories.CategoryID"),
+            ("QuantityPerUnit", "TEXT"),
+            ("UnitPrice", "NUMERIC"),
+            ("Price", "NUMERIC"),
+            ("UnitsInStock", "INTEGER"),
+            ("UnitsOnOrder", "INTEGER"),
+            ("ReorderLevel", "INTEGER"),
+            ("Discontinued", "INTEGER"),
         ],
         "relationships": [
-            "1-to-many Invoice (via Invoice.CustomerId)",
-            "many-to-1 Employee (via SupportRepId)",
+            "many-to-1 Suppliers (via SupplierID)",
+            "many-to-1 Categories (via CategoryID)",
+            "1-to-many OrderDetails (via OrderDetails.ProductID)",
         ],
     },
-    "Invoice": {
+    "Categories": {
         "columns": [
-            ("InvoiceId", "INTEGER PK"),
-            ("CustomerId", "INTEGER FK -> Customer.CustomerId"),
-            ("InvoiceDate", "DATETIME (YYYY-MM-DD HH:MM:SS)"),
-            ("BillingAddress", "NVARCHAR(70)"),
-            ("BillingCity", "NVARCHAR(40)"),
-            ("BillingState", "NVARCHAR(40)"),
-            ("BillingCountry", "NVARCHAR(40)"),
-            ("BillingPostalCode", "NVARCHAR(10)"),
-            ("Total", "NUMERIC(10,2) (total revenue/amount for invoice)"),
+            ("CategoryID", "INTEGER PK"),
+            ("CategoryName", "TEXT"),
+            ("Description", "TEXT"),
+        ],
+        "relationships": ["1-to-many Products (via Products.CategoryID)"],
+    },
+    "Suppliers": {
+        "columns": [
+            ("SupplierID", "INTEGER PK"),
+            ("CompanyName", "TEXT"),
+            ("ContactName", "TEXT"),
+            ("ContactTitle", "TEXT"),
+            ("City", "TEXT"),
+            ("Country", "TEXT"),
+            ("Phone", "TEXT"),
+        ],
+        "relationships": ["1-to-many Products (via Products.SupplierID)"],
+    },
+    "Orders": {
+        "columns": [
+            ("OrderID", "INTEGER PK"),
+            ("CustomerID", "TEXT FK -> Customers.CustomerID"),
+            ("EmployeeID", "INTEGER FK -> Employees.EmployeeID"),
+            ("OrderDate", "DATETIME"),
+            ("RequiredDate", "DATETIME"),
+            ("ShippedDate", "DATETIME"),
+            ("ShipVia", "INTEGER FK -> Shippers.ShipperID"),
+            ("Freight", "NUMERIC"),
+            ("ShipName", "TEXT"),
+            ("ShipCity", "TEXT"),
+            ("ShipCountry", "TEXT"),
         ],
         "relationships": [
-            "many-to-1 Customer (via CustomerId)",
-            "1-to-many InvoiceLine (via InvoiceLine.InvoiceId)",
+            "many-to-1 Customers (via CustomerID)",
+            "many-to-1 Employees (via EmployeeID)",
+            "many-to-1 Shippers (via ShipVia = ShipperID)",
+            "1-to-many OrderDetails (via OrderDetails.OrderID)",
         ],
     },
-    "InvoiceLine": {
+    "OrderDetails": {
         "columns": [
-            ("InvoiceLineId", "INTEGER PK"),
-            ("InvoiceId", "INTEGER FK -> Invoice.InvoiceId"),
-            ("TrackId", "INTEGER FK -> Track.TrackId"),
-            ("UnitPrice", "NUMERIC(10,2)"),
+            ("OrderID", "INTEGER PK FK -> Orders.OrderID"),
+            ("ProductID", "INTEGER PK FK -> Products.ProductID"),
+            ("UnitPrice", "NUMERIC"),
             ("Quantity", "INTEGER"),
+            ("Discount", "REAL"),
         ],
         "relationships": [
-            "many-to-1 Invoice (via InvoiceId)",
-            "many-to-1 Track (via TrackId)",
+            "many-to-1 Orders (via OrderID)",
+            "many-to-1 Products (via ProductID)",
         ],
     },
-    "Employee": {
+    "Employees": {
         "columns": [
-            ("EmployeeId", "INTEGER PK"),
-            ("LastName", "NVARCHAR(20)"),
-            ("FirstName", "NVARCHAR(20)"),
-            ("Title", "NVARCHAR(30) (e.g. Sales Manager, Sales Support Agent)"),
-            ("ReportsTo", "INTEGER FK -> Employee.EmployeeId"),
-            ("BirthDate", "DATETIME"),
-            ("HireDate", "DATETIME"),
-            ("City", "NVARCHAR(40)"),
-            ("Country", "NVARCHAR(40)"),
-            ("Email", "NVARCHAR(60)"),
+            ("EmployeeID", "INTEGER PK"),
+            ("LastName", "TEXT"),
+            ("FirstName", "TEXT"),
+            ("Title", "TEXT"),
+            ("ReportsTo", "INTEGER FK -> Employees.EmployeeID"),
+            ("BirthDate", "DATE"),
+            ("HireDate", "DATE"),
+            ("City", "TEXT"),
+            ("Country", "TEXT"),
         ],
         "relationships": [
-            "1-to-many Customer (via Customer.SupportRepId)",
+            "1-to-many Orders (via Orders.EmployeeID)",
             "self-referential hierarchy (via ReportsTo)",
         ],
     },
-    "Track": {
+    "Shippers": {
         "columns": [
-            ("TrackId", "INTEGER PK"),
-            ("Name", "NVARCHAR(200) (song/track title)"),
-            ("AlbumId", "INTEGER FK -> Album.AlbumId"),
-            ("MediaTypeId", "INTEGER FK -> MediaType.MediaTypeId"),
-            ("GenreId", "INTEGER FK -> Genre.GenreId"),
-            ("Composer", "NVARCHAR(220)"),
-            ("Milliseconds", "INTEGER (duration)"),
-            ("Bytes", "INTEGER (file size)"),
-            ("UnitPrice", "NUMERIC(10,2)"),
+            ("ShipperID", "INTEGER PK"),
+            ("ShipperName", "TEXT"),
+            ("CompanyName", "TEXT"),
+            ("Phone", "TEXT"),
         ],
-        "relationships": [
-            "many-to-1 Album (via AlbumId)",
-            "many-to-1 Genre (via GenreId)",
-            "many-to-1 MediaType (via MediaTypeId)",
-            "1-to-many InvoiceLine (via InvoiceLine.TrackId)",
-        ],
-    },
-    "Album": {
-        "columns": [
-            ("AlbumId", "INTEGER PK"),
-            ("Title", "NVARCHAR(160)"),
-            ("ArtistId", "INTEGER FK -> Artist.ArtistId"),
-        ],
-        "relationships": [
-            "many-to-1 Artist (via ArtistId)",
-            "1-to-many Track (via Track.AlbumId)",
-        ],
-    },
-    "Artist": {
-        "columns": [
-            ("ArtistId", "INTEGER PK"),
-            ("Name", "NVARCHAR(120)"),
-        ],
-        "relationships": ["1-to-many Album (via Album.ArtistId)"],
-    },
-    "Genre": {
-        "columns": [
-            ("GenreId", "INTEGER PK"),
-            ("Name", "NVARCHAR(120) (e.g. Rock, Jazz, Metal)"),
-        ],
-        "relationships": ["1-to-many Track (via Track.GenreId)"],
-    },
-    "MediaType": {
-        "columns": [
-            ("MediaTypeId", "INTEGER PK"),
-            ("Name", "NVARCHAR(120) (e.g. MPEG audio file)"),
-        ],
-        "relationships": ["1-to-many Track (via Track.MediaTypeId)"],
+        "relationships": ["1-to-many Orders (via Orders.ShipVia = Shippers.ShipperID)"],
     },
 }
 
-# Domain vocabulary of real business terms supported by Chinook
 RECOGNIZED_TERMS = {
     "customer", "customers", "client", "clients", "company", "companies",
-    "invoice", "invoices", "sales", "revenue", "spend", "spent", "total", "billing",
-    "employee", "employees", "staff", "support", "rep", "reps", "title", "hire", "hired",
-    "track", "tracks", "song", "songs", "music", "audio", "artist", "artists", "band", "bands",
-    "album", "albums", "genre", "genres", "rock", "jazz", "metal", "media", "format",
-    "country", "countries", "city", "cities", "unitprice", "price", "quantity", "unit", "units",
-    "duration", "milliseconds", "bytes", "line", "items", "item"
+    "product", "products", "item", "items", "goods", "beverage", "beverages",
+    "category", "categories", "supplier", "suppliers", "vendor", "vendors",
+    "shipper", "shippers", "shipping", "freight", "delivery", "ship",
+    "order", "orders", "orderdetails", "ordered", "sales", "revenue", "spend", "spent", "total",
+    "employee", "employees", "staff", "representative", "rep", "manager", "hire", "hired",
+    "price", "unitprice", "cost", "quantity", "stock", "unitsinstock", "unitsonorder", "discount",
+    "country", "countries", "city", "cities", "address", "postalcode", "phone",
+    "germany", "london", "paris", "japan", "berlin", "usa", "uk", "france", "brazil", "canada",
+    "chais", "chang", "tofu", "aniseed", "syrup", "anton", "cajun",
 }
 
-# Terms that are clearly OUT-OF-SCOPE for our structured database
 UNSUPPORTED_DOMAINS = [
     (r"\b(weather|temperature|forecast|rain)\b", "weather and atmospheric conditions"),
-    (r"\b(stock\s+price|ticker|nasdaq|dow jones|s&p|share price)\b", "external stock market ticker data"),
-    (r"\b(password|wifi|credential|api key|secret|credit card|card number|bank account|ssn|pin)\b", "internal security credentials and payment secrets"),
-    (r"\b(cafeteria|lunch|menu|food|canteen)\b", "company cafeteria and dining information"),
-    (r"\b(policy|handbook|posh|maternity leave|parental leave|dress code|complaint)\b", "unstructured HR policy documents (owned by Knowledge Service /search)"),
-    (r"\b(medical|doctor|diagnosis|prescription|patient|health insurance claim)\b", "personal healthcare records and insurance claims"),
+    (r"\b(stock\s+price|ticker|nasdaq|dow jones|s&p|share price|nse)\b", "external stock market ticker data"),
+    (r"\b(password|wifi|credential|api key|secret|credit card|card number|bank account|ssn|pin)\b", "security credentials and payment secrets"),
+    (r"\b(cafeteria|lunch|canteen)\b", "cafeteria and dining information"),
+    (r"\b(posh|maternity leave|parental leave|dress code|complaint|whistleblower)\b", "HR policy documents (handled by Knowledge Service /search)"),
+    (r"\b(medical|doctor|diagnosis|prescription|patient|health insurance claim)\b", "healthcare records and insurance claims"),
     (r"\b(box office|movie ticket|hollywood)\b", "cinema box office records"),
+    (r"\b(bitcoin|crypto|ethereum|blockchain)\b", "cryptocurrency market feeds"),
 ]
 
 
 class SchemaContextBuilder:
-    """Formats concise schema context for LLM prompts and handles domain classification."""
-
     @classmethod
     def get_compact_schema_prompt(cls) -> str:
-        """
-        Builds a compact, token-efficient string representation of the schema.
-        Consumes < 450 tokens.
-        """
-        lines = [
-            "### DATABASE SCHEMA (SQLite - Chinook Real Enterprise Database):",
-            "You have read-only access to a real relational enterprise database with 11 tables:\n",
-        ]
-
+        lines = ["Database Schema (SQLite - Northwind):\n"]
         for table_name, meta in SCHEMA_METADATA.items():
             col_strs = [f"{col_name} ({col_type})" for col_name, col_type in meta["columns"]]
-            lines.append(f"• **{table_name}**:")
-            lines.append(f"  Columns: {', '.join(col_strs)}")
-            lines.append(f"  FK / Links: {'; '.join(meta['relationships'])}\n")
+            lines.append(f"- {table_name}: {', '.join(col_strs)}")
+            lines.append(f"  Links: {'; '.join(meta['relationships'])}")
 
         lines.extend([
-            "### BUSINESS RULES:",
-            "- Total Revenue = `SUM(Invoice.Total)`",
-            "- Customer full name = `FirstName || ' ' || LastName`",
-            "- Support / Sales Rep = `Employee` linked via `Customer.SupportRepId = Employee.EmployeeId`",
-            "- Track Sales = `InvoiceLine` joined with `Track`",
-            "- Always use table aliases and explicit JOIN conditions.",
-            "- Return ONLY standard SQLite SELECT queries. Never generate destructive statements.",
+            "\nQuery Rules:",
+            "- Products table has Price and UnitPrice.",
+            "- Customers table has CustomerName, ContactName, and CompanyName.",
+            "- OrderDetails (or [Order Details]) holds line items (Quantity, UnitPrice, Discount).",
+            "- Line total = Quantity * UnitPrice * (1 - Discount).",
+            "- Return only SQLite SELECT queries.",
         ])
-
         return "\n".join(lines)
 
     @classmethod
     def check_answerability(cls, question: str) -> Tuple[bool, Optional[str]]:
-        """
-        Evaluates whether the question can be answered from the available schema.
-        Returns:
-            (answerable: bool, reason: Optional[str])
-        """
         q_lower = question.lower().strip()
 
-        # Check explicit out-of-scope domain patterns
         for pattern, domain_desc in UNSUPPORTED_DOMAINS:
             if re.search(pattern, q_lower):
-                return False, f"The question asks for {domain_desc}, which is not present in the structured business database."
+                return False, f"Question asks for {domain_desc}, which is not in the database."
 
-        # Extract words from question
         words = set(re.findall(r"\b[a-z]{3,}\b", q_lower))
-
-        # Check if the question overlaps with any known business concepts
         has_relevant_concept = bool(words.intersection(RECOGNIZED_TERMS))
-
-        # Check for generic data query keywords
-        generic_data_words = {"how", "many", "what", "which", "who", "top", "list", "total", "average", "count", "sum", "highest", "lowest"}
-        if words.issubset(generic_data_words) or not has_relevant_concept:
-            if not has_relevant_concept:
-                return False, "The question asks for concepts or entities that do not exist in the enterprise database schema."
+        if not has_relevant_concept:
+            return False, "Question asks for entities that do not exist in the database schema."
 
         return True, None

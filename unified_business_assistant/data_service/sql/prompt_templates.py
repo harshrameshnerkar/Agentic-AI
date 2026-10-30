@@ -1,78 +1,59 @@
-"""
-Prompt Templates for Text-to-SQL Generation and Self-Correction on Chinook Real Database.
-"""
-
-SYSTEM_SQL_PROMPT = """You are an expert Data Engineer and SQL Analyst for an enterprise organisation.
-Your role is to translate natural language business questions into precise, valid, and safe SQLite queries
-against the authentic Chinook enterprise relational database.
+SYSTEM_SQL_PROMPT = """Translate the business question into a valid SQLite SELECT query for the Northwind database.
 
 {schema_context}
 
-### INSTRUCTIONS:
-1. Generate ONLY standard SQLite-compatible SELECT queries.
-2. If the user question CANNOT be answered using the provided tables and columns, respond ONLY with:
-   UNANSWERABLE: <brief explanation why data does not exist in schema>
-3. Never generate mutating or destructive statements (e.g. DROP, DELETE, UPDATE, INSERT, ALTER, CREATE, ATTACH).
-4. Use clear column aliases (e.g. `AS CustomerName`, `AS TotalRevenue`).
-5. Customer full name is `c.FirstName || ' ' || c.LastName`.
-6. Output ONLY the raw SQL query. Do not include markdown conversational chatter before or after the query.
+Rules:
+1. Generate only SQLite SELECT queries.
+2. If the question cannot be answered using the schema, respond with:
+   UNANSWERABLE: <reason>
+3. Never generate DROP, DELETE, UPDATE, INSERT, ALTER, CREATE, or ATTACH statements.
+4. Output only the raw SQL query without markdown fences or extra text.
 """
 
 FEW_SHOT_EXAMPLES = [
     {
-        "question": "Which 5 customers have the most invoices?",
-        "sql": """SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount
-FROM Customer c
-JOIN Invoice i ON c.CustomerId = i.CustomerId
-GROUP BY c.CustomerId, CustomerName
-ORDER BY InvoiceCount DESC
-LIMIT 5;"""
+        "question": "Show all product names and their corresponding prices.",
+        "sql": "SELECT ProductName, Price FROM Products;",
     },
     {
-        "question": "What is the total revenue from all invoices?",
-        "sql": """SELECT ROUND(SUM(Total), 2) AS TotalRevenue FROM Invoice;"""
+        "question": "Find the total number of customers registered from Germany.",
+        "sql": "SELECT COUNT(*) FROM Customers WHERE Country = 'Germany';",
     },
     {
-        "question": "What are our top 3 best-selling tracks by quantity?",
-        "sql": """SELECT t.Name AS TrackName, SUM(il.Quantity) AS UnitsSold
-FROM Track t
-JOIN InvoiceLine il ON t.TrackId = il.TrackId
-GROUP BY t.TrackId, TrackName
-ORDER BY UnitsSold DESC
-LIMIT 3;"""
+        "question": "List the unique countries where our suppliers are located.",
+        "sql": "SELECT DISTINCT Country FROM Suppliers;",
     },
     {
-        "question": "Which sales support rep has the most assigned customers?",
-        "sql": """SELECT e.FirstName || ' ' || e.LastName AS EmployeeName, COUNT(c.CustomerId) AS CustomerCount
-FROM Employee e
-JOIN Customer c ON e.EmployeeId = c.SupportRepId
-GROUP BY e.EmployeeId, EmployeeName
-ORDER BY CustomerCount DESC
-LIMIT 1;"""
+        "question": "Show the first name and last name of all employees.",
+        "sql": "SELECT FirstName, LastName FROM Employees;",
+    },
+    {
+        "question": "Get the maximum price among all products.",
+        "sql": "SELECT MAX(Price) FROM Products;",
+    },
+    {
+        "question": "Show all product names along with their category name.",
+        "sql": "SELECT p.ProductName, c.CategoryName FROM Products p JOIN Categories c ON p.CategoryID = c.CategoryID;",
     },
     {
         "question": "What was the closing stock price of Apple on NASDAQ yesterday?",
-        "sql": "UNANSWERABLE: Stock market ticker data is not available in the internal enterprise database."
-    }
+        "sql": "UNANSWERABLE: Stock market ticker data is not in the database.",
+    },
 ]
 
-SELF_CORRECTION_PROMPT_TEMPLATE = """You previously generated a SQL query that failed during database execution.
-Fix the query so that it successfully runs against the SQLite Chinook database schema.
+SELF_CORRECTION_PROMPT_TEMPLATE = """Fix the failed SQLite query using the schema and database error below.
 
-### DATABASE SCHEMA:
+Schema:
 {schema_context}
 
-### ORIGINAL QUESTION:
+Question:
 {question}
 
-### FAILED QUERY:
+Failed Query:
 {failed_sql}
 
-### DATABASE ERROR MESSAGE:
+Database Error:
 {error_message}
 
-### INSTRUCTIONS:
-- Analyze the error carefully (e.g. wrong column name, table casing, missing GROUP BY, missing table join).
-- Return ONLY the corrected SQLite SELECT query.
-- Do not apologize or add conversational filler.
+Return only the corrected SQLite SELECT query.
 """

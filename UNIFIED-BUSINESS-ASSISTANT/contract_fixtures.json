@@ -1,0 +1,114 @@
+{
+  "contract_version": "1.0.0",
+  "interface_1_knowledge_service": {
+    "endpoint": "/search",
+    "method": "POST",
+    "sample_requests": {
+      "standard": {
+        "query": "What is the refund window?", 
+        "top_k": 5,
+        "filters": {
+          "department": "finance"
+        }
+      },
+      "posh_query": {
+        "query": "What is the procedure for filing a POSH complaint at Jayaswal Neco?",
+        "top_k": 3
+      }
+    },
+    "sample_responses": {
+      "match_found": {
+        "results": [
+          {
+            "text": "Refunds are processed within 14 business days following receipt of returned items. Exceptions apply to custom products.",
+            "source": "policy_handbook.pdf",
+            "page": 14,
+            "score": 0.82
+          },
+          {
+            "text": "All reimbursement claims must be submitted to the accounts team within 30 days of incurring the expense.",
+            "source": "finance_reimbursement_policy.pdf",
+            "page": 4,
+            "score": 0.74
+          }
+        ],
+        "no_match": false
+      },
+      "no_match": {
+        "results": [],
+        "no_match": true
+      }
+    }
+  },
+  "interface_2_data_service": {
+    "endpoint": "/query",
+    "method": "POST",
+    "sample_requests": {
+      "aggregation": {
+        "question": "Total sales by region last quarter"
+      },
+      "filtered_list": {
+        "question": "Find the total number of customers registered from Germany."
+      }
+    },
+    "sample_responses": {
+      "success": {
+        "sql": "SELECT region, SUM(amount) AS total FROM sales GROUP BY region;",
+        "rows": [
+          {
+            "region": "West",
+            "total": 40321
+          },
+          {
+            "region": "East",
+            "total": 38190
+          }
+        ],
+        "columns": [
+          "region",
+          "total"
+        ],
+        "row_count": 2,
+        "error": null,
+        "answerable": true
+      },
+      "unanswerable": {
+        "sql": "",
+        "rows": [],
+        "columns": [],
+        "row_count": 0,
+        "error": "The database schema does not track corporate criminal indictments or money laundering infractions.",
+        "answerable": false
+      }
+    }
+  },
+  "interface_3_routing_decision": {
+    "owned_by": "Role C",
+    "sample_decisions": {
+      "knowledge_route": {
+        "question": "What is GitLab's expense policy for daily meals?",
+        "route": "knowledge",
+        "routing_rule": "Policy, handbook, code of conduct, and HR compliance queries route to Knowledge Service",
+        "fallback": "If no_match=true, answer 'I do not have corporate policy documentation regarding this query.'"
+      },
+      "data_route": {
+        "question": "Show all product names and their corresponding prices.",
+        "route": "data",
+        "routing_rule": "Aggregations, counts, price lookups, order records, and database entities route to Data Service",
+        "fallback": "If answerable=false, check if query contains policy keywords or declare unanswerable"
+      },
+      "both_route": {
+        "question": "Check our employee handbook to see if any customers from Germany are violating our gift and hospitality policies.",
+        "route": "both",
+        "routing_rule": "Cross-domain queries requiring structured entity extraction plus policy validation route to both",
+        "fallback": "Query Data Service for entities, then cross-reference with Knowledge Service"
+      },
+      "none_route": {
+        "question": "What is the exact current real-time stock price of Jayaswal Neco on the NSE right now?",
+        "route": "none",
+        "routing_rule": "Out of scope, live real-time feeds, or malicious injection prompts route to none",
+        "fallback": "Immediately return safety/scope guardrail message"
+      }
+    }
+  }
+}

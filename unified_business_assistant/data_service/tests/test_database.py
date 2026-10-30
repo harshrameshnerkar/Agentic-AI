@@ -1,8 +1,8 @@
 """
-Database Integrity and Seeding Tests for Role B on Real Chinook Database.
+Database Integrity and Seeding Tests for Role B on Real Northwind Database.
 Verifies:
 - Authentic real tables exist.
-- Over 1,000 total real rows exist (actual: 15,607 rows, 0% AI-generated).
+- Over 1,000 total real rows exist (actual: 625,890 rows, 0% AI-generated).
 - Strict foreign key constraints valid.
 - Read-only connection blocks write operations at the database engine level.
 """
@@ -28,7 +28,7 @@ class TestDatabaseIntegrity(unittest.TestCase):
     def test_table_presence_and_row_counts(self):
         """Database must have >= 5 tables and >= 1000 total real rows."""
         counts = db_manager.get_table_counts()
-        expected_tables = {"Customer", "Invoice", "InvoiceLine", "Employee", "Track", "Album", "Artist", "Genre"}
+        expected_tables = {"Customers", "Orders", "Order Details", "Employees", "Products", "Categories", "Suppliers", "Shippers"}
         for t in expected_tables:
             self.assertIn(t, counts, f"Table {t} missing from database.")
             self.assertGreater(counts[t], 0, f"Table {t} is empty.")
@@ -54,10 +54,10 @@ class TestDatabaseIntegrity(unittest.TestCase):
         try:
             cursor = conn.cursor()
             with self.assertRaises(sqlite3.OperationalError):
-                cursor.execute("INSERT INTO Genre (Name) VALUES ('Malicious');")
+                cursor.execute("INSERT INTO Categories (CategoryName) VALUES ('Malicious');")
 
             with self.assertRaises(sqlite3.OperationalError):
-                cursor.execute("DROP TABLE Customer;")
+                cursor.execute("DROP TABLE Customers;")
         finally:
             conn.close()
 

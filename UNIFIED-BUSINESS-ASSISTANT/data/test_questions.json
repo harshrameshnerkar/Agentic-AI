@@ -1,0 +1,110 @@
+{
+  "description": "Benchmark questions for Day 2 retrieval recall evaluation with ground truth document and page",
+  "questions": [
+    {
+      "id": "q01",
+      "question": "What is the paid maternity leave duration under Reckitt parental leave policy?",
+      "expected_source": "reckitt_global_parental_leave_policy.pdf",
+      "expected_pages": [1, 2],
+      "category": "HR"
+    },
+    {
+      "id": "q02",
+      "question": "How many days of paid paternity leave are granted at Reckitt?",
+      "expected_source": "reckitt_global_parental_leave_policy.pdf",
+      "expected_pages": [2],
+      "category": "HR"
+    },
+    {
+      "id": "q03",
+      "question": "Who must chair or preside over the Internal Complaints Committee under Susan Electricals POSH policy?",
+      "expected_source": "susan_electricals_posh_anti_sexual_harassment_policy.pdf",
+      "expected_pages": [3, 7],
+      "category": "HR"
+    },
+    {
+      "id": "q04",
+      "question": "What is the time limit to file a complaint of sexual harassment under POSH in Susan Electricals?",
+      "expected_source": "susan_electricals_posh_anti_sexual_harassment_policy.pdf",
+      "expected_pages": [4, 7],
+      "category": "HR"
+    },
+    {
+      "id": "q05",
+      "question": "What is the maximum single item expense that can be submitted via Navan without prior approval at GitLab?",
+      "expected_source": "Gitlab Expense Policy.pdf",
+      "expected_pages": [3],
+      "category": "Finance"
+    },
+    {
+      "id": "q06",
+      "question": "What is GitLab's policy on team members expensing items on behalf of their managers?",
+      "expected_source": "Gitlab Expense Policy.pdf",
+      "expected_pages": [1, 2, 3],
+      "category": "Finance"
+    },
+    {
+      "id": "q07",
+      "question": "How does an employee make a protected disclosure under the Whistleblower Vigil Mechanism policy at Susan Electricals?",
+      "expected_source": "susan_electricals_vigil_mechanism_whistleblower_policy.pdf",
+      "expected_pages": [2, 3],
+      "category": "Governance"
+    },
+    {
+      "id": "q08",
+      "question": "What constitutes Unpublished Price Sensitive Information (UPSI) under Susan Electricals code of fair disclosure?",
+      "expected_source": "susan_electricals_upsi_fair_disclosure_code.pdf",
+      "expected_pages": [1, 2],
+      "category": "Governance"
+    },
+    {
+      "id": "q09",
+      "question": "What are Google's seven AI principles for evaluating AI applications?",
+      "expected_source": "Google AI principles operational guidelines.pdf",
+      "expected_pages": [2, 3],
+      "category": "AI Ethics"
+    },
+    {
+      "id": "q10",
+      "question": "What are the rules regarding gifts and hospitality under Reckitt Third Party Code of Conduct?",
+      "expected_source": "reckitt_third_party_code_of_conduct.pdf",
+      "expected_pages": [3],
+      "category": "Ethics"
+    },
+    {
+      "id": "q11",
+      "question": "What is the primary objective of Jayaswal Neco Corporate Social Responsibility (CSR) policy?",
+      "expected_source": "jayaswal_neco_corporate_social_responsibility_policy.pdf",
+      "expected_pages": [1, 2],
+      "category": "CSR"
+    },
+    {
+      "id": "q12",
+      "question": "What expectations are placed on suppliers regarding forced labour under Jayaswal Neco supplier code of conduct?",
+      "expected_source": "jayaswal_neco_supplier_code_of_conduct.pdf",
+      "expected_pages": [1, 2],
+      "category": "Supply Chain"
+    },
+    {
+      "id": "q13",
+      "question": "What are the core development values and principles at GitLab?",
+      "expected_source": "Gitlab development principles.pdf",
+      "expected_pages": [1, 2, 6],
+      "category": "Operations"
+    },
+    {
+      "id": "q14",
+      "question": "How does Reckitt define non-retaliation for employees raising ethical concerns in its Code of Conduct?",
+      "expected_source": "reckitt_global_code_of_conduct.pdf",
+      "expected_pages": [1, 2, 6],
+      "category": "Governance"
+    },
+    {
+      "id": "q15",
+      "question": "What standards are required for human rights and fair treatment of workers under Reckitt Human Rights and Responsible Business Policy?",
+      "expected_source": "reckitt_human_rights_and_responsible_business_policy.pdf",
+      "expected_pages": [1, 2, 3],
+      "category": "HR"
+    }
+  ]
+}

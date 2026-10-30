@@ -1,9 +1,9 @@
-# Role B: Authentic Enterprise Database Schema Documentation (Chinook Dataset)
+# Role B: Authentic Enterprise Database Schema Documentation (Northwind Dataset)
 
 ## 1. Overview & Provenance
-The Role B Data Service owns an authentic, real-world relational enterprise database (`enterprise_business.db`) containing **11 interconnected tables** and **15,607 real records** (0% AI-generated). 
+The Role B Data Service owns an authentic, real-world relational enterprise database (`enterprise_business.db`) containing **12 tables**, compatibility views (`OrderDetails`), and **625,890 real records** (0% AI-generated). 
 
-The dataset is sourced from the official open-source [Chinook Database repository](https://github.com/lerocha/chinook-database), representing a real multinational commercial digital media store with international customers, sales employees, invoices, line items, tracks, artists, albums, genres, and media formats.
+The dataset is sourced from the official enterprise [Northwind Database](https://github.com/jpwhite3/northwind-SQLite3), representing a real global specialty foods export-import corporation with customers, employees, suppliers, product catalog categories, orders, itemized order details, and shipping partners.
 
 ---
 
@@ -11,101 +11,116 @@ The dataset is sourced from the official open-source [Chinook Database repositor
 
 ```mermaid
 erDiagram
-    Employee ||--o{ Employee : "reports to"
-    Employee ||--o{ Customer : "supports"
-    Customer ||--o{ Invoice : "billed to"
-    Invoice ||--|{ InvoiceLine : "contains"
-    Track ||--o{ InvoiceLine : "sold in"
-    Album ||--o{ Track : "contains"
-    Artist ||--o{ Album : "composed"
-    Genre ||--o{ Track : "categorizes"
-    MediaType ||--o{ Track : "encodes"
+    Employees ||--o{ Employees : "reports to"
+    Employees ||--o{ Orders : "manages"
+    Customers ||--o{ Orders : "places"
+    Shippers ||--o{ Orders : "ships"
+    Orders ||--|{ OrderDetails : "includes"
+    Products ||--o{ OrderDetails : "ordered in"
+    Suppliers ||--o{ Products : "supplies"
+    Categories ||--o{ Products : "classifies"
 
-    Customer {
-        int CustomerId PK
-        string FirstName
-        string LastName
-        string Company
+    Customers {
+        string CustomerID PK
+        string CompanyName
+        string ContactName
+        string ContactTitle
         string Address
         string City
-        string State
-        string Country
+        string Region
         string PostalCode
+        string Country
         string Phone
         string Fax
-        string Email
-        int SupportRepId FK
+        string CustomerName
     }
 
-    Invoice {
-        int InvoiceId PK
-        int CustomerId FK
-        datetime InvoiceDate
-        string BillingAddress
-        string BillingCity
-        string BillingState
-        string BillingCountry
-        string BillingPostalCode
-        numeric Total
+    Orders {
+        int OrderID PK
+        string CustomerID FK
+        int EmployeeID FK
+        datetime OrderDate
+        datetime RequiredDate
+        datetime ShippedDate
+        int ShipVia FK
+        numeric Freight
+        string ShipName
+        string ShipAddress
+        string ShipCity
+        string ShipRegion
+        string ShipPostalCode
+        string ShipCountry
     }
 
-    InvoiceLine {
-        int InvoiceLineId PK
-        int InvoiceId FK
-        int TrackId FK
+    OrderDetails {
+        int OrderID PK,FK
+        int ProductID PK,FK
         numeric UnitPrice
         int Quantity
+        float Discount
     }
 
-    Employee {
-        int EmployeeId PK
+    Products {
+        int ProductID PK
+        string ProductName
+        int SupplierID FK
+        int CategoryID FK
+        string QuantityPerUnit
+        numeric UnitPrice
+        numeric Price
+        int UnitsInStock
+        int UnitsOnOrder
+        int ReorderLevel
+        int Discontinued
+    }
+
+    Suppliers {
+        int SupplierID PK
+        string CompanyName
+        string ContactName
+        string ContactTitle
+        string Address
+        string City
+        string Region
+        string PostalCode
+        string Country
+        string Phone
+        string Fax
+        string HomePage
+    }
+
+    Categories {
+        int CategoryID PK
+        string CategoryName
+        string Description
+        blob Picture
+    }
+
+    Employees {
+        int EmployeeID PK
         string LastName
         string FirstName
         string Title
-        int ReportsTo FK
+        string TitleOfCourtesy
         datetime BirthDate
         datetime HireDate
         string Address
         string City
-        string State
-        string Country
+        string Region
         string PostalCode
+        string Country
+        string HomePhone
+        string Extension
+        blob Photo
+        string Notes
+        int ReportsTo FK
+    }
+
+    Shippers {
+        int ShipperID PK
+        string CompanyName
+        string ShipperName
         string Phone
-        string Fax
-        string Email
-    }
-
-    Track {
-        int TrackId PK
-        string Name
-        int AlbumId FK
-        int MediaTypeId FK
-        int GenreId FK
-        string Composer
-        int Milliseconds
-        int Bytes
-        numeric UnitPrice
-    }
-
-    Album {
-        int AlbumId PK
-        string Title
-        int ArtistId FK
-    }
-
-    Artist {
-        int ArtistId PK
-        string Name
-    }
-
-    Genre {
-        int GenreId PK
-        string Name
-    }
-
-    MediaType {
-        int MediaTypeId PK
-        string Name
     }
 ```
 
@@ -115,31 +130,35 @@ erDiagram
 
 | Table Name | Real Row Count | Primary Key | Foreign Key Links | Business Description |
 |---|---|---|---|---|
-| **`Customer`** | 59 rows | `CustomerId` | `SupportRepId -> Employee.EmployeeId` | Real global commercial customers (USA, Canada, Brazil, Germany, France, etc.) |
-| **`Invoice`** | 412 rows | `InvoiceId` | `CustomerId -> Customer.CustomerId` | Commercial invoices with transaction dates, billing addresses, and amounts |
-| **`InvoiceLine`** | 2,240 rows | `InvoiceLineId` | `InvoiceId -> Invoice.InvoiceId`, `TrackId -> Track.TrackId` | Itemized line item details with unit prices and purchase quantities |
-| **`Employee`** | 8 rows | `EmployeeId` | `ReportsTo -> Employee.EmployeeId` | Real corporate workforce: General Manager, Sales Manager, Support Agents |
-| **`Track`** | 3,503 rows | `TrackId` | `AlbumId`, `MediaTypeId`, `GenreId` | Audio tracks, composer credits, durations (milliseconds), file sizes (bytes) |
-| **`Album`** | 347 rows | `AlbumId` | `ArtistId -> Artist.ArtistId` | Commercial music albums |
-| **`Artist`** | 275 rows | `ArtistId` | None | International recording artists (AC/DC, Queen, Miles Davis, etc.) |
-| **`Genre`** | 25 rows | `GenreId` | None | Musical genres: Rock, Jazz, Metal, Blues, Classical, R&B, etc. |
-| **`MediaType`** | 5 rows | `MediaTypeId` | None | Audio formats: MPEG audio, Protected AAC, AAC audio, etc. |
-| **`Playlist`** | 18 rows | `PlaylistId` | None | User and promotional media playlists |
-| **`PlaylistTrack`**| 8,715 rows | `(PlaylistId, TrackId)` | `PlaylistId`, `TrackId` | Playlist-track cross references |
-| **TOTAL** | **15,607 rows** | | | **100% Real, non-AI-generated enterprise data** |
+| **`Customers`** | 91 rows | `CustomerID` | None | International clients (Germany, USA, Mexico, UK, France, Brazil, etc.) |
+| **`Orders`** | 830 rows | `OrderID` | `CustomerID`, `EmployeeID`, `ShipVia` | Commercial orders with ship dates, freight costs, and destinations |
+| **`[Order Details]` / `OrderDetails`** | 2,155 rows | `(OrderID, ProductID)` | `OrderID`, `ProductID` | Itemized line item details with unit prices, quantities, and discounts |
+| **`Products`** | 77 rows | `ProductID` | `SupplierID`, `CategoryID` | Specialty food products, inventory stock counts, reorder levels, unit prices |
+| **`Suppliers`** | 29 rows | `SupplierID` | None | International food vendors and manufacturers |
+| **`Categories`** | 8 rows | `CategoryID` | None | Product classifications (Beverages, Condiments, Confections, Dairy, etc.) |
+| **`Employees`** | 9 rows | `EmployeeID` | `ReportsTo -> Employees.EmployeeID` | Company workforce: Vice President, Sales Representatives, Coordinators |
+| **`Shippers`** | 3 rows | `ShipperID` | None | Freight carriers (Speedy Express, United Package, Federal Shipping) |
+| **`Regions`** | 4 rows | `RegionID` | None | Sales regions (Eastern, Western, Northern, Southern) |
+| **`Territories`** | 53 rows | `TerritoryID` | `RegionID -> Regions.RegionID` | Geographic sales territories |
+| **`EmployeeTerritories`**| 49 rows | `(EmployeeID, TerritoryID)`| `EmployeeID`, `TerritoryID` | Employee territory assignments |
+| **`CustomerDemographics`**| 622,621 rows | `CustomerTypeID` | None | Extended market demographics |
+| **TOTAL** | **625,890 rows** | | | **100% Real, non-AI-generated enterprise data** |
 
 ---
 
 ## 4. Key Business Metrics & SQL Conventions
-1. **Total Gross Revenue**: `SELECT ROUND(SUM(Total), 2) FROM Invoice;`
-2. **Top Customers by Invoices**:
+1. **Total Units Sold & Order Revenue**:
    ```sql
-   SELECT c.FirstName || ' ' || c.LastName AS CustomerName, COUNT(i.InvoiceId) AS InvoiceCount
-   FROM Customer c
-   JOIN Invoice i ON c.CustomerId = i.CustomerId
-   GROUP BY c.CustomerId, CustomerName
-   ORDER BY InvoiceCount DESC
+   SELECT ROUND(SUM(UnitPrice * Quantity * (1 - Discount)), 2) AS TotalRevenue FROM OrderDetails;
+   ```
+2. **Top Customers by Orders**:
+   ```sql
+   SELECT c.CompanyName, COUNT(o.OrderID) AS OrderCount
+   FROM Customers c
+   JOIN Orders o ON c.CustomerID = o.CustomerID
+   GROUP BY c.CustomerID, c.CompanyName
+   ORDER BY OrderCount DESC
    LIMIT 5;
    ```
-3. **Sales Support Rep Attribution**: Join `Customer.SupportRepId` on `Employee.EmployeeId`.
-4. **Answerability Standard**: Questions asking for data not in the store schema (e.g., employee dress code, guest Wi-Fi passwords, stock ticker prices, credit card CVVs) return `answerable=false`.
+3. **Space-tolerant Table Names**: In SQLite, `[Order Details]` has a space. The system provides a standardized `OrderDetails` view so queries can use either `[Order Details]` or `OrderDetails`.
+4. **Answerability Standard**: Questions asking for data outside the enterprise food commerce schema (e.g., employee HR POSH policies, company cafeteria lunch menus, Wi-Fi passwords, stock ticker prices, credit card CVVs) return `answerable=false`.

@@ -1,0 +1,298 @@
+"""
+Mock Services for Day 1 Development (Interfaces 1 & 2)
+Allows Role C to build and test the complete orchestrator without waiting for Role A & B.
+Conforms strictly to the committed INTERFACE CONTRACT v1.0.0.
+"""
+
+from typing import Dict, Any, List, Optional
+import re
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Mock Knowledge Service (Interface 1 - Role A)
+# ──────────────────────────────────────────────────────────────────────────────
+
+MOCK_POLICY_KNOWLEDGE_BASE = [
+    # ── Gitlab Documents ── 
+    {
+        "keywords": ["gitlab", "five", "beliefs", "five-beliefs"],
+        "text": "GitLab's five beliefs are a) Quality is in the eye of the user, b) Trust is built in, not boltd on. c) Context is the moat, d) Humans direct, machines build, both are first-class, e) Software gets built everywhere.",
+        "difficulty": "medium",
+        "source": "Gitlab/gitlab mission.pdf",
+        "page": 2,
+        "score": 0.95
+    },
+    {
+        "keywords": ["WFH", "equipment", "expense policy", "gitlab"],
+        "text": "Visual guide showing categories of approved work from home equipment including computer equipment, furniture, lighting, and other office supplies.",
+        "source": "Gitlab/Gitlab Expense Policy.pdf",
+        "page": 20,
+        "score": 0.94
+    },
+    {
+        "keywords": ["security principles", "vulnerability disclosure", "hackerone", "security document"],
+        "text": "GitLab's security is built around principles including least privilege, defense-in-depth, and transparency. GitLab operates a public HackerOne bug bounty program for responsible vulnerability disclosure, allowing external security researchers to report vulnerabilities.",
+        "source": "Gitlab/Gitlab security.pdf",
+        "page": 2,
+        "score": 0.93
+    },
+
+    # ── Google Docs Documents ──
+    {
+        "keywords": ["seven ai principles", "ai principles", "weapons of mass destruction"],
+        "text": "Google's seven AI Principles are: (1) Be socially beneficial; (2) Avoid creating or reinforcing unfair bias; (3) Be built and tested for safety; (4) Be accountable to people; (5) Incorporate privacy design principles; (6) Uphold high standards of scientific excellence; (7) Be made available for uses that accord with these principles. Google also committed to NOT pursue AI for weapons of mass destruction or illegal surveillance.",
+        "source": "Google docs/Google AI principles operational guidelines.pdf",
+        "page": 1,
+        "score": 0.96
+    },
+    {
+        "keywords": ["privacy principles", "privacy policy summary", "transparency and user choice", "takeout"],
+        "text": "Google's two core privacy principles are Transparency and User Choice. Google provides privacy dashboards, the ability to review and delete search history, ad personalization settings that can be turned off, and tools like Google Takeout to download personal data.",
+        "source": "Google docs/Google privacy policy summary.pdf",
+        "page": 2,
+        "score": 0.94
+    },
+    {
+        "keywords": ["renewable energy", "supplier code of conduct", "responsible supply chain report"],
+        "text": "In 2018, Google set a goal to help its suppliers transition to renewable energy and committed to develop markets enabling access to affordable renewable energy in communities where it sources and produces products. Google works with more than 1,000 suppliers worldwide that support hardware manufacturing and indirect services.",
+        "source": "Google docs/Google supplier code of conduct.pdf",
+        "page": 4,
+        "score": 0.92
+    },
+
+    # ── Jayaswal Neco Documents ──
+    {
+        "keywords": ["anti-corruption", "anti-bribery", "scope of jayaswal", "jnil", "third parties"],
+        "text": "The Anti-Corruption and Anti-Bribery and Anti-Money Laundering Policy of JNIL applies to JNIL itself, its Employees, and Third Parties acting on behalf of JNIL. JNIL shall ensure all associates and affiliates adopt a similar policy. The policy reflects JNIL zero-tolerance approach to bribery, corruption, and money laundering.",
+        "source": "jayaswal/jayaswal_neco_anti_corruption_anti_bribery_policy.pdf",
+        "page": 3,
+        "score": 0.95
+    },
+    {
+        "keywords": ["csr activities", "fy 2022-23", "healthcare", "sanitation", "safe drinking water"],
+        "text": "For FY 2022-23, Jayaswal Neco CSR healthcare and sanitation activities included: organising health check-up and blood donation camps, establishing First Aid Centres, free medical counselling and medicine distribution, eye check-up camps, free ambulance services in mine peripheral villages, sanitary pad vending machines, female toilets, and iron removal plants on handpumps.",
+        "source": "jayaswal/jayaswal_neco_csr_activities_fy2022_to_fy2026.pdf",
+        "page": 5,
+        "score": 0.93
+    },
+    {
+        "keywords": ["purpose of jayaswal", "remuneration policy", "three key objectives", "section 178"],
+        "text": "The Remuneration Policy of JNIL is adopted under Section 178 of the Companies Act, 2013 and SEBI Listing Obligations. Its three key objectives are: (i) to ensure remuneration is reasonable and sufficient to attract, retain and motivate Directors, KMP and Senior Management; (ii) clear relationship of remuneration to performance; and (iii) a balance between fixed and incentive pay.",
+        "source": "jayaswal/jayaswal_neco_remuneration_policy.pdf",
+        "page": 2,
+        "score": 0.94
+    },
+    {
+        "keywords": ["define senior management", "definition of senior management", "jayaswal neco remuneration"],
+        "text": "Senior Management means officers and personnel of the listed entity who are members of its core management team, excluding Board of Directors. It comprises all members of management one level below the CEO, MD, Whole Time Director, or Manager, specifically including functional heads and Key Managerial Personnel.",
+        "source": "jayaswal/jayaswal_neco_remuneration_policy.pdf",
+        "page": 3,
+        "score": 0.96
+    },
+
+    # ── Reckitt Documents ──
+    {
+        "keywords": ["maternity leave", "parental leave policy", "reckitt", "premature births"],
+        "text": "Under Reckitt Global Parental Leave Policy, fully paid maternity leave is 26 weeks, subject to 12 months of continuous employment at RB. The first 16 weeks must be taken immediately after birth; the remaining 10 weeks before the child's first birthday. For premature births before the 37th week, paid weeks are extended by the number of weeks between birth date and 37th week.",
+        "source": "reckitt/reckitt_global_parental_leave_policy.pdf",
+        "page": 2,
+        "score": 0.95
+    },
+    {
+        "keywords": ["product safety policy", "reckitt product safety", "don'ts", "purpose and scope"],
+        "text": "The purpose of Reckitt Product Safety Policy is to protect consumers by ensuring every Reckitt product is safe and compliant. Explicit Don'ts include: releasing a product with unacceptable safety risk; ignoring or suppressing product safety information; using unapproved ingredients; and making product safety decisions without proper authority.",
+        "source": "reckitt/reckitt_product_safety_policy.pdf",
+        "page": 1,
+        "score": 0.95
+    },
+
+    # ── Susan Electricals Documents ──
+    {
+        "keywords": ["susan electricals", "code of conduct", "compliance officer", "board and senior management"],
+        "text": "The Code of Conduct of Susan Electricals India Limited applies to the Board of Directors and Senior Management Personnel under Regulation 17(5) of SEBI Listing Regulations. The Company Secretary is appointed as the Compliance Officer under the Code, responsible for answering questions and ensuring compliance.",
+        "source": "susan/susan_electricals_code_of_conduct_board_senior_management.pdf",
+        "page": 2,
+        "score": 0.95
+    },
+    {
+        "keywords": ["vigil mechanism", "whistle blower policy", "protected disclosure", "susan electricals"],
+        "text": "The legal basis is Section 177(9) of the Companies Act, 2013 and Regulation 22 of SEBI LODR Regulations, 2015. Protected Disclosure is defined as a concern raised by an employee in writing or email in good faith, disclosing unethical or improper activity, including identity details of the submitter.",
+        "source": "susan/susan_electricals_vigil_mechanism_whistleblower_policy.pdf",
+        "page": 4,
+        "score": 0.94
+    },
+    {
+        "keywords": ["nomination and remuneration policy", "susan electricals", "three key objectives"],
+        "text": "The three key objectives of Susan Electricals Nomination and Remuneration Policy are: (a) To formulate criteria for determining qualifications, competencies, and independence for director appointments; (b) To specify the manner for effective evaluation of Board and Committee performance; and (c) To recommend remuneration policy for Directors, KMP, and employees.",
+        "source": "susan/susan_electricals_nomination_and_remuneration_policy.pdf",
+        "page": 3,
+        "score": 0.94
+    }
+]
+
+def search_knowledge_mock(query: str, top_k: int = 5, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Mock implementation of Interface 1 (POST /search).
+    Returns ranked passages matching the query or no_match=True.
+    """
+    q_lower = query.lower()
+    matches = []
+    
+    for doc in MOCK_POLICY_KNOWLEDGE_BASE:
+        # Check keyword overlaps
+        score_boost = sum(0.15 for kw in doc["keywords"] if kw in q_lower)
+        if score_boost > 0:
+            assigned_score = min(0.98, round(doc["score"] + score_boost * 0.05, 3))
+            matches.append({
+                "text": doc["text"],
+                "source": doc["source"],
+                "page": doc["page"],
+                "score": assigned_score
+            })
+
+    # Sort descending by score
+    matches.sort(key=lambda x: x["score"], reverse=True)
+    results = matches[:top_k]
+
+    if not results:
+        return {
+            "results": [],
+            "no_match": True
+        }
+
+    return {
+        "results": results,
+        "no_match": False
+    }
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Mock Data Service (Interface 2 - Role B)
+# ──────────────────────────────────────────────────────────────────────────────
+
+MOCK_SQL_DATABASE = {
+    "product": {
+        "sql": "SELECT ProductName, Price FROM Products ORDER BY Price DESC LIMIT 5;",
+        "columns": ["ProductName", "Price"],
+        "rows": [
+            {"ProductName": "Côte de Blaye", "Price": 263.5},
+            {"ProductName": "Thüringer Rostbratwurst", "Price": 123.79},
+            {"ProductName": "Mishi Kobe Niku", "Price": 97.0},
+            {"ProductName": "Sir Rodney's Marmalade", "Price": 81.0},
+            {"ProductName": "Carnarvon Tigers", "Price": 62.5}
+        ]
+    },
+    "customer": {
+        "sql": "SELECT CustomerName, City, Country FROM Customers WHERE Country = 'Germany';",
+        "columns": ["CustomerName", "City", "Country"],
+        "rows": [
+            {"CustomerName": "Alfreds Futterkiste", "City": "Berlin", "Country": "Germany"},
+            {"CustomerName": "Blauer See Delikatessen", "City": "Mannheim", "Country": "Germany"},
+            {"CustomerName": "Königlich Essen", "City": "Brandenburg", "Country": "Germany"},
+            {"CustomerName": "Lehmanns Marktstand", "City": "Frankfurt", "Country": "Germany"},
+            {"CustomerName": "Morgenstern Gesundkost", "City": "Leipzig", "Country": "Germany"}
+        ]
+    },
+    "employee": {
+        "sql": "SELECT EmployeeID, FirstName, LastName, Title FROM Employees;",
+        "columns": ["EmployeeID", "FirstName", "LastName", "Title"],
+        "rows": [
+            {"EmployeeID": 1, "FirstName": "Nancy", "LastName": "Davolio", "Title": "Sales Representative"},
+            {"EmployeeID": 2, "FirstName": "Andrew", "LastName": "Fuller", "Title": "Vice President, Sales"},
+            {"EmployeeID": 3, "FirstName": "Janet", "LastName": "Leverling", "Title": "Sales Representative"},
+            {"EmployeeID": 4, "FirstName": "Margaret", "LastName": "Peacock", "Title": "Sales Representative"}
+        ]
+    },
+    "supplier": {
+        "sql": "SELECT SupplierID, SupplierName, Phone, Country FROM Suppliers WHERE SupplierName LIKE '%Exotic%';",
+        "columns": ["SupplierID", "SupplierName", "Phone", "Country"],
+        "rows": [
+            {"SupplierID": 1, "SupplierName": "Exotic Liquids", "Phone": "(171) 555-2222", "Country": "UK"}
+        ]
+    },
+    "shipper": {
+        "sql": "SELECT ShipperID, ShipperName, Phone FROM Shippers;",
+        "columns": ["ShipperID", "ShipperName", "Phone"],
+        "rows": [
+            {"ShipperID": 1, "ShipperName": "Speedy Express", "Phone": "(503) 555-9831"},
+            {"ShipperID": 2, "ShipperName": "United Package", "Phone": "(503) 555-3199"},
+            {"ShipperID": 3, "ShipperName": "Federal Shipping", "Phone": "(503) 555-9931"}
+        ]
+    },
+    "order": {
+        "sql": "SELECT OrderID, OrderDate, CustomerID, EmployeeID FROM Orders ORDER BY OrderDate DESC LIMIT 4;",
+        "columns": ["OrderID", "OrderDate", "CustomerID", "EmployeeID"],
+        "rows": [
+            {"OrderID": 10443, "OrderDate": "1997-02-12", "CustomerID": 66, "EmployeeID": 8},
+            {"OrderID": 10442, "OrderDate": "1997-02-11", "CustomerID": 20, "EmployeeID": 3},
+            {"OrderID": 10441, "OrderDate": "1997-02-10", "CustomerID": 55, "EmployeeID": 3},
+            {"OrderID": 10440, "OrderDate": "1997-02-10", "CustomerID": 71, "EmployeeID": 4}
+        ]
+    }
+}
+
+UNANSWERABLE_DATA_PATTERNS = [
+    r"money laundering",
+    r"criminal",
+    r"stock price",
+    r"nse ticker",
+    r"financial year 2026",
+    r"revenue .* 2026",
+    r"personal cell",
+    r"home address",
+    r"sql injection",
+    r"exploit",
+    r"nonexistent",
+    r"profit margin"
+]
+
+def query_data_mock(question: str) -> Dict[str, Any]:
+    """
+    Mock implementation of Interface 2 (POST /query).
+    Returns sql, rows, columns, row_count, error, and answerable flag.
+    """
+    q_lower = question.lower()
+    
+    # Check if question is unanswerable from database context
+    for pattern in UNANSWERABLE_DATA_PATTERNS:
+        if re.search(pattern, q_lower):
+            return {
+                "sql": "",
+                "rows": [],
+                "columns": [],
+                "row_count": 0,
+                "error": f"The query '{question}' cannot be answered by the relational database schema.",
+                "answerable": False
+            }
+
+    # Match tables
+    for table_key, table_data in MOCK_SQL_DATABASE.items():
+        if table_key in q_lower:
+            return {
+                "sql": table_data["sql"],
+                "rows": table_data["rows"],
+                "columns": table_data["columns"],
+                "row_count": len(table_data["rows"]),
+                "error": None,
+                "answerable": True
+            }
+
+    # Default fallback structured query for count/aggregate
+    if any(k in q_lower for k in ["count", "total", "average", "sum", "sales", "how many"]):
+        return {
+            "sql": "SELECT COUNT(*) AS total_count FROM Orders;",
+            "rows": [{"total_count": 830}],
+            "columns": ["total_count"],
+            "row_count": 1,
+            "error": None,
+            "answerable": True
+        }
+
+    # If nothing matched in SQL database
+    return {
+        "sql": "",
+        "rows": [],
+        "columns": [],
+        "row_count": 0,
+        "error": "No matching database tables or columns found for this request.",
+        "answerable": False
+    }

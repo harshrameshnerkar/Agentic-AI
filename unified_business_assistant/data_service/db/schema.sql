@@ -1,170 +1,372 @@
 -- ==============================================================================
 -- UNIFIED BUSINESS ASSISTANT - ROLE B: DATA SERVICE
--- Real World Enterprise Database Schema (Chinook Official Open-Source Dataset)
--- 11 Interconnected Tables, 15,607 Records (Zero AI-Generated Rows)
+-- Real World Enterprise Database Schema (Northwind Official Dataset)
 -- ==============================================================================
 
-PRAGMA foreign_keys = ON;
-
-CREATE TABLE [Album]
-(
-    [AlbumId] INTEGER  NOT NULL,
-    [Title] NVARCHAR(160)  NOT NULL,
-    [ArtistId] INTEGER  NOT NULL,
-    CONSTRAINT [PK_Album] PRIMARY KEY  ([AlbumId]),
-    FOREIGN KEY ([ArtistId]) REFERENCES [Artist] ([ArtistId]) 
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+CREATE TABLE [Categories]
+(      [CategoryID] INTEGER PRIMARY KEY AUTOINCREMENT,
+       [CategoryName] TEXT,
+       [Description] TEXT,
+       [Picture] BLOB
 );
 
-CREATE TABLE [Artist]
-(
-    [ArtistId] INTEGER  NOT NULL,
-    [Name] NVARCHAR(120),
-    CONSTRAINT [PK_Artist] PRIMARY KEY  ([ArtistId])
-);
-
-CREATE TABLE [Customer]
-(
-    [CustomerId] INTEGER  NOT NULL,
-    [FirstName] NVARCHAR(40)  NOT NULL,
-    [LastName] NVARCHAR(20)  NOT NULL,
-    [Company] NVARCHAR(80),
-    [Address] NVARCHAR(70),
-    [City] NVARCHAR(40),
-    [State] NVARCHAR(40),
-    [Country] NVARCHAR(40),
-    [PostalCode] NVARCHAR(10),
-    [Phone] NVARCHAR(24),
-    [Fax] NVARCHAR(24),
-    [Email] NVARCHAR(60)  NOT NULL,
-    [SupportRepId] INTEGER,
-    CONSTRAINT [PK_Customer] PRIMARY KEY  ([CustomerId]),
-    FOREIGN KEY ([SupportRepId]) REFERENCES [Employee] ([EmployeeId]) 
-		ON DELETE NO ACTION ON UPDATE NO ACTION
-);
-
-CREATE TABLE [Employee]
-(
-    [EmployeeId] INTEGER  NOT NULL,
-    [LastName] NVARCHAR(20)  NOT NULL,
-    [FirstName] NVARCHAR(20)  NOT NULL,
-    [Title] NVARCHAR(30),
-    [ReportsTo] INTEGER,
-    [BirthDate] DATETIME,
-    [HireDate] DATETIME,
-    [Address] NVARCHAR(70),
-    [City] NVARCHAR(40),
-    [State] NVARCHAR(40),
-    [Country] NVARCHAR(40),
-    [PostalCode] NVARCHAR(10),
-    [Phone] NVARCHAR(24),
-    [Fax] NVARCHAR(24),
-    [Email] NVARCHAR(60),
-    CONSTRAINT [PK_Employee] PRIMARY KEY  ([EmployeeId]),
-    FOREIGN KEY ([ReportsTo]) REFERENCES [Employee] ([EmployeeId]) 
-		ON DELETE NO ACTION ON UPDATE NO ACTION
-);
-
-CREATE TABLE [Genre]
-(
-    [GenreId] INTEGER  NOT NULL,
-    [Name] NVARCHAR(120),
-    CONSTRAINT [PK_Genre] PRIMARY KEY  ([GenreId])
-);
-
-CREATE TABLE [Invoice]
-(
-    [InvoiceId] INTEGER  NOT NULL,
-    [CustomerId] INTEGER  NOT NULL,
-    [InvoiceDate] DATETIME  NOT NULL,
-    [BillingAddress] NVARCHAR(70),
-    [BillingCity] NVARCHAR(40),
-    [BillingState] NVARCHAR(40),
-    [BillingCountry] NVARCHAR(40),
-    [BillingPostalCode] NVARCHAR(10),
-    [Total] NUMERIC(10,2)  NOT NULL,
-    CONSTRAINT [PK_Invoice] PRIMARY KEY  ([InvoiceId]),
-    FOREIGN KEY ([CustomerId]) REFERENCES [Customer] ([CustomerId]) 
-		ON DELETE NO ACTION ON UPDATE NO ACTION
-);
-
-CREATE TABLE [InvoiceLine]
-(
-    [InvoiceLineId] INTEGER  NOT NULL,
-    [InvoiceId] INTEGER  NOT NULL,
-    [TrackId] INTEGER  NOT NULL,
-    [UnitPrice] NUMERIC(10,2)  NOT NULL,
-    [Quantity] INTEGER  NOT NULL,
-    CONSTRAINT [PK_InvoiceLine] PRIMARY KEY  ([InvoiceLineId]),
-    FOREIGN KEY ([InvoiceId]) REFERENCES [Invoice] ([InvoiceId]) 
+CREATE TABLE [CustomerCustomerDemo](
+   [CustomerID]TEXT NOT NULL,
+   [CustomerTypeID]TEXT NOT NULL,
+   PRIMARY KEY ("CustomerID","CustomerTypeID"),
+   FOREIGN KEY ([CustomerID]) REFERENCES [Customers] ([CustomerID]) 
 		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId]) 
+	FOREIGN KEY ([CustomerTypeID]) REFERENCES [CustomerDemographics] ([CustomerTypeID]) 
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-CREATE TABLE [MediaType]
-(
-    [MediaTypeId] INTEGER  NOT NULL,
-    [Name] NVARCHAR(120),
-    CONSTRAINT [PK_MediaType] PRIMARY KEY  ([MediaTypeId])
+CREATE TABLE [CustomerDemographics](
+   [CustomerTypeID]TEXT NOT NULL,
+   [CustomerDesc]TEXT,
+    PRIMARY KEY ("CustomerTypeID")
 );
 
-CREATE TABLE [Playlist]
-(
-    [PlaylistId] INTEGER  NOT NULL,
-    [Name] NVARCHAR(120),
-    CONSTRAINT [PK_Playlist] PRIMARY KEY  ([PlaylistId])
+CREATE TABLE [Customers]
+(      [CustomerID] TEXT,
+       [CompanyName] TEXT,
+       [ContactName] TEXT,
+       [ContactTitle] TEXT,
+       [Address] TEXT,
+       [City] TEXT,
+       [Region] TEXT,
+       [PostalCode] TEXT,
+       [Country] TEXT,
+       [Phone] TEXT,
+       [Fax] TEXT, CustomerName TEXT,
+       PRIMARY KEY (`CustomerID`)
 );
 
-CREATE TABLE [PlaylistTrack]
-(
-    [PlaylistId] INTEGER  NOT NULL,
-    [TrackId] INTEGER  NOT NULL,
-    CONSTRAINT [PK_PlaylistTrack] PRIMARY KEY  ([PlaylistId], [TrackId]),
-    FOREIGN KEY ([PlaylistId]) REFERENCES [Playlist] ([PlaylistId]) 
-		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId]) 
+CREATE TABLE [Employees]
+(      [EmployeeID] INTEGER PRIMARY KEY AUTOINCREMENT,
+       [LastName] TEXT,
+       [FirstName] TEXT,
+       [Title] TEXT,
+       [TitleOfCourtesy] TEXT,
+       [BirthDate] DATE,
+       [HireDate] DATE,
+       [Address] TEXT,
+       [City] TEXT,
+       [Region] TEXT,
+       [PostalCode] TEXT,
+       [Country] TEXT,
+       [HomePhone] TEXT,
+       [Extension] TEXT,
+       [Photo] BLOB,
+       [Notes] TEXT,
+       [ReportsTo] INTEGER,
+       [PhotoPath] TEXT,
+	   FOREIGN KEY ([ReportsTo]) REFERENCES [Employees] ([EmployeeID]) 
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-CREATE TABLE [Track]
-(
-    [TrackId] INTEGER  NOT NULL,
-    [Name] NVARCHAR(200)  NOT NULL,
-    [AlbumId] INTEGER,
-    [MediaTypeId] INTEGER  NOT NULL,
-    [GenreId] INTEGER,
-    [Composer] NVARCHAR(220),
-    [Milliseconds] INTEGER  NOT NULL,
-    [Bytes] INTEGER,
-    [UnitPrice] NUMERIC(10,2)  NOT NULL,
-    CONSTRAINT [PK_Track] PRIMARY KEY  ([TrackId]),
-    FOREIGN KEY ([AlbumId]) REFERENCES [Album] ([AlbumId]) 
+CREATE TABLE [EmployeeTerritories](
+   [EmployeeID]INTEGER NOT NULL,
+   [TerritoryID]TEXT NOT NULL,
+    PRIMARY KEY ("EmployeeID","TerritoryID"),
+	FOREIGN KEY ([EmployeeID]) REFERENCES [Employees] ([EmployeeID]) 
 		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([GenreId]) REFERENCES [Genre] ([GenreId]) 
-		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([MediaTypeId]) REFERENCES [MediaType] ([MediaTypeId]) 
+	FOREIGN KEY ([TerritoryID]) REFERENCES [Territories] ([TerritoryID]) 
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-CREATE INDEX [IFK_AlbumArtistId] ON [Album] ([ArtistId]);
+CREATE TABLE [Order Details](
+   [OrderID]INTEGER NOT NULL,
+   [ProductID]INTEGER NOT NULL,
+   [UnitPrice]NUMERIC NOT NULL DEFAULT 0,
+   [Quantity]INTEGER NOT NULL DEFAULT 1,
+   [Discount]REAL NOT NULL DEFAULT 0,
+    PRIMARY KEY ("OrderID","ProductID"),
+    CHECK ([Discount]>=(0) AND [Discount]<=(1)),
+    CHECK ([Quantity]>(0)),
+    CHECK ([UnitPrice]>=(0)),
+	FOREIGN KEY ([OrderID]) REFERENCES [Orders] ([OrderID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+	FOREIGN KEY ([ProductID]) REFERENCES [Products] ([ProductID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
+);
 
-CREATE INDEX [IFK_CustomerSupportRepId] ON [Customer] ([SupportRepId]);
+CREATE TABLE [Orders](
+   [OrderID]INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+   [CustomerID]TEXT,
+   [EmployeeID]INTEGER,
+   [OrderDate]DATETIME,
+   [RequiredDate]DATETIME,
+   [ShippedDate]DATETIME,
+   [ShipVia]INTEGER,
+   [Freight]NUMERIC DEFAULT 0,
+   [ShipName]TEXT,
+   [ShipAddress]TEXT,
+   [ShipCity]TEXT,
+   [ShipRegion]TEXT,
+   [ShipPostalCode]TEXT,
+   [ShipCountry]TEXT,
+   FOREIGN KEY ([EmployeeID]) REFERENCES [Employees] ([EmployeeID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+	FOREIGN KEY ([CustomerID]) REFERENCES [Customers] ([CustomerID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+	FOREIGN KEY ([ShipVia]) REFERENCES [Shippers] ([ShipperID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
+);
 
-CREATE INDEX [IFK_EmployeeReportsTo] ON [Employee] ([ReportsTo]);
+CREATE TABLE [Products](
+   [ProductID]INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+   [ProductName]TEXT NOT NULL,
+   [SupplierID]INTEGER,
+   [CategoryID]INTEGER,
+   [QuantityPerUnit]TEXT,
+   [UnitPrice]NUMERIC DEFAULT 0,
+   [UnitsInStock]INTEGER DEFAULT 0,
+   [UnitsOnOrder]INTEGER DEFAULT 0,
+   [ReorderLevel]INTEGER DEFAULT 0,
+   [Discontinued]TEXT NOT NULL DEFAULT '0', Price NUMERIC,
+    CHECK ([UnitPrice]>=(0)),
+    CHECK ([ReorderLevel]>=(0)),
+    CHECK ([UnitsInStock]>=(0)),
+    CHECK ([UnitsOnOrder]>=(0)),
+	FOREIGN KEY ([CategoryID]) REFERENCES [Categories] ([CategoryID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+	FOREIGN KEY ([SupplierID]) REFERENCES [Suppliers] ([SupplierID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
+);
 
-CREATE INDEX [IFK_InvoiceCustomerId] ON [Invoice] ([CustomerId]);
+CREATE TABLE [Regions](
+   [RegionID]INTEGER NOT NULL PRIMARY KEY,
+   [RegionDescription]TEXT NOT NULL
+);
 
-CREATE INDEX [IFK_InvoiceLineInvoiceId] ON [InvoiceLine] ([InvoiceId]);
+CREATE TABLE [Shippers](
+   [ShipperID]INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+   [CompanyName]TEXT NOT NULL,
+   [Phone]TEXT
+, ShipperName TEXT);
 
-CREATE INDEX [IFK_InvoiceLineTrackId] ON [InvoiceLine] ([TrackId]);
+CREATE TABLE [Suppliers](
+   [SupplierID]INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+   [CompanyName]TEXT NOT NULL,
+   [ContactName]TEXT,
+   [ContactTitle]TEXT,
+   [Address]TEXT,
+   [City]TEXT,
+   [Region]TEXT,
+   [PostalCode]TEXT,
+   [Country]TEXT,
+   [Phone]TEXT,
+   [Fax]TEXT,
+   [HomePage]TEXT
+);
 
-CREATE INDEX [IFK_PlaylistTrackPlaylistId] ON [PlaylistTrack] ([PlaylistId]);
+CREATE TABLE [Territories](
+   [TerritoryID]TEXT NOT NULL,
+   [TerritoryDescription]TEXT NOT NULL,
+   [RegionID]INTEGER NOT NULL,
+    PRIMARY KEY ("TerritoryID"),
+	FOREIGN KEY ([RegionID]) REFERENCES [Regions] ([RegionID]) 
+		ON DELETE NO ACTION ON UPDATE NO ACTION
+);
 
-CREATE INDEX [IFK_PlaylistTrackTrackId] ON [PlaylistTrack] ([TrackId]);
+CREATE VIEW [Alphabetical list of products] 
+AS
+SELECT Products.*, 
+       Categories.CategoryName
+FROM Categories 
+   INNER JOIN Products ON Categories.CategoryID = Products.CategoryID
+WHERE (((Products.Discontinued)=0));
 
-CREATE INDEX [IFK_TrackAlbumId] ON [Track] ([AlbumId]);
+CREATE VIEW [Current Product List] 
+AS
+SELECT ProductID,
+       ProductName 
+FROM Products 
+WHERE Discontinued=0;
 
-CREATE INDEX [IFK_TrackGenreId] ON [Track] ([GenreId]);
+CREATE VIEW [Customer and Suppliers by City] 
+AS
+SELECT City, 
+       CompanyName, 
+       ContactName, 
+       'Customers' AS Relationship 
+FROM Customers
+UNION 
+SELECT City, 
+       CompanyName, 
+       ContactName, 
+       'Suppliers'
+FROM Suppliers 
+ORDER BY City, CompanyName;
 
-CREATE INDEX [IFK_TrackMediaTypeId] ON [Track] ([MediaTypeId]);
+CREATE VIEW [Invoices] 
+AS
+SELECT Orders.ShipName,
+       Orders.ShipAddress,
+       Orders.ShipCity,
+       Orders.ShipRegion, 
+       Orders.ShipPostalCode,
+       Orders.ShipCountry,
+       Orders.CustomerID,
+       Customers.CompanyName AS CustomerName, 
+       Customers.Address,
+       Customers.City,
+       Customers.Region,
+       Customers.PostalCode,
+       Customers.Country,
+       (Employees.FirstName + ' ' + Employees.LastName) AS Salesperson, 
+       Orders.OrderID,
+       Orders.OrderDate,
+       Orders.RequiredDate,
+       Orders.ShippedDate, 
+       Shippers.CompanyName As ShipperName,
+       [Order Details].ProductID,
+       Products.ProductName, 
+       [Order Details].UnitPrice,
+       [Order Details].Quantity,
+       [Order Details].Discount, 
+       ((([Order Details].UnitPrice*Quantity*(1-Discount))/100)*100) AS ExtendedPrice,
+       Orders.Freight 
+FROM Customers 
+  JOIN Orders ON Customers.CustomerID = Orders.CustomerID  
+    JOIN Employees ON Employees.EmployeeID = Orders.EmployeeID    
+     JOIN [Order Details] ON Orders.OrderID = [Order Details].OrderID     
+      JOIN Products ON Products.ProductID = [Order Details].ProductID      
+       JOIN Shippers ON Shippers.ShipperID = Orders.ShipVia;
+
+CREATE VIEW [Orders Qry] AS
+SELECT Orders.OrderID,
+       Orders.CustomerID,
+       Orders.EmployeeID, 
+       Orders.OrderDate, 
+       Orders.RequiredDate,
+       Orders.ShippedDate, 
+       Orders.ShipVia, 
+       Orders.Freight,
+       Orders.ShipName, 
+       Orders.ShipAddress, 
+       Orders.ShipCity,
+       Orders.ShipRegion,
+       Orders.ShipPostalCode,
+       Orders.ShipCountry,
+       Customers.CompanyName,
+       Customers.Address,
+       Customers.City,
+       Customers.Region,
+       Customers.PostalCode, 
+       Customers.Country
+FROM Customers 
+     JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+
+CREATE VIEW [Order Subtotals] AS
+SELECT [Order Details].OrderID, 
+Sum(([Order Details].UnitPrice*Quantity*(1-Discount)/100)*100) AS Subtotal
+FROM [Order Details]
+GROUP BY [Order Details].OrderID;
+
+CREATE VIEW [Product Sales for 1997] AS
+SELECT Categories.CategoryName, 
+       Products.ProductName, 
+       Sum(([Order Details].UnitPrice*Quantity*(1-Discount)/100)*100) AS ProductSales
+FROM Categories
+ JOIN    Products On Categories.CategoryID = Products.CategoryID
+    JOIN  [Order Details] on Products.ProductID = [Order Details].ProductID     
+     JOIN  [Orders] on Orders.OrderID = [Order Details].OrderID 
+WHERE Orders.ShippedDate Between DATETIME('1997-01-01') And DATETIME('1997-12-31')
+GROUP BY Categories.CategoryName, Products.ProductName;
+
+CREATE VIEW [Products Above Average Price] AS
+SELECT Products.ProductName, 
+       Products.UnitPrice
+FROM Products
+WHERE Products.UnitPrice>(SELECT AVG(UnitPrice) From Products);
+
+CREATE VIEW [Products by Category] AS
+SELECT Categories.CategoryName, 
+       Products.ProductName, 
+       Products.QuantityPerUnit, 
+       Products.UnitsInStock, 
+       Products.Discontinued
+FROM Categories 
+     INNER JOIN Products ON Categories.CategoryID = Products.CategoryID
+WHERE Products.Discontinued <> 1;
+
+CREATE VIEW [Quarterly Orders] AS
+SELECT DISTINCT Customers.CustomerID, 
+                Customers.CompanyName, 
+                Customers.City, 
+                Customers.Country
+FROM Customers 
+     JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+WHERE Orders.OrderDate BETWEEN DATETIME('1997-01-01') And DATETIME('1997-12-31');
+
+CREATE VIEW [Sales Totals by Amount] AS
+SELECT [Order Subtotals].Subtotal AS SaleAmount, 
+                  Orders.OrderID, 
+               Customers.CompanyName, 
+                  Orders.ShippedDate
+FROM Customers 
+ JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+    JOIN [Order Subtotals] ON Orders.OrderID = [Order Subtotals].OrderID 
+WHERE ([Order Subtotals].Subtotal >2500) 
+AND (Orders.ShippedDate BETWEEN DATETIME('1997-01-01') And DATETIME('1997-12-31'));
+
+CREATE VIEW [Summary of Sales by Quarter] AS
+SELECT Orders.ShippedDate, 
+       Orders.OrderID, 
+       [Order Subtotals].Subtotal
+FROM Orders 
+     INNER JOIN [Order Subtotals] ON Orders.OrderID = [Order Subtotals].OrderID
+WHERE Orders.ShippedDate IS NOT NULL;
+
+CREATE VIEW [Summary of Sales by Year] AS
+SELECT      Orders.ShippedDate, 
+            Orders.OrderID, 
+ [Order Subtotals].Subtotal
+FROM Orders 
+     INNER JOIN [Order Subtotals] ON Orders.OrderID = [Order Subtotals].OrderID
+WHERE Orders.ShippedDate IS NOT NULL;
+
+CREATE VIEW [Category Sales for 1997] AS
+SELECT     [Product Sales for 1997].CategoryName, 
+       Sum([Product Sales for 1997].ProductSales) AS CategorySales
+FROM [Product Sales for 1997]
+GROUP BY [Product Sales for 1997].CategoryName;
+
+CREATE VIEW [Order Details Extended] AS
+SELECT [Order Details].OrderID, 
+       [Order Details].ProductID, 
+       Products.ProductName, 
+	   [Order Details].UnitPrice, 
+       [Order Details].Quantity, 
+       [Order Details].Discount, 
+      ([Order Details].UnitPrice*Quantity*(1-Discount)/100)*100 AS ExtendedPrice
+FROM Products 
+     JOIN [Order Details] ON Products.ProductID = [Order Details].ProductID;
+
+CREATE VIEW [Sales by Category] AS
+SELECT Categories.CategoryID, 
+       Categories.CategoryName, 
+         Products.ProductName, 
+	Sum([Order Details Extended].ExtendedPrice) AS ProductSales
+FROM  Categories 
+    JOIN Products 
+      ON Categories.CategoryID = Products.CategoryID
+       JOIN [Order Details Extended] 
+         ON Products.ProductID = [Order Details Extended].ProductID                
+           JOIN Orders 
+             ON Orders.OrderID = [Order Details Extended].OrderID 
+WHERE Orders.OrderDate BETWEEN DATETIME('1997-01-01') And DATETIME('1997-12-31')
+GROUP BY Categories.CategoryID, Categories.CategoryName, Products.ProductName;
+
+CREATE VIEW [ProductDetails_V] as
+select 
+p.*, 
+c.CategoryName, c.Description as [CategoryDescription],
+s.CompanyName as [SupplierName], s.Region as [SupplierRegion]
+from [Products] p
+join [Categories] c on p.CategoryId = c.CategoryId
+join [Suppliers] s on s.SupplierId = p.SupplierId;
+
+CREATE VIEW OrderDetails AS SELECT OrderID, ProductID, UnitPrice, Quantity, Discount FROM [Order Details];
+
