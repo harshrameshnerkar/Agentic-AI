@@ -1185,7 +1185,7 @@ def serve_dashboard():
       <!-- New Chat Button -->
       <button class="btn-new-chat" onclick="createNewChat()">
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        + New Chat
+        New Chat
       </button>
 
       <!-- Recent History Header -->
@@ -1257,12 +1257,12 @@ def serve_dashboard():
       <!-- Top: User Profile Card -->
       <div class="user-profile-section">
         <div class="user-profile-card">
-          <div class="user-avatar-circle">H</div>
+          <div class="user-avatar-circle">U</div>
           <div class="user-details">
-            <h3>Harsh</h3>
+            <h3>User</h3>
             <div class="user-role-badge">
               <div class="user-status-dot"></div>
-              <span>Lead Architect · Enterprise</span>
+              <span>Enterprise User</span>
             </div>
           </div>
         </div>
@@ -1345,10 +1345,10 @@ def serve_dashboard():
   <!-- Signed Out Screen Overlay -->
   <div id="loggedOutOverlay" class="logged-out-overlay" style="display: none;">
     <div class="logged-out-card">
-      <div class="user-avatar-circle" style="width: 58px; height: 58px; font-size: 1.8rem; margin: 0 auto 16px;">H</div>
+      <div class="user-avatar-circle" style="width: 58px; height: 58px; font-size: 1.8rem; margin: 0 auto 16px;">U</div>
       <h2 style="font-size: 1.3rem; margin-bottom: 8px;">Signed Out</h2>
       <p style="font-size: 0.88rem; color: var(--text-muted);">You have safely signed out of Unified Business Assistant.</p>
-      <button class="btn-signin" onclick="signInAgain()">Sign In as Harsh</button>
+      <button class="btn-signin" onclick="signInAgain()">Sign In as User</button>
     </div>
   </div>
 
@@ -1492,7 +1492,7 @@ def serve_dashboard():
           <div class="msg-row ai">
             <div class="msg-avatar">AI</div>
             <div class="msg-bubble">
-              <strong>Welcome, Harsh!</strong><br>
+              <strong>Welcome, User!</strong><br>
               Unified Business Assistant is ready. This enterprise orchestrator combines:<br>
               • <strong>Role A (/search)</strong>: Corporate Policy RAG across 50 enterprise PDFs.<br>
               • <strong>Role B (/query)</strong>: Text-to-SQL data analytics on Northwind.<br>
