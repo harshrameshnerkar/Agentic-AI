@@ -340,6 +340,8 @@ NORTHWIND_TABLES_META = {
             "customerid": "CustomerID", "customer id": "CustomerID",
             "customername": "CustomerName", "customer name": "CustomerName",
             "contactname": "ContactName", "contact name": "ContactName",
+            "contact number": "ContactName", "contact no": "ContactName", "contact person": "ContactName",
+            "contact": "ContactName", "phone": "ContactName", "phone number": "ContactName",
             "address": "Address",
             "city": "City", "cities": "City",
             "postalcode": "PostalCode", "postal code": "PostalCode", "zip": "PostalCode",
@@ -616,9 +618,27 @@ def query_data_mock(question: str) -> Dict[str, Any]:
     # 4. Limit and Direction
     limit = extract_limit(q_lower, default=None)
     is_bottom = "bottom" in q_lower or bool(re.search(r'\blast\s+(?:\d+|records?|rows?)\b', q_lower))
+    is_sort_requested = any(w in q_lower for w in ["sort", "sorted", "order by", "alphabetical", "alphabetically"])
 
     order_clause = ""
-    if target_table == "Products" and any(k in q_lower for k in ["lowest", "cheap", "cheapest", "least", "min", "minimum", "asc", "ascending"]):
+    if is_sort_requested:
+        # Check sort target
+        direction_kw = "DESC" if any(w in q_lower for w in ["desc", "descending", "reverse", "z to a", "z-a"]) else "ASC"
+        if any(w in q_lower for w in ["name", "alphabetical", "alphabetically", "a to z", "a-z"]):
+            name_cols = [c for c in target_meta["columns"] if "name" in c.lower()]
+            sort_col = name_cols[0] if name_cols else selected_cols[0]
+            order_clause = f" ORDER BY {sort_col} {direction_kw}"
+        elif "price" in q_lower:
+            order_clause = f" ORDER BY Price {direction_kw}"
+        elif "date" in q_lower:
+            date_cols = [c for c in target_meta["columns"] if "date" in c.lower()]
+            sort_col = date_cols[0] if date_cols else target_meta["pk"]
+            order_clause = f" ORDER BY {sort_col} {direction_kw}"
+        elif selected_cols:
+            order_clause = f" ORDER BY {selected_cols[0]} {direction_kw}"
+        else:
+            order_clause = f" ORDER BY {target_meta['pk']} {direction_kw}"
+    elif target_table == "Products" and any(k in q_lower for k in ["lowest", "cheap", "cheapest", "least", "min", "minimum", "asc", "ascending"]):
         order_clause = " ORDER BY Price ASC"
     elif target_table == "Products" and any(k in q_lower for k in ["highest", "expensive", "most expensive", "top", "max", "desc", "descending"]):
         order_clause = " ORDER BY Price DESC"
@@ -630,6 +650,9 @@ def query_data_mock(question: str) -> Dict[str, Any]:
         order_clause = f" ORDER BY {target_meta['pk']} ASC"
     elif "product" in q_lower and "price" in q_lower:
         order_clause = " ORDER BY Price ASC" if ("low" in q_lower or "asc" in q_lower) else " ORDER BY Price DESC"
+    else:
+        # Explicit natural primary key ordering
+        order_clause = f" ORDER BY {target_meta['pk']} ASC"
 
     # WHERE filter
     where_clause = ""
