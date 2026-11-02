@@ -347,6 +347,101 @@ def serve_dashboard():
     .route-both { background: rgba(157, 78, 221, 0.18); color: #c77dff; border: 1px solid rgba(157, 78, 221, 0.3); }
     .route-none { background: rgba(255, 77, 109, 0.18); color: #ff758f; border: 1px solid rgba(255, 77, 109, 0.3); }
 
+    /* Boxed Table & Formatted Content */
+    .table-container {
+      margin: 12px 0;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(10, 15, 25, 0.85);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      text-align: left;
+    }
+    .custom-table th {
+      background: rgba(79, 172, 254, 0.18);
+      color: #38bdf8;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      white-space: nowrap;
+    }
+    .custom-table th:last-child {
+      border-right: none;
+    }
+    .custom-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+    }
+    .custom-table td:last-child {
+      border-right: none;
+    }
+    .custom-table tr:last-child td {
+      border-bottom: none;
+    }
+    .custom-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .custom-table tr:hover td {
+      background: rgba(0, 242, 254, 0.07);
+    }
+    .rendered-answer {
+      font-size: 0.93rem;
+      line-height: 1.6;
+    }
+    .rendered-answer h3 {
+      font-size: 1.02rem;
+      font-weight: 600;
+      margin: 8px 0;
+      color: #38bdf8;
+    }
+    .rendered-answer p {
+      margin: 6px 0;
+    }
+    .rendered-answer strong {
+      color: #ffffff;
+    }
+    .rendered-answer blockquote {
+      border-left: 3px solid var(--accent-purple);
+      background: rgba(157, 78, 221, 0.1);
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 10px 0;
+      color: #e2e8f0;
+      font-style: italic;
+    }
+    .rendered-answer code {
+      font-family: var(--font-mono);
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #38bdf8;
+    }
+    .rendered-answer pre {
+      background: #080c14;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    .rendered-answer pre code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      display: block;
+      color: #38bdf8;
+    }
+
     pre code {
       font-family: var(--font-mono);
       background: #080c14;
@@ -678,7 +773,7 @@ def serve_dashboard():
             <div class="msg-avatar">AI</div>
             <div class="msg-bubble">
               <div><span class="route-tag ${routeClass}">Route: ${data.route} (${Math.round((data.confidence||1)*100)}% conf)</span></div>
-              <div style="white-space: pre-wrap;">${escapeHtml(data.final_answer)}</div>
+              <div class="rendered-answer">${formatMarkdown(data.final_answer)}</div>
               ${citationsHtml}
             </div>
           </div>
@@ -705,6 +800,74 @@ def serve_dashboard():
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+    }
+
+    function parseTables(text) {
+      const tableRegex = /((?:^[ \t]*\|.+?\|[ \t]*\r?\n)+)/gm;
+      return text.replace(tableRegex, (match) => {
+        const lines = match.trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length < 2) return match;
+        const isSep = /^\|(?:\s*:?-+:?\s*\|)+$/.test(lines[1]);
+        if (!isSep) return match;
+
+        const parseRow = (line) => line.slice(1, line.endsWith('|') ? -1 : undefined).split('|').map(c => c.trim());
+        const headers = parseRow(lines[0]);
+        const bodyRows = lines.slice(2).map(parseRow);
+
+        let html = '<div class="table-container"><table class="custom-table"><thead><tr>';
+        for (const h of headers) html += '<th>' + escapeHtml(h) + '</th>';
+        html += '</tr></thead><tbody>';
+        for (const row of bodyRows) {
+          html += '<tr>';
+          for (let i = 0; i < headers.length; i++) {
+            html += '<td>' + escapeHtml(row[i] !== undefined ? row[i] : '') + '</td>';
+          }
+          html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        return html;
+      });
+    }
+
+    function formatMarkdown(text) {
+      if (!text) return '';
+      const codeBlocks = [];
+      let processed = text.replace(/```([a-zA-Z0-9_-]*)\r?\n([\s\S]*?)```/g, (match, lang, code) => {
+        const token = `__CODE_BLOCK_${codeBlocks.length}__`;
+        codeBlocks.push(`<pre><code class="${lang ? 'language-' + lang : ''}">${escapeHtml(code.trim())}</code></pre>`);
+        return token;
+      });
+
+      processed = parseTables(processed);
+      processed = processed.replace(/^>[ \t]+(.*)$/gm, '<blockquote>$1</blockquote>');
+      processed = processed.replace(/<\/blockquote>\s*<blockquote>/g, '<br>');
+      processed = processed.replace(/^###[ \t]+(.*)$/gm, '<h3>$1</h3>');
+      processed = processed.replace(/^##[ \t]+(.*)$/gm, '<h2>$1</h2>');
+      processed = processed.replace(/^#[ \t]+(.*)$/gm, '<h1>$1</h1>');
+      processed = processed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      processed = processed.replace(/`([^`]+)`/g, (m, c) => `<code>${escapeHtml(c)}</code>`);
+
+      const blocks = processed.split(/\r?\n\r?\n/);
+      const formattedBlocks = blocks.map(block => {
+        const trimmed = block.trim();
+        if (!trimmed) return '';
+        if (trimmed.startsWith('<div class="table-container">') || 
+            trimmed.startsWith('__CODE_BLOCK_') || 
+            trimmed.startsWith('<blockquote>') || 
+            trimmed.startsWith('<h1') || 
+            trimmed.startsWith('<h2') || 
+            trimmed.startsWith('<h3')) {
+          return trimmed;
+        }
+        return `<p>${trimmed.replace(/\r?\n/g, '<br>')}</p>`;
+      });
+      processed = formattedBlocks.filter(Boolean).join('\n');
+
+      codeBlocks.forEach((cb, idx) => {
+        processed = processed.replace(`__CODE_BLOCK_${idx}__`, cb);
+      });
+
+      return processed;
     }
   </script>
 </body>
