@@ -11,3 +11,4 @@ __pycache__/
 # Keep ChromaDB vector store and evaluation report tracked for out-of-the-box execution
 !db/chroma_db/chroma.sqlite3
 !eval/EVAL_REPORT.md
+
