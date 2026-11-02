@@ -154,10 +154,11 @@ class RoleCOrchestrator:
                     key, val = list(rows[0].items())[0]
                     answer_text += f"**{key}**: `{val}`\n\n"
                 else:
-                    answer_text += "| " + " | ".join(data_res.get("columns", [])) + " |\n"
-                    answer_text += "| " + " | ".join(["---"] * len(data_res.get("columns", []))) + " |\n"
+                    columns = data_res.get("columns") or (list(rows[0].keys()) if rows else [])
+                    answer_text += "| " + " | ".join(columns) + " |\n"
+                    answer_text += "| " + " | ".join(["---"] * len(columns)) + " |\n"
                     for r in rows[:10]:
-                        answer_text += "| " + " | ".join(str(r.get(c, "")) for c in data_res.get("columns", [])) + " |\n"
+                        answer_text += "| " + " | ".join(str(r.get(c, "")) for c in columns) + " |\n"
                     answer_text += "\n"
             answer_text += f"```sql\n{sql}\n```"
             response_payload["final_answer"] = answer_text
@@ -203,9 +204,20 @@ class RoleCOrchestrator:
             combined_text = "### Cross-Domain Analysis (Database Entities + Corporate Policy):\n\n"
             
             if data_res.get("answerable") and rows:
-                combined_text += f"**1. Structured System Data**: Found {len(rows)} record(s) matching query criteria in the database."
+                combined_text += f"**1. Structured System Data**: Found {len(rows)} record(s) matching query criteria in the database:\n\n"
+                if len(rows) == 1 and len(rows[0]) == 1:
+                    key, val = list(rows[0].items())[0]
+                    combined_text += f"**{key}**: `{val}`\n\n"
+                else:
+                    columns = data_res.get("columns") or (list(rows[0].keys()) if rows else [])
+                    if columns:
+                        combined_text += "| " + " | ".join(columns) + " |\n"
+                        combined_text += "| " + " | ".join(["---"] * len(columns)) + " |\n"
+                        for r in rows[:10]:
+                            combined_text += "| " + " | ".join(str(r.get(c, "")) for c in columns) + " |\n"
+                        combined_text += "\n"
                 if sql:
-                    combined_text += f"\n```sql\n{sql}\n```\n"
+                    combined_text += f"```sql\n{sql}\n```\n\n"
             else:
                 combined_text += f"**1. Structured System Data**: {data_res.get('error', 'No direct relational table was found for this specific check.')}\n\n"
 
