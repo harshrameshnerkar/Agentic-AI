@@ -676,10 +676,10 @@ def serve_dashboard():
       </div>
 
       <div class="quick-prompts">
-        <div class="prompt-chip" onclick="fillPrompt('Show all product names and their corresponding prices.')">📊 Data: Product Prices</div>
-        <div class="prompt-chip" onclick="fillPrompt('What is GitLab\\'s Expense Policy for daily meal reimbursement?')">📄 Knowledge: Meal Policy</div>
-        <div class="prompt-chip" onclick="fillPrompt('Check our employee handbook to see if any customers from Germany are violating our gift and hospitality policies.')">🔀 Hybrid: German Customers</div>
-        <div class="prompt-chip" onclick="fillPrompt('What is the exact current real-time stock price of Jayaswal Neco on the NSE right now?')">🛡️ Guardrail: Live Ticker</div>
+        <div class="prompt-chip" data-prompt="Show all product names and their corresponding prices.">📊 Data: Product Prices</div>
+        <div class="prompt-chip" data-prompt="What is GitLab's Expense Policy for daily meal reimbursement?">📄 Knowledge: Meal Policy</div>
+        <div class="prompt-chip" data-prompt="Check our employee handbook to see if any customers from Germany are violating our gift and hospitality policies.">🔀 Hybrid: German Customers</div>
+        <div class="prompt-chip" data-prompt="What is the exact current real-time stock price of Jayaswal Neco on the NSE right now?">🛡️ Guardrail: Live Ticker</div>
       </div>
 
       <div class="chat-input-area">
@@ -750,6 +750,15 @@ def serve_dashboard():
       document.getElementById('userInput').value = text;
       sendQuery();
     }
+
+    document.querySelectorAll('.prompt-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        const text = this.getAttribute('data-prompt');
+        if (text) {
+          fillPrompt(text);
+        }
+      });
+    });
 
     async function sendQuery() {
       const input = document.getElementById('userInput');
