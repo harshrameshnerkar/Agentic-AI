@@ -34,7 +34,7 @@ if sys.platform == "win32":
         pass
 
 app = FastAPI(
-    title="Data Service (Role B)",
+    title="Role B - Data Service",
     description="Text-to-SQL Service over Northwind transactional database",
     version="1.0.0"
 )
@@ -49,11 +49,12 @@ app.add_middleware(
 
 
 class DataQueryRequest(BaseModel):
-    question: str = Field(..., description="The user question, unmodified")
+    question: str = Field(..., min_length=1, description="The user question, unmodified")
 
 
 class DataQueryResponse(BaseModel):
-    sql: str
+    success: bool
+    sql: Optional[str] = None
     rows: List[Dict[str, Any]]
     columns: List[str]
     row_count: int
@@ -64,7 +65,7 @@ class DataQueryResponse(BaseModel):
 @app.get("/")
 def root():
     return {
-        "service": "Role B - Data Service",
+        "service": "role-b-data-service",
         "interface": "Interface 2 (POST /query)",
         "port": 8001,
         "status": "online",
@@ -75,13 +76,13 @@ def root():
 @app.get("/health")
 def health():
     return {
-        "status": "healthy",
-        "service": "Role B - Data Service",
+        "status": "ok",
+        "service": "role-b-data-service",
         "database": "Northwind",
         "port": 8001,
         "real_api_integrated": _real_api_client is not None
     }
- 
+
 
 @app.post("/query", response_model=DataQueryResponse)
 def execute_query(payload: DataQueryRequest):
@@ -93,6 +94,17 @@ def execute_query(payload: DataQueryRequest):
     """
     question = payload.question.strip()
 
+    if not question:
+        return DataQueryResponse(
+            success=False,
+            sql=None,
+            rows=[],
+            columns=[],
+            row_count=0,
+            error="Question must not be empty or whitespace.",
+            answerable=False
+        )
+
     # 1. Try real Role B service if client is available
     if _real_api_client is not None:
         try:
@@ -101,7 +113,8 @@ def execute_query(payload: DataQueryRequest):
                 data = resp.json()
                 if data.get("answerable") and data.get("sql"):
                     return DataQueryResponse(
-                        sql=data.get("sql", ""),
+                        success=True,
+                        sql=data.get("sql"),
                         rows=data.get("rows", []),
                         columns=data.get("columns", []),
                         row_count=data.get("row_count", len(data.get("rows", []))),
@@ -114,17 +127,22 @@ def execute_query(payload: DataQueryRequest):
     # 2. Fall back to the comprehensive Northwind SQLite engine
     try:
         res = query_data_mock(question)
+        ans = res.get("answerable", True)
+        err = res.get("error")
+        success = bool(ans and not err)
         return DataQueryResponse(
-            sql=res.get("sql", ""),
+            success=success,
+            sql=res.get("sql") if success else None,
             rows=res.get("rows", []),
             columns=res.get("columns", []),
             row_count=res.get("row_count", 0),
-            error=res.get("error"),
-            answerable=res.get("answerable", True)
+            error=err,
+            answerable=ans
         )
     except Exception as e:
         return DataQueryResponse(
-            sql="",
+            success=False,
+            sql=None,
             rows=[],
             columns=[],
             row_count=0,
@@ -135,4 +153,4 @@ def execute_query(payload: DataQueryRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app_role_b.py:app" if os.path.exists("app_role_b.py") else app, host="127.0.0.1", port=8001, reload=False)
+    uvicorn.run("app_role_b:app" if os.path.exists("app_role_b.py") else app, host="127.0.0.1", port=8001, reload=False)

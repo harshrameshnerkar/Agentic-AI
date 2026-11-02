@@ -156,7 +156,7 @@ class QueryResponse(BaseModel):
     """Shared response contract used by the mock and real APIs."""
 
     success: bool
-    sql: str
+    sql: str | None = None
     columns: list[str]
     rows: list[dict[str, Any]]
     row_count: int
@@ -168,7 +168,7 @@ def _failure(error: str) -> QueryResponse:
     """Return a consistent failure response without result data."""
     return QueryResponse(
         success=False,
-        sql="",
+        sql=None,
         columns=[],
         rows=[],
         row_count=0,

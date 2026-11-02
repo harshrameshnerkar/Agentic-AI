@@ -84,6 +84,8 @@ def not_verified(name: str, detail: str) -> None:
 def load_dataset() -> list[dict[str, Any]]:
     """Load the shared dataset and validate its basic structure."""
     path = ROOT / "merged_test_set.json"
+    if not path.is_file():
+        path = ROOT.parent / "merged_test_set.json"
 
     if not path.is_file():
         report("Dataset exists", False, f"Missing file: {path}")
