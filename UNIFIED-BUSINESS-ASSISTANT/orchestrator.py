@@ -175,16 +175,18 @@ class RoleCOrchestrator:
                 return response_payload
 
             results = knowledge_res["results"]
-            citations = [f"{r['source']} (Page {r['page']})" for r in results]
-            response_payload["citations"] = citations
+            seen_sources = set()
+            unique_citations = []
+            for r in results:
+                src = r.get("source", "")
+                if src and src not in seen_sources:
+                    seen_sources.add(src)
+                    unique_citations.append(f"{src} (Page {r.get('page', 1)})")
+            response_payload["citations"] = unique_citations[:3]
 
-            # Synthesize answer from top passages
+            # Synthesize answer from primary passage
             primary_passage = results[0]["text"]
-            answer_text = f"{primary_passage}\n\n**Sources:**\n"
-            for c in citations[:3]:
-                answer_text += f"- 📄 {c}\n"
-
-            response_payload["final_answer"] = answer_text
+            response_payload["final_answer"] = primary_passage
             return response_payload
 
         # ── ROUTE: BOTH (Hybrid / Cross-Domain) ────────────────────────────────
@@ -196,9 +198,18 @@ class RoleCOrchestrator:
             rows = data_res.get("rows", [])
             results = knowledge_res.get("results", [])
 
+            # Deduplicate citations across unique policy files
+            seen_sources = set()
+            unique_citations = []
+            for r in results:
+                src = r.get("source", "")
+                if src and src not in seen_sources:
+                    seen_sources.add(src)
+                    unique_citations.append(f"{src} (Page {r.get('page', 1)})")
+
             response_payload["sql"] = sql
             response_payload["data_rows"] = rows
-            response_payload["citations"] = [f"{r['source']} (Page {r['page']})" for r in results]
+            response_payload["citations"] = unique_citations[:2]
 
             # Synthesize comparative answer
             combined_text = "### Cross-Domain Analysis (Database Entities + Corporate Policy):\n\n"
@@ -223,7 +234,7 @@ class RoleCOrchestrator:
 
             if results and not knowledge_res.get("no_match"):
                 combined_text += f"**2. Corporate Policy Framework**: According to company policy:\n\n> {results[0]['text']}\n\n"
-                combined_text += f"**Conclusion**: Policy regulations strictly govern actions involving these entities. Refer to `{results[0]['source']}` (Page {results[0]['page']})."
+                combined_text += "**Conclusion**: Policy regulations strictly govern business interactions and engagements involving these entities."
             else:
                 combined_text += "**2. Corporate Policy Framework**: No specific restriction policy document was found for these entities."
 

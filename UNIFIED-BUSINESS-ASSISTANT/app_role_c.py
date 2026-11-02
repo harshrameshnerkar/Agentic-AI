@@ -442,6 +442,35 @@ def serve_dashboard():
       color: #38bdf8;
     }
 
+    .citations-bar {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .citations-title {
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .citation-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(0, 242, 254, 0.08);
+      border: 1px solid rgba(0, 242, 254, 0.22);
+      color: #38bdf8;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+    }
+
     pre code {
       font-family: var(--font-mono);
       background: #080c14;
@@ -765,7 +794,10 @@ def serve_dashboard():
         const routeClass = 'route-' + (data.route || 'knowledge');
         let citationsHtml = '';
         if (data.citations && data.citations.length > 0) {
-          citationsHtml = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--accent-cyan);"><strong>Citations:</strong> ${data.citations.join(' | ')}</div>`;
+          const pills = data.citations.map(function(c) {
+            return '<span class="citation-pill">📄 ' + escapeHtml(c) + '</span>';
+          }).join(' ');
+          citationsHtml = '<div class="citations-bar"><span class="citations-title">Sources:</span> ' + pills + '</div>';
         }
 
         chatBox.innerHTML += `
