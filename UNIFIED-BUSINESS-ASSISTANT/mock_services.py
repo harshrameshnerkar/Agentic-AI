@@ -264,6 +264,54 @@ def query_data_mock(question: str) -> Dict[str, Any]:
                 "answerable": False
             }
 
+    # Check for specific table variations
+    if "customer" in q_lower:
+        if "bottom" in q_lower or "last" in q_lower:
+            return {
+                "sql": "SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers ORDER BY CustomerID DESC LIMIT 5;",
+                "rows": [
+                    {"CustomerID": 91, "CustomerName": "Wolski", "ContactName": "Zbyszek", "City": "Walla", "Country": "Poland"},
+                    {"CustomerID": 90, "CustomerName": "Wilman Kala", "ContactName": "Matti Karttunen", "City": "Helsinki", "Country": "Finland"},
+                    {"CustomerID": 89, "CustomerName": "White Clover Markets", "ContactName": "Karl Jablonski", "City": "Seattle", "Country": "USA"},
+                    {"CustomerID": 88, "CustomerName": "Wellington Importadora", "ContactName": "Paula Parente", "City": "Resende", "Country": "Brazil"},
+                    {"CustomerID": 87, "CustomerName": "Wartian Herkku", "ContactName": "Pirkko Koskitalo", "City": "Pirkkala", "Country": "Finland"}
+                ],
+                "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
+                "row_count": 5,
+                "error": None,
+                "answerable": True
+            }
+        elif "top" in q_lower or "first" in q_lower:
+            return {
+                "sql": "SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers ORDER BY CustomerID ASC LIMIT 5;",
+                "rows": [
+                    {"CustomerID": 1, "CustomerName": "Alfreds Futterkiste", "ContactName": "Maria Anders", "City": "Berlin", "Country": "Germany"},
+                    {"CustomerID": 2, "CustomerName": "Ana Trujillo Emparedados y helados", "ContactName": "Ana Trujillo", "City": "México D.F.", "Country": "Mexico"},
+                    {"CustomerID": 3, "CustomerName": "Antonio Moreno Taquería", "ContactName": "Antonio Moreno", "City": "México D.F.", "Country": "Mexico"},
+                    {"CustomerID": 4, "CustomerName": "Around the Horn", "ContactName": "Thomas Hardy", "City": "London", "Country": "UK"},
+                    {"CustomerID": 5, "CustomerName": "Berglunds snabbköp", "ContactName": "Christina Berglund", "City": "Luleå", "Country": "Sweden"}
+                ],
+                "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
+                "row_count": 5,
+                "error": None,
+                "answerable": True
+            }
+        elif "german" in q_lower or "germany" in q_lower:
+            return {
+                "sql": "SELECT CustomerName, City, Country FROM Customers WHERE Country = 'Germany';",
+                "rows": [
+                    {"CustomerName": "Alfreds Futterkiste", "City": "Berlin", "Country": "Germany"},
+                    {"CustomerName": "Blauer See Delikatessen", "City": "Mannheim", "Country": "Germany"},
+                    {"CustomerName": "Königlich Essen", "City": "Brandenburg", "Country": "Germany"},
+                    {"CustomerName": "Lehmanns Marktstand", "City": "Frankfurt", "Country": "Germany"},
+                    {"CustomerName": "Morgenstern Gesundkost", "City": "Leipzig", "Country": "Germany"}
+                ],
+                "columns": ["CustomerName", "City", "Country"],
+                "row_count": 5,
+                "error": None,
+                "answerable": True
+            }
+
     # Match tables
     for table_key, table_data in MOCK_SQL_DATABASE.items():
         if table_key in q_lower:
