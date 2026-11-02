@@ -327,9 +327,9 @@ NORTHWIND_TABLES_META = {
         "columns": ["CategoryID", "CategoryName", "Description"],
         "aliases": ["category", "categories"],
         "col_aliases": {
-            "categoryid": "CategoryID", "category id": "CategoryID",
-            "categoryname": "CategoryName", "category name": "CategoryName",
-            "description": "Description"
+            "categoryid": "CategoryID", "category id": "CategoryID", "category ids": "CategoryID",
+            "categoryname": "CategoryName", "category name": "CategoryName", "category names": "CategoryName",
+            "description": "Description", "descriptions": "Description"
         }
     },
     "Customers": {
@@ -337,14 +337,14 @@ NORTHWIND_TABLES_META = {
         "columns": ["CustomerID", "CustomerName", "ContactName", "Address", "City", "PostalCode", "Country"],
         "aliases": ["customer", "customers", "client", "clients"],
         "col_aliases": {
-            "customerid": "CustomerID", "customer id": "CustomerID",
-            "customername": "CustomerName", "customer name": "CustomerName",
-            "contactname": "ContactName", "contact name": "ContactName",
-            "contact number": "ContactName", "contact no": "ContactName", "contact person": "ContactName",
-            "contact": "ContactName", "phone": "ContactName", "phone number": "ContactName",
-            "address": "Address",
+            "customerid": "CustomerID", "customer id": "CustomerID", "customer ids": "CustomerID",
+            "customername": "CustomerName", "customer name": "CustomerName", "customer names": "CustomerName",
+            "contactname": "ContactName", "contact name": "ContactName", "contact names": "ContactName",
+            "contact number": "ContactName", "contact numbers": "ContactName", "contact no": "ContactName", "contact person": "ContactName", "contact persons": "ContactName",
+            "contact": "ContactName", "contacts": "ContactName", "phone": "ContactName", "phone number": "ContactName", "phone numbers": "ContactName", "phones": "ContactName",
+            "address": "Address", "addresses": "Address",
             "city": "City", "cities": "City",
-            "postalcode": "PostalCode", "postal code": "PostalCode", "zip": "PostalCode",
+            "postalcode": "PostalCode", "postal code": "PostalCode", "postal codes": "PostalCode", "zip": "PostalCode", "zip code": "PostalCode", "zip codes": "PostalCode",
             "country": "Country", "countries": "Country"
         }
     },
@@ -353,12 +353,13 @@ NORTHWIND_TABLES_META = {
         "columns": ["EmployeeID", "LastName", "FirstName", "BirthDate", "Photo", "Notes"],
         "aliases": ["employee", "employees", "staff", "worker", "workers"],
         "col_aliases": {
-            "employeeid": "EmployeeID", "employee id": "EmployeeID",
-            "firstname": "FirstName", "first name": "FirstName",
-            "lastname": "LastName", "last name": "LastName",
-            "birthdate": "BirthDate", "birth date": "BirthDate",
-            "photo": "Photo",
-            "notes": "Notes", "title": "Notes"
+            "employeeid": "EmployeeID", "employee id": "EmployeeID", "employee ids": "EmployeeID",
+            "firstname": "FirstName", "first name": "FirstName", "first names": "FirstName",
+            "lastname": "LastName", "last name": "LastName", "last names": "LastName",
+            "employee name": "LastName", "employee names": "LastName",
+            "birthdate": "BirthDate", "birth date": "BirthDate", "birth dates": "BirthDate", "birthdays": "BirthDate",
+            "photo": "Photo", "photos": "Photo",
+            "notes": "Notes", "title": "Notes", "titles": "Notes"
         }
     },
     "Shippers": {
@@ -366,9 +367,9 @@ NORTHWIND_TABLES_META = {
         "columns": ["ShipperID", "ShipperName", "Phone"],
         "aliases": ["shipper", "shippers", "carrier", "carriers", "shipping"],
         "col_aliases": {
-            "shipperid": "ShipperID", "shipper id": "ShipperID",
-            "shippername": "ShipperName", "shipper name": "ShipperName",
-            "phone": "Phone", "phone number": "Phone", "telephone": "Phone"
+            "shipperid": "ShipperID", "shipper id": "ShipperID", "shipper ids": "ShipperID",
+            "shippername": "ShipperName", "shipper name": "ShipperName", "shipper names": "ShipperName",
+            "phone": "Phone", "phone number": "Phone", "phone numbers": "Phone", "phones": "Phone", "telephone": "Phone"
         }
     },
     "Suppliers": {
@@ -376,14 +377,14 @@ NORTHWIND_TABLES_META = {
         "columns": ["SupplierID", "SupplierName", "ContactName", "Address", "City", "PostalCode", "Country", "Phone"],
         "aliases": ["supplier", "suppliers", "vendor", "vendors"],
         "col_aliases": {
-            "supplierid": "SupplierID", "supplier id": "SupplierID",
-            "suppliername": "SupplierName", "supplier name": "SupplierName",
-            "contactname": "ContactName", "contact name": "ContactName",
-            "address": "Address",
+            "supplierid": "SupplierID", "supplier id": "SupplierID", "supplier ids": "SupplierID",
+            "suppliername": "SupplierName", "supplier name": "SupplierName", "supplier names": "SupplierName",
+            "contactname": "ContactName", "contact name": "ContactName", "contact names": "ContactName",
+            "address": "Address", "addresses": "Address",
             "city": "City", "cities": "City",
-            "postalcode": "PostalCode", "postal code": "PostalCode", "zip": "PostalCode",
+            "postalcode": "PostalCode", "postal code": "PostalCode", "postal codes": "PostalCode", "zip": "PostalCode", "zip code": "PostalCode", "zip codes": "PostalCode",
             "country": "Country", "countries": "Country",
-            "phone": "Phone", "phone number": "Phone"
+            "phone": "Phone", "phone number": "Phone", "phone numbers": "Phone", "phones": "Phone"
         }
     },
     "Products": {
@@ -391,12 +392,12 @@ NORTHWIND_TABLES_META = {
         "columns": ["ProductID", "ProductName", "SupplierID", "CategoryID", "Unit", "Price"],
         "aliases": ["product", "products", "item", "items"],
         "col_aliases": {
-            "productid": "ProductID", "product id": "ProductID",
-            "productname": "ProductName", "product name": "ProductName",
-            "supplierid": "SupplierID", "supplier id": "SupplierID",
-            "categoryid": "CategoryID", "category id": "CategoryID",
+            "productid": "ProductID", "product id": "ProductID", "product ids": "ProductID",
+            "productname": "ProductName", "product name": "ProductName", "product names": "ProductName",
+            "supplierid": "SupplierID", "supplier id": "SupplierID", "supplier ids": "SupplierID",
+            "categoryid": "CategoryID", "category id": "CategoryID", "category ids": "CategoryID",
             "unit": "Unit", "units": "Unit",
-            "price": "Price", "unit price": "Price", "unitprice": "Price", "prices": "Price", "cost": "Price"
+            "price": "Price", "unit price": "Price", "unitprice": "Price", "prices": "Price", "unit prices": "Price", "cost": "Price", "costs": "Price"
         }
     },
     "Orders": {
@@ -404,11 +405,11 @@ NORTHWIND_TABLES_META = {
         "columns": ["OrderID", "CustomerID", "EmployeeID", "OrderDate", "ShipperID"],
         "aliases": ["order", "orders"],
         "col_aliases": {
-            "orderid": "OrderID", "order id": "OrderID",
-            "customerid": "CustomerID", "customer id": "CustomerID",
-            "employeeid": "EmployeeID", "employee id": "EmployeeID",
-            "orderdate": "OrderDate", "order date": "OrderDate", "date": "OrderDate",
-            "shipperid": "ShipperID", "shipper id": "ShipperID"
+            "orderid": "OrderID", "order id": "OrderID", "order ids": "OrderID",
+            "customerid": "CustomerID", "customer id": "CustomerID", "customer ids": "CustomerID",
+            "employeeid": "EmployeeID", "employee id": "EmployeeID", "employee ids": "EmployeeID",
+            "orderdate": "OrderDate", "order date": "OrderDate", "order dates": "OrderDate", "date": "OrderDate", "dates": "OrderDate",
+            "shipperid": "ShipperID", "shipper id": "ShipperID", "shipper ids": "ShipperID"
         }
     },
     "OrderDetails": {
@@ -416,10 +417,10 @@ NORTHWIND_TABLES_META = {
         "columns": ["OrderDetailID", "OrderID", "ProductID", "Quantity"],
         "aliases": ["orderdetail", "orderdetails", "order detail", "order details", "order_details", "line item", "line items"],
         "col_aliases": {
-            "orderdetailid": "OrderDetailID", "order detail id": "OrderDetailID",
-            "orderid": "OrderID", "order id": "OrderID",
-            "productid": "ProductID", "product id": "ProductID",
-            "quantity": "Quantity", "qty": "Quantity"
+            "orderdetailid": "OrderDetailID", "order detail id": "OrderDetailID", "order detail ids": "OrderDetailID",
+            "orderid": "OrderID", "order id": "OrderID", "order ids": "OrderID",
+            "productid": "ProductID", "product id": "ProductID", "product ids": "ProductID",
+            "quantity": "Quantity", "quantities": "Quantity", "qty": "Quantity"
         }
     }
 }
