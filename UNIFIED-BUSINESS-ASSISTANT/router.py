@@ -72,9 +72,10 @@ class QueryRouter:
 
     # Data Service Signals (SQL, Aggregates, Tables, Columns)
     DATA_SIGNALS = [
-        r"\b(show|find|list|get|display|calculate)\b.*\b(products?|prices?|orders?|customers?|suppliers?|employees?|shippers?|categories|category|quantity)\b",
+        r"\b(show|find|list|get|display|calculate|give|fetch|return|select)\b.*\b(products?|prices?|orders?|orderdetails?|order\s+details?|customers?|suppliers?|employees?|shippers?|categories|category|quantity|rows?|records?|tables?)\b",
         r"\b(count|sum|total quantity|average price|avg|maximum price|max|minimum price|min)\b",
-        r"\b(categoryid|supplierid|employeeid|orderid|customerid)\b",
+        r"\b(categoryid|supplierid|employeeid|orderid|customerid|orderdetailid)\b",
+        r"\b(northwind|orderdetails|order\s+details)\b",
         r"\bselect\b.*\bfrom\b",
         r"\bdistinct\b",
         r"\bfirst name and last name\b",

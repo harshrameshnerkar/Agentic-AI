@@ -157,7 +157,7 @@ class RoleCOrchestrator:
                     columns = data_res.get("columns") or (list(rows[0].keys()) if rows else [])
                     answer_text += "| " + " | ".join(columns) + " |\n"
                     answer_text += "| " + " | ".join(["---"] * len(columns)) + " |\n"
-                    for r in rows[:50]:
+                    for r in rows:
                         answer_text += "| " + " | ".join(str(r.get(c, "")) for c in columns) + " |\n"
                     answer_text += "\n"
             answer_text += f"```sql\n{sql}\n```"

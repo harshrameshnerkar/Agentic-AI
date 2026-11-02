@@ -642,6 +642,8 @@ def serve_dashboard():
     .table-container {
       margin: 12px 0;
       overflow-x: auto;
+      max-height: 520px;
+      overflow-y: auto;
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 8px;
       background: rgba(10, 15, 25, 0.85);
@@ -654,7 +656,10 @@ def serve_dashboard():
       text-align: left;
     }
     .custom-table th {
-      background: rgba(56, 189, 248, 0.18);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #0f1c2e;
       color: #38bdf8;
       font-weight: 600;
       padding: 10px 14px;

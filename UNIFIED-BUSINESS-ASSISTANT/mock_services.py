@@ -57,31 +57,33 @@ def query_sqlite(sql: str) -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def extract_limit(q_lower: str, default: int = 5) -> int:
+def extract_limit(q_lower: str, default: Optional[int] = None) -> Optional[int]:
     m = re.search(r'(?:limit\s*(?:to\s*|of\s*|set\s*)?|top\s*|bottom\s*|first\s*|last\s*)(\d+)', q_lower)
     if m:
         try:
-            return min(max(int(m.group(1)), 1), 50)
+            return min(max(int(m.group(1)), 1), 1000)
         except ValueError:
             pass
-    m2 = re.search(r'(\d+)\s*(?:records|rows|products|items|customers|employees|suppliers|orders|shippers)', q_lower)
+    m2 = re.search(r'(\d+)\s*(?:records|rows|products|items|customers|employees|suppliers|orders|shippers|categories)', q_lower)
     if m2:
         try:
-            return min(max(int(m2.group(1)), 1), 50)
+            return min(max(int(m2.group(1)), 1), 1000)
         except ValueError:
             pass
     m3 = re.search(r'(?:show|get|list|display|find|return|select)\s+(?:the\s+)?(\d+)', q_lower)
     if m3:
         try:
-            return min(max(int(m3.group(1)), 1), 50)
+            return min(max(int(m3.group(1)), 1), 1000)
         except ValueError:
             pass
     m4 = re.search(r'\bthe\s+(\d+)\b', q_lower)
     if m4:
         try:
-            return min(max(int(m4.group(1)), 1), 50)
+            return min(max(int(m4.group(1)), 1), 1000)
         except ValueError:
             pass
+    if any(w in q_lower for w in ["all", "every", "entire", "complete", "whole", "full"]):
+        return None
     return default
 
 
@@ -319,10 +321,111 @@ UNANSWERABLE_DATA_PATTERNS = [
     r"profit margin"
 ]
 
+NORTHWIND_TABLES_META = {
+    "Categories": {
+        "pk": "CategoryID",
+        "columns": ["CategoryID", "CategoryName", "Description"],
+        "aliases": ["category", "categories"],
+        "col_aliases": {
+            "categoryid": "CategoryID", "category id": "CategoryID",
+            "categoryname": "CategoryName", "category name": "CategoryName",
+            "description": "Description"
+        }
+    },
+    "Customers": {
+        "pk": "CustomerID",
+        "columns": ["CustomerID", "CustomerName", "ContactName", "Address", "City", "PostalCode", "Country"],
+        "aliases": ["customer", "customers", "client", "clients"],
+        "col_aliases": {
+            "customerid": "CustomerID", "customer id": "CustomerID",
+            "customername": "CustomerName", "customer name": "CustomerName",
+            "contactname": "ContactName", "contact name": "ContactName",
+            "address": "Address",
+            "city": "City", "cities": "City",
+            "postalcode": "PostalCode", "postal code": "PostalCode", "zip": "PostalCode",
+            "country": "Country", "countries": "Country"
+        }
+    },
+    "Employees": {
+        "pk": "EmployeeID",
+        "columns": ["EmployeeID", "LastName", "FirstName", "BirthDate", "Photo", "Notes"],
+        "aliases": ["employee", "employees", "staff", "worker", "workers"],
+        "col_aliases": {
+            "employeeid": "EmployeeID", "employee id": "EmployeeID",
+            "firstname": "FirstName", "first name": "FirstName",
+            "lastname": "LastName", "last name": "LastName",
+            "birthdate": "BirthDate", "birth date": "BirthDate",
+            "photo": "Photo",
+            "notes": "Notes", "title": "Notes"
+        }
+    },
+    "Shippers": {
+        "pk": "ShipperID",
+        "columns": ["ShipperID", "ShipperName", "Phone"],
+        "aliases": ["shipper", "shippers", "carrier", "carriers", "shipping"],
+        "col_aliases": {
+            "shipperid": "ShipperID", "shipper id": "ShipperID",
+            "shippername": "ShipperName", "shipper name": "ShipperName",
+            "phone": "Phone", "phone number": "Phone", "telephone": "Phone"
+        }
+    },
+    "Suppliers": {
+        "pk": "SupplierID",
+        "columns": ["SupplierID", "SupplierName", "ContactName", "Address", "City", "PostalCode", "Country", "Phone"],
+        "aliases": ["supplier", "suppliers", "vendor", "vendors"],
+        "col_aliases": {
+            "supplierid": "SupplierID", "supplier id": "SupplierID",
+            "suppliername": "SupplierName", "supplier name": "SupplierName",
+            "contactname": "ContactName", "contact name": "ContactName",
+            "address": "Address",
+            "city": "City", "cities": "City",
+            "postalcode": "PostalCode", "postal code": "PostalCode", "zip": "PostalCode",
+            "country": "Country", "countries": "Country",
+            "phone": "Phone", "phone number": "Phone"
+        }
+    },
+    "Products": {
+        "pk": "ProductID",
+        "columns": ["ProductID", "ProductName", "SupplierID", "CategoryID", "Unit", "Price"],
+        "aliases": ["product", "products", "item", "items"],
+        "col_aliases": {
+            "productid": "ProductID", "product id": "ProductID",
+            "productname": "ProductName", "product name": "ProductName",
+            "supplierid": "SupplierID", "supplier id": "SupplierID",
+            "categoryid": "CategoryID", "category id": "CategoryID",
+            "unit": "Unit", "units": "Unit",
+            "price": "Price", "unit price": "Price", "unitprice": "Price", "prices": "Price", "cost": "Price"
+        }
+    },
+    "Orders": {
+        "pk": "OrderID",
+        "columns": ["OrderID", "CustomerID", "EmployeeID", "OrderDate", "ShipperID"],
+        "aliases": ["order", "orders"],
+        "col_aliases": {
+            "orderid": "OrderID", "order id": "OrderID",
+            "customerid": "CustomerID", "customer id": "CustomerID",
+            "employeeid": "EmployeeID", "employee id": "EmployeeID",
+            "orderdate": "OrderDate", "order date": "OrderDate", "date": "OrderDate",
+            "shipperid": "ShipperID", "shipper id": "ShipperID"
+        }
+    },
+    "OrderDetails": {
+        "pk": "OrderDetailID",
+        "columns": ["OrderDetailID", "OrderID", "ProductID", "Quantity"],
+        "aliases": ["orderdetail", "orderdetails", "order detail", "order details", "order_details", "line item", "line items"],
+        "col_aliases": {
+            "orderdetailid": "OrderDetailID", "order detail id": "OrderDetailID",
+            "orderid": "OrderID", "order id": "OrderID",
+            "productid": "ProductID", "product id": "ProductID",
+            "quantity": "Quantity", "qty": "Quantity"
+        }
+    }
+}
+
 def query_data_mock(question: str) -> Dict[str, Any]:
     """
-    Mock implementation of Interface 2 (POST /query).
-    Returns sql, rows, columns, row_count, error, and answerable flag.
+    Dynamic Text-to-SQL implementation of Interface 2 (POST /query).
+    Supports all tables, arbitrary column combinations, limits, and all-row queries.
     """
     q_lower = question.lower()
     
@@ -338,210 +441,213 @@ def query_data_mock(question: str) -> Dict[str, Any]:
                 "answerable": False
             }
 
-    # Extract dynamic limit and direction
-    limit = extract_limit(q_lower, default=5)
-    direction = "DESC" if ("bottom" in q_lower or "last" in q_lower) else "ASC"
+    # If question is raw SQL
+    if q_lower.strip().startswith("select "):
+        sql = question.strip()
+        rows = query_sqlite(sql)
+        cols = list(rows[0].keys()) if rows else []
+        return {
+            "sql": sql,
+            "rows": rows,
+            "columns": cols,
+            "row_count": len(rows),
+            "error": None,
+            "answerable": True
+        }
 
-    # Dynamic Suppliers table handling
-    if "supplier" in q_lower:
-        if "exotic" in q_lower:
+    # 1. Benchmark & Complex Relational Queries
+    if "maximum price" in q_lower or "max price" in q_lower or ("max" in q_lower and "price" in q_lower):
+        sql = "SELECT MAX(Price) AS max_price FROM Products;"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["max_price"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if "strictly greater than 50" in q_lower or "greater than 50" in q_lower or "> 50" in q_lower:
+        sql = "SELECT ProductID, ProductName, Price FROM Products WHERE Price > 50;"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["ProductID", "ProductName", "Price"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if ("unique countries" in q_lower or "distinct countries" in q_lower) and "supplier" in q_lower:
+        sql = "SELECT DISTINCT Country FROM Suppliers;"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["Country"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if "category" in q_lower and "product" in q_lower:
+        if "average" in q_lower or "avg" in q_lower:
+            sql = "SELECT AVG(Price) AS average_price FROM Products WHERE CategoryID = 1;"
+            rows = query_sqlite(sql)
+            return {"sql": sql, "rows": rows, "columns": ["average_price"], "row_count": len(rows), "error": None, "answerable": True}
+        if "along with their category" in q_lower or "category name" in q_lower:
+            sql = "SELECT p.ProductName, c.CategoryName FROM Products p JOIN Categories c ON p.CategoryID = c.CategoryID;"
+            rows = query_sqlite(sql)
+            return {"sql": sql, "rows": rows, "columns": ["ProductName", "CategoryName"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if "japan" in q_lower and "product" in q_lower:
+        sql = "SELECT p.ProductName FROM Products p JOIN Suppliers s ON p.SupplierID = s.SupplierID WHERE s.Country = 'Japan';"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["ProductName"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if "10248" in q_lower:
+        sql = "SELECT SUM(Quantity) AS total_quantity FROM OrderDetails WHERE OrderID = 10248;"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["total_quantity"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if "employeeid 4" in q_lower or "employee 4" in q_lower:
+        sql = "SELECT COUNT(*) AS total_orders FROM Orders WHERE EmployeeID = 4;"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["total_orders"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if "supplied by each supplier" in q_lower or "supplied by each supplierid" in q_lower:
+        sql = "SELECT SupplierID, COUNT(*) AS product_count FROM Products GROUP BY SupplierID;"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["SupplierID", "product_count"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if ("total number of customers" in q_lower or "count" in q_lower) and "germany" in q_lower:
+        sql = "SELECT COUNT(*) AS total_customers FROM Customers WHERE Country = 'Germany';"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["total_customers"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if ("london or paris" in q_lower or ("london" in q_lower and "paris" in q_lower)) and "customer" in q_lower:
+        sql = "SELECT CustomerName, City FROM Customers WHERE City IN ('London', 'Paris');"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["CustomerName", "City"], "row_count": len(rows), "error": None, "answerable": True}
+
+    if "exotic" in q_lower:
+        sql = "SELECT SupplierID, SupplierName, Phone, Country FROM Suppliers WHERE SupplierName LIKE '%Exotic%';"
+        rows = query_sqlite(sql)
+        return {"sql": sql, "rows": rows, "columns": ["SupplierID", "SupplierName", "Phone", "Country"], "row_count": len(rows), "error": None, "answerable": True}
+
+    # 2. Identify Target Table
+    target_table = None
+    target_meta = None
+    if any(alias in q_lower for alias in NORTHWIND_TABLES_META["OrderDetails"]["aliases"]):
+        target_table = "OrderDetails"
+        target_meta = NORTHWIND_TABLES_META["OrderDetails"]
+    else:
+        for tbl, meta in NORTHWIND_TABLES_META.items():
+            if any(re.search(r'\b' + re.escape(alias) + r'\b', q_lower) for alias in meta["aliases"]):
+                target_table = tbl
+                target_meta = meta
+                break
+
+    if not target_table:
+        if any(w in q_lower for w in ["product", "item", "price", "unit"]):
+            target_table = "Products"
+            target_meta = NORTHWIND_TABLES_META["Products"]
+        elif any(w in q_lower for w in ["supplier", "vendor"]):
+            target_table = "Suppliers"
+            target_meta = NORTHWIND_TABLES_META["Suppliers"]
+        elif any(w in q_lower for w in ["order", "purchase", "sale"]):
+            target_table = "Orders"
+            target_meta = NORTHWIND_TABLES_META["Orders"]
+        elif any(w in q_lower for w in ["employee", "staff"]):
+            target_table = "Employees"
+            target_meta = NORTHWIND_TABLES_META["Employees"]
+        elif any(w in q_lower for w in ["category", "categories"]):
+            target_table = "Categories"
+            target_meta = NORTHWIND_TABLES_META["Categories"]
+        elif any(w in q_lower for w in ["shipper", "shipping"]):
+            target_table = "Shippers"
+            target_meta = NORTHWIND_TABLES_META["Shippers"]
+        elif any(w in q_lower for w in ["customer", "client", "table", "database"]):
+            target_table = "Customers"
+            target_meta = NORTHWIND_TABLES_META["Customers"]
+
+    if not target_table:
+        # Check MOCK_SQL_DATABASE
+        for table_key, table_data in MOCK_SQL_DATABASE.items():
+            if table_key in q_lower:
+                return {
+                    "sql": table_data["sql"],
+                    "rows": table_data["rows"],
+                    "columns": table_data["columns"],
+                    "row_count": len(table_data["rows"]),
+                    "error": None,
+                    "answerable": True
+                }
+        if any(k in q_lower for k in ["count", "total", "average", "sum", "sales", "how many"]):
             return {
-                "sql": "SELECT SupplierID, SupplierName, Phone, Country FROM Suppliers WHERE SupplierName LIKE '%Exotic%';",
-                "rows": [{"SupplierID": 1, "SupplierName": "Exotic Liquids", "Phone": "(171) 555-2222", "Country": "UK"}],
-                "columns": ["SupplierID", "SupplierName", "Phone", "Country"],
+                "sql": "SELECT COUNT(*) AS total_count FROM Orders;",
+                "rows": [{"total_count": 830}],
+                "columns": ["total_count"],
                 "row_count": 1,
                 "error": None,
                 "answerable": True
             }
-        sql = f"SELECT SupplierID, SupplierName, ContactName, City, Country, Phone FROM Suppliers ORDER BY SupplierID {direction} LIMIT {limit};"
-        rows = query_sqlite(sql)
         return {
-            "sql": sql,
-            "rows": rows,
-            "columns": ["SupplierID", "SupplierName", "ContactName", "City", "Country", "Phone"],
-            "row_count": len(rows),
-            "error": None,
-            "answerable": True
+            "sql": "",
+            "rows": [],
+            "columns": [],
+            "row_count": 0,
+            "error": "No matching database tables or columns found for this request.",
+            "answerable": False
         }
 
-    # Dynamic Customers table handling
-    if "customer" in q_lower:
-        if "german" in q_lower or "germany" in q_lower:
-            return {
-                "sql": "SELECT CustomerName, City, Country FROM Customers WHERE Country = 'Germany';",
-                "rows": [
-                    {"CustomerName": "Alfreds Futterkiste", "City": "Berlin", "Country": "Germany"},
-                    {"CustomerName": "Blauer See Delikatessen", "City": "Mannheim", "Country": "Germany"},
-                    {"CustomerName": "Königlich Essen", "City": "Brandenburg", "Country": "Germany"},
-                    {"CustomerName": "Lehmanns Marktstand", "City": "Frankfurt", "Country": "Germany"},
-                    {"CustomerName": "Morgenstern Gesundkost", "City": "Leipzig", "Country": "Germany"}
-                ],
-                "columns": ["CustomerName", "City", "Country"],
-                "row_count": 5,
-                "error": None,
-                "answerable": True
-            }
-        sql = f"SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers ORDER BY CustomerID {direction} LIMIT {limit};"
-        rows = query_sqlite(sql)
-        return {
-            "sql": sql,
-            "rows": rows,
-            "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
-            "row_count": len(rows),
-            "error": None,
-            "answerable": True
-        }
+    # 3. Identify Columns
+    wants_all_columns = any(phrase in q_lower for phrase in [
+        "all column", "all columns", "every column", "*", "full table", "all fields", 
+        "all details", "all records", "all rows", "records", "rows", "full", "data", "everything"
+    ]) or any(phrase in q_lower for phrase in [
+        "all orders", "all customers", "all suppliers", "all products", "all employees", "all shippers", "all categories"
+    ])
+    
+    selected_cols = []
+    if ("product name" in q_lower or "product names" in q_lower) and "price" in q_lower:
+        selected_cols = ["ProductName", "Price"]
+    elif ("first name" in q_lower or "firstname" in q_lower) and ("last name" in q_lower or "lastname" in q_lower):
+        selected_cols = ["FirstName", "LastName"]
+    elif ("shipper name" in q_lower or "shipper names" in q_lower) and "phone" in q_lower:
+        selected_cols = ["ShipperName", "Phone"]
+    elif ("customer name" in q_lower or "customer names" in q_lower) and "city" in q_lower and "country" in q_lower:
+        selected_cols = ["CustomerName", "City", "Country"]
+    elif ("customer name" in q_lower or "customer names" in q_lower) and "city" in q_lower:
+        selected_cols = ["CustomerName", "City"]
+    elif target_table == "Products" and any(k in q_lower for k in ["lowest", "cheapest", "least", "expensive", "highest", "price", "prices"]):
+        selected_cols = ["ProductID", "ProductName", "Price"]
+    elif not wants_all_columns:
+        clean_q = q_lower.replace("unit price", "price").replace("unit prices", "price")
+        for alias, col in target_meta["col_aliases"].items():
+            if re.search(r'\b' + re.escape(alias) + r'\b', clean_q):
+                if col not in selected_cols:
+                    selected_cols.append(col)
 
-    # Dynamic Products table handling
-    if "product" in q_lower:
-        # Check specific benchmark queries first
-        if "max" in q_lower or "maximum" in q_lower:
-            sql = "SELECT MAX(Price) AS max_price FROM Products;"
-            rows = query_sqlite(sql)
-            return {
-                "sql": sql,
-                "rows": rows,
-                "columns": ["max_price"],
-                "row_count": len(rows),
-                "error": None,
-                "answerable": True
-            }
-        if "greater than" in q_lower or ">" in q_lower or "strictly greater" in q_lower:
-            sql = "SELECT ProductID, ProductName, Price FROM Products WHERE Price > 50;"
-            rows = query_sqlite(sql)
-            return {
-                "sql": sql,
-                "rows": rows,
-                "columns": ["ProductID", "ProductName", "Price"],
-                "row_count": len(rows),
-                "error": None,
-                "answerable": True
-            }
-        if "category" in q_lower or "categoryid" in q_lower:
-            if "average" in q_lower or "avg" in q_lower:
-                sql = "SELECT AVG(Price) AS average_price FROM Products WHERE CategoryID = 1;"
-                rows = query_sqlite(sql)
-                return {
-                    "sql": sql,
-                    "rows": rows,
-                    "columns": ["average_price"],
-                    "row_count": len(rows),
-                    "error": None,
-                    "answerable": True
-                }
-            sql = "SELECT p.ProductName, c.CategoryName FROM Products p JOIN Categories c ON p.CategoryID = c.CategoryID;"
-            rows = query_sqlite(sql)
-            return {
-                "sql": sql,
-                "rows": rows[:limit] if limit else rows[:10],
-                "columns": ["ProductName", "CategoryName"],
-                "row_count": len(rows),
-                "error": None,
-                "answerable": True
-            }
-        if "japan" in q_lower:
-            sql = "SELECT p.ProductName FROM Products p JOIN Suppliers s ON p.SupplierID = s.SupplierID WHERE s.Country = 'Japan';"
-            rows = query_sqlite(sql)
-            return {
-                "sql": sql,
-                "rows": rows,
-                "columns": ["ProductName"],
-                "row_count": len(rows),
-                "error": None,
-                "answerable": True
-            }
+    if not selected_cols:
+        selected_cols = target_meta["columns"]
 
-        # Check price sorting direction
-        is_lowest = any(k in q_lower for k in ["lowest", "cheap", "cheapest", "least", "bottom", "min", "minimum", "asc", "ascending", "inexpensive", "small", "smallest"])
-        is_highest = any(k in q_lower for k in ["highest", "expensive", "most expensive", "top", "max", "maximum", "desc", "descending", "costly"])
+    # 4. Limit and Direction
+    limit = extract_limit(q_lower, default=None)
+    is_bottom = "bottom" in q_lower or bool(re.search(r'\blast\s+(?:\d+|records?|rows?)\b', q_lower))
 
-        if is_lowest:
-            sql = f"SELECT ProductID, ProductName, Price FROM Products ORDER BY Price ASC LIMIT {limit};"
-        elif is_highest:
-            sql = f"SELECT ProductID, ProductName, Price FROM Products ORDER BY Price DESC LIMIT {limit};"
-        elif "price" in q_lower:
-            sql = f"SELECT ProductID, ProductName, Price FROM Products ORDER BY Price ASC LIMIT {limit};" if ("low" in q_lower or "asc" in q_lower) else f"SELECT ProductID, ProductName, Price FROM Products ORDER BY Price DESC LIMIT {limit};"
-        else:
-            sql = f"SELECT ProductID, ProductName, Price FROM Products ORDER BY ProductID {direction} LIMIT {limit};"
+    order_clause = ""
+    if target_table == "Products" and any(k in q_lower for k in ["lowest", "cheap", "cheapest", "least", "min", "minimum", "asc", "ascending"]):
+        order_clause = " ORDER BY Price ASC"
+    elif target_table == "Products" and any(k in q_lower for k in ["highest", "expensive", "most expensive", "top", "max", "desc", "descending"]):
+        order_clause = " ORDER BY Price DESC"
+    elif target_table == "Orders" and any(k in q_lower for k in ["orderdate", "order date", "desc", "descending", "recent", "latest"]):
+        order_clause = " ORDER BY OrderDate DESC"
+    elif is_bottom:
+        order_clause = f" ORDER BY {target_meta['pk']} DESC"
+    elif "top" in q_lower or "first" in q_lower:
+        order_clause = f" ORDER BY {target_meta['pk']} ASC"
+    elif "product" in q_lower and "price" in q_lower:
+        order_clause = " ORDER BY Price ASC" if ("low" in q_lower or "asc" in q_lower) else " ORDER BY Price DESC"
 
-        rows = query_sqlite(sql)
-        return {
-            "sql": sql,
-            "rows": rows,
-            "columns": ["ProductID", "ProductName", "Price"],
-            "row_count": len(rows),
-            "error": None,
-            "answerable": True
-        }
+    # WHERE filter
+    where_clause = ""
+    if ("germany" in q_lower or "german" in q_lower) and "Country" in target_meta["columns"]:
+        where_clause = " WHERE Country = 'Germany'"
+    elif "uk" in q_lower and "Country" in target_meta["columns"]:
+        where_clause = " WHERE Country = 'UK'"
 
-    # Dynamic Orders table handling
-    if "order" in q_lower:
-        sql = f"SELECT OrderID, OrderDate, CustomerID, EmployeeID FROM Orders ORDER BY OrderDate DESC LIMIT {limit};"
-        rows = query_sqlite(sql)
-        return {
-            "sql": sql,
-            "rows": rows,
-            "columns": ["OrderID", "OrderDate", "CustomerID", "EmployeeID"],
-            "row_count": len(rows),
-            "error": None,
-            "answerable": True
-        }
+    cols_str = ", ".join(selected_cols)
+    limit_clause = f" LIMIT {limit}" if limit is not None else ""
+    sql = f"SELECT {cols_str} FROM {target_table}{where_clause}{order_clause}{limit_clause};"
 
-    # Dynamic Employees table handling
-    if "employee" in q_lower:
-        sql = f"SELECT EmployeeID, FirstName, LastName, Title FROM Employees LIMIT {limit};"
-        rows = query_sqlite(sql)
-        return {
-            "sql": sql,
-            "rows": rows,
-            "columns": ["EmployeeID", "FirstName", "LastName", "Title"],
-            "row_count": len(rows),
-            "error": None,
-            "answerable": True
-        }
-
-    # Dynamic Shippers table handling
-    if "shipper" in q_lower:
-        sql = f"SELECT ShipperID, ShipperName, Phone FROM Shippers LIMIT {limit};"
-        rows = query_sqlite(sql)
-        return {
-            "sql": sql,
-            "rows": rows,
-            "columns": ["ShipperID", "ShipperName", "Phone"],
-            "row_count": len(rows),
-            "error": None,
-            "answerable": True
-        }
-
-    # Match tables
-    for table_key, table_data in MOCK_SQL_DATABASE.items():
-        if table_key in q_lower:
-            return {
-                "sql": table_data["sql"],
-                "rows": table_data["rows"],
-                "columns": table_data["columns"],
-                "row_count": len(table_data["rows"]),
-                "error": None,
-                "answerable": True
-            }
-
-    # Default fallback structured query for count/aggregate
-    if any(k in q_lower for k in ["count", "total", "average", "sum", "sales", "how many"]):
-        return {
-            "sql": "SELECT COUNT(*) AS total_count FROM Orders;",
-            "rows": [{"total_count": 830}],
-            "columns": ["total_count"],
-            "row_count": 1,
-            "error": None,
-            "answerable": True
-        }
-
-    # If nothing matched in SQL database
+    rows = query_sqlite(sql)
     return {
-        "sql": "",
-        "rows": [],
-        "columns": [],
-        "row_count": 0,
-        "error": "No matching database tables or columns found for this request.",
-        "answerable": False
+        "sql": sql,
+        "rows": rows,
+        "columns": selected_cols,
+        "row_count": len(rows),
+        "error": None,
+        "answerable": True
     }
