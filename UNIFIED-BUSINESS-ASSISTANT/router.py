@@ -140,11 +140,21 @@ class QueryRouter:
                 )
 
         # Step 2: Check Explicit Hybrid / Cross-Domain (Route -> BOTH)
-        # Note: If it's simply a document title like "Product Safety Policy", it's not hybrid!
-        is_pure_policy_title = any(re.search(title, q_lower) for title in self.POLICY_DOCUMENT_TITLES)
+        # Note: If it's simply a document title like "Product Safety Policy", it's not hybrid unless independent data signals exist!
+        matched_policy_titles = [t for t in self.POLICY_DOCUMENT_TITLES if re.search(t, q_lower)]
         
+        # Strip matched policy titles to detect if independent data signals exist
+        stripped_q = q_lower
+        for pt in matched_policy_titles:
+            stripped_q = re.sub(pt, "", stripped_q)
+
+        # Count Data Signals vs Knowledge Signals
+        data_matches = [p for p in self.DATA_SIGNALS if re.search(p, q_lower)]
+        knowledge_matches = [p for p in self.KNOWLEDGE_SIGNALS if re.search(p, q_lower)]
+        independent_data_matches = [p for p in self.DATA_SIGNALS if re.search(p, stripped_q)]
+
         matched_hybrid = [p for p in self.HYBRID_SIGNALS if re.search(p, q_lower)]
-        if matched_hybrid and not is_pure_policy_title:
+        if matched_hybrid and (not matched_policy_titles or independent_data_matches):
             return RoutingDecision(
                 question=q_norm,
                 route=RouteType.BOTH,
@@ -154,12 +164,22 @@ class QueryRouter:
                 matched_signals=matched_hybrid
             )
 
-        # Count Data Signals vs Knowledge Signals
-        data_matches = [p for p in self.DATA_SIGNALS if re.search(p, q_lower)]
-        knowledge_matches = [p for p in self.KNOWLEDGE_SIGNALS if re.search(p, q_lower)]
+        # Check for compound cross-domain queries (e.g., "show supplier name and phone number also tell me about gitlabs expense policy")
+        has_compound_intent = any(re.search(r'\b' + re.escape(w) + r'\b', q_lower) for w in ["also", "and also", "as well as", "along with", "in addition to"]) or ";" in q_lower
+        is_hybrid_overlap = (len(independent_data_matches) >= 1 and len(knowledge_matches) >= 1) or (has_compound_intent and len(data_matches) >= 1 and (len(knowledge_matches) >= 1 or matched_policy_titles))
+
+        if is_hybrid_overlap:
+            return RoutingDecision(
+                question=q_norm,
+                route=RouteType.BOTH,
+                routing_rule="Query contains both structured transactional terms and corporate policy governance terms.",
+                fallback="Query Data Service first; if answerable=false, try knowledge alone.",
+                confidence=0.92,
+                matched_signals=data_matches + knowledge_matches
+            )
 
         # Specific check for Corporate Document Titles (e.g., Reckitt Product Safety Policy, Google Supply Chain Report)
-        if is_pure_policy_title:
+        if matched_policy_titles and not independent_data_matches:
             return RoutingDecision(
                 question=q_norm,
                 route=RouteType.KNOWLEDGE,
@@ -167,17 +187,6 @@ class QueryRouter:
                 fallback="If Knowledge Service returns no_match=true, answer 'I do not have corporate policy documentation regarding this query.'",
                 confidence=0.96,
                 matched_signals=["policy_document_title_match"]
-            )
-
-        # If significant overlap of both signals without a pure policy title -> Route BOTH
-        if len(data_matches) >= 1 and len(knowledge_matches) >= 1:
-            return RoutingDecision(
-                question=q_norm,
-                route=RouteType.BOTH,
-                routing_rule="Query contains both structured transactional terms and corporate policy governance terms.",
-                fallback="Query Data Service first; if answerable=false, try knowledge alone.",
-                confidence=0.90,
-                matched_signals=data_matches + knowledge_matches
             )
 
         # Step 3: Pure Data Service Route

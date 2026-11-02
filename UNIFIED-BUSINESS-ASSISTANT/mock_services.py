@@ -98,11 +98,11 @@ MOCK_POLICY_KNOWLEDGE_BASE = [
         "score": 0.95
     },
     {
-        "keywords": ["WFH", "equipment", "expense policy", "gitlab"],
-        "text": "Visual guide showing categories of approved work from home equipment including computer equipment, furniture, lighting, and other office supplies.",
+        "keywords": ["WFH", "equipment", "expense policy", "gitlab", "gitlabs", "meals", "reimbursement", "travel", "expense"],
+        "text": "Meals are otherwise reimbursable, however Team Members should be mindful of budget while claiming meals with clients and partners. $80 limit per person per meal. All Participants should be added (both internal and external participants) in the section provided. Please also add a description for the meal/event. The bill should be paid by the most senior Team Member present and submitted for reimbursement by that Team Member.",
         "source": "Gitlab/Gitlab Expense Policy.pdf",
-        "page": 20,
-        "score": 0.94
+        "page": 24,
+        "score": 0.98
     },
     {
         "keywords": ["security principles", "vulnerability disclosure", "hackerone", "security document"],

@@ -224,7 +224,7 @@ class RoleCOrchestrator:
                     if columns:
                         combined_text += "| " + " | ".join(columns) + " |\n"
                         combined_text += "| " + " | ".join(["---"] * len(columns)) + " |\n"
-                        for r in rows[:10]:
+                        for r in rows:
                             combined_text += "| " + " | ".join(str(r.get(c, "")) for c in columns) + " |\n"
                         combined_text += "\n"
                 if sql:
