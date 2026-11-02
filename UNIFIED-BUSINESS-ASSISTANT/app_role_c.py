@@ -109,7 +109,7 @@ def health_probe():
 
 @app.get("/", response_class=HTMLResponse)
 def serve_dashboard():
-    html_content = """<!DOCTYPE html>
+    html_content = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -803,38 +803,56 @@ def serve_dashboard():
     }
 
     function parseTables(text) {
-      const tableRegex = /((?:^[ \t]*\|.+?\|[ \t]*\r?\n)+)/gm;
-      return text.replace(tableRegex, (match) => {
-        const lines = match.trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-        if (lines.length < 2) return match;
-        const isSep = /^\|(?:\s*:?-+:?\s*\|)+$/.test(lines[1]);
-        if (!isSep) return match;
-
-        const parseRow = (line) => line.slice(1, line.endsWith('|') ? -1 : undefined).split('|').map(c => c.trim());
-        const headers = parseRow(lines[0]);
-        const bodyRows = lines.slice(2).map(parseRow);
-
-        let html = '<div class="table-container"><table class="custom-table"><thead><tr>';
-        for (const h of headers) html += '<th>' + escapeHtml(h) + '</th>';
-        html += '</tr></thead><tbody>';
-        for (const row of bodyRows) {
-          html += '<tr>';
-          for (let i = 0; i < headers.length; i++) {
-            html += '<td>' + escapeHtml(row[i] !== undefined ? row[i] : '') + '</td>';
+      if (!text || text.indexOf('|') === -1) return text;
+      const lines = text.split(/\r?\n/);
+      const out = [];
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        if (trimmed.startsWith('|') && trimmed.endsWith('|') && i + 1 < lines.length) {
+          const nextTrimmed = lines[i + 1].trim();
+          if (/^\|(?:\s*:?-+:?\s*\|)+$/.test(nextTrimmed)) {
+            const parseCells = function(l) {
+              return l.trim().slice(1, -1).split('|').map(function(c) { return c.trim(); });
+            };
+            const headers = parseCells(trimmed);
+            i += 2;
+            const bodyRows = [];
+            while (i < lines.length && lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+              bodyRows.push(parseCells(lines[i]));
+              i++;
+            }
+            let html = '<div class="table-container"><table class="custom-table"><thead><tr>';
+            for (let h = 0; h < headers.length; h++) {
+              html += '<th>' + escapeHtml(headers[h]) + '</th>';
+            }
+            html += '</tr></thead><tbody>';
+            for (let r = 0; r < bodyRows.length; r++) {
+              html += '<tr>';
+              for (let c = 0; c < headers.length; c++) {
+                const val = bodyRows[r][c] !== undefined ? bodyRows[r][c] : '';
+                html += '<td>' + escapeHtml(val) + '</td>';
+              }
+              html += '</tr>';
+            }
+            html += '</tbody></table></div>';
+            out.push(html);
+            continue;
           }
-          html += '</tr>';
         }
-        html += '</tbody></table></div>';
-        return html;
-      });
+        out.push(line);
+        i++;
+      }
+      return out.join('\n');
     }
 
     function formatMarkdown(text) {
       if (!text) return '';
       const codeBlocks = [];
-      let processed = text.replace(/```([a-zA-Z0-9_-]*)\r?\n([\s\S]*?)```/g, (match, lang, code) => {
-        const token = `__CODE_BLOCK_${codeBlocks.length}__`;
-        codeBlocks.push(`<pre><code class="${lang ? 'language-' + lang : ''}">${escapeHtml(code.trim())}</code></pre>`);
+      let processed = text.replace(/```([a-zA-Z0-9_-]*)\s*([\s\S]*?)```/g, function(match, lang, code) {
+        const token = '__CODE_BLOCK_' + codeBlocks.length + '__';
+        codeBlocks.push('<pre><code class="' + (lang ? 'language-' + lang : '') + '">' + escapeHtml(code.trim()) + '</code></pre>');
         return token;
       });
 
@@ -845,10 +863,10 @@ def serve_dashboard():
       processed = processed.replace(/^##[ \t]+(.*)$/gm, '<h2>$1</h2>');
       processed = processed.replace(/^#[ \t]+(.*)$/gm, '<h1>$1</h1>');
       processed = processed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      processed = processed.replace(/`([^`]+)`/g, (m, c) => `<code>${escapeHtml(c)}</code>`);
+      processed = processed.replace(/`([^`]+)`/g, function(m, c) { return '<code>' + escapeHtml(c) + '</code>'; });
 
-      const blocks = processed.split(/\r?\n\r?\n/);
-      const formattedBlocks = blocks.map(block => {
+      const blocks = processed.split(/\n\n+/);
+      const formattedBlocks = blocks.map(function(block) {
         const trimmed = block.trim();
         if (!trimmed) return '';
         if (trimmed.startsWith('<div class="table-container">') || 
@@ -859,12 +877,12 @@ def serve_dashboard():
             trimmed.startsWith('<h3')) {
           return trimmed;
         }
-        return `<p>${trimmed.replace(/\r?\n/g, '<br>')}</p>`;
+        return '<p>' + trimmed.replace(/\n/g, '<br>') + '</p>';
       });
       processed = formattedBlocks.filter(Boolean).join('\n');
 
-      codeBlocks.forEach((cb, idx) => {
-        processed = processed.replace(`__CODE_BLOCK_${idx}__`, cb);
+      codeBlocks.forEach(function(cb, idx) {
+        processed = processed.replace('__CODE_BLOCK_' + idx + '__', cb);
       });
 
       return processed;
