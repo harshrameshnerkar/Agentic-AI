@@ -7,9 +7,73 @@ Conforms strictly to the committed INTERFACE CONTRACT v1.0.0.
 from typing import Dict, Any, List, Optional
 import re
 
+import sqlite3
+import os
+
 # ──────────────────────────────────────────────────────────────────────────────
-# Mock Knowledge Service (Interface 1 - Role A)
+# SQLite Database connection for Northwind queries
 # ──────────────────────────────────────────────────────────────────────────────
+_SQLITE_CONN = None
+
+def get_northwind_sqlite_conn():
+    global _SQLITE_CONN
+    if _SQLITE_CONN is not None:
+        return _SQLITE_CONN
+
+    db_path = os.path.join(os.path.dirname(__file__), "db", "northwind.sqlite3")
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+    conn = sqlite3.connect(db_path, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Suppliers'")
+    if not cursor.fetchone():
+        sql_file = os.path.join(os.path.dirname(__file__), "northwind.sql")
+        if os.path.exists(sql_file):
+            with open(sql_file, "r", encoding="utf-8") as f:
+                sql_content = f.read()
+            clean_lines = [
+                l.replace("AUTO_INCREMENT", "") for l in sql_content.splitlines()
+                if not l.strip().startswith(("CREATE DATABASE", "USE ", "START TRANSACTION", "COMMIT", "SET "))
+            ]
+            for stmt in "\n".join(clean_lines).split(";"):
+                if stmt.strip():
+                    try:
+                        cursor.execute(stmt.strip())
+                    except Exception:
+                        pass
+            conn.commit()
+
+    _SQLITE_CONN = conn
+    return _SQLITE_CONN
+
+def query_sqlite(sql: str) -> List[Dict[str, Any]]:
+    try:
+        conn = get_northwind_sqlite_conn()
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        return [dict(r) for r in cursor.fetchall()]
+    except Exception:
+        return []
+
+def extract_limit(q_lower: str, default: int = 5) -> int:
+    m = re.search(r'(?:limit\s*(?:to\s*|of\s*|set\s*)?|top\s*|bottom\s*|first\s*|last\s*)(\d+)', q_lower)
+    if m:
+        try:
+            val = int(m.group(1))
+            return min(max(val, 1), 50)
+        except ValueError:
+            pass
+    m2 = re.search(r'(\d+)\s*(?:records|rows)', q_lower)
+    if m2:
+        try:
+            val = int(m2.group(1))
+            return min(max(val, 1), 50)
+        except ValueError:
+            pass
+    return default
+
 
 MOCK_POLICY_KNOWLEDGE_BASE = [
     # ── Gitlab Documents ── 
@@ -264,39 +328,35 @@ def query_data_mock(question: str) -> Dict[str, Any]:
                 "answerable": False
             }
 
-    # Check for specific table variations
+    # Extract dynamic limit and direction
+    limit = extract_limit(q_lower, default=5)
+    direction = "DESC" if ("bottom" in q_lower or "last" in q_lower) else "ASC"
+
+    # Dynamic Suppliers table handling
+    if "supplier" in q_lower:
+        if "exotic" in q_lower:
+            return {
+                "sql": "SELECT SupplierID, SupplierName, Phone, Country FROM Suppliers WHERE SupplierName LIKE '%Exotic%';",
+                "rows": [{"SupplierID": 1, "SupplierName": "Exotic Liquids", "Phone": "(171) 555-2222", "Country": "UK"}],
+                "columns": ["SupplierID", "SupplierName", "Phone", "Country"],
+                "row_count": 1,
+                "error": None,
+                "answerable": True
+            }
+        sql = f"SELECT SupplierID, SupplierName, ContactName, City, Country, Phone FROM Suppliers ORDER BY SupplierID {direction} LIMIT {limit};"
+        rows = query_sqlite(sql)
+        return {
+            "sql": sql,
+            "rows": rows,
+            "columns": ["SupplierID", "SupplierName", "ContactName", "City", "Country", "Phone"],
+            "row_count": len(rows),
+            "error": None,
+            "answerable": True
+        }
+
+    # Dynamic Customers table handling
     if "customer" in q_lower:
-        if "bottom" in q_lower or "last" in q_lower:
-            return {
-                "sql": "SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers ORDER BY CustomerID DESC LIMIT 5;",
-                "rows": [
-                    {"CustomerID": 91, "CustomerName": "Wolski", "ContactName": "Zbyszek", "City": "Walla", "Country": "Poland"},
-                    {"CustomerID": 90, "CustomerName": "Wilman Kala", "ContactName": "Matti Karttunen", "City": "Helsinki", "Country": "Finland"},
-                    {"CustomerID": 89, "CustomerName": "White Clover Markets", "ContactName": "Karl Jablonski", "City": "Seattle", "Country": "USA"},
-                    {"CustomerID": 88, "CustomerName": "Wellington Importadora", "ContactName": "Paula Parente", "City": "Resende", "Country": "Brazil"},
-                    {"CustomerID": 87, "CustomerName": "Wartian Herkku", "ContactName": "Pirkko Koskitalo", "City": "Pirkkala", "Country": "Finland"}
-                ],
-                "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
-                "row_count": 5,
-                "error": None,
-                "answerable": True
-            }
-        elif "top" in q_lower or "first" in q_lower:
-            return {
-                "sql": "SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers ORDER BY CustomerID ASC LIMIT 5;",
-                "rows": [
-                    {"CustomerID": 1, "CustomerName": "Alfreds Futterkiste", "ContactName": "Maria Anders", "City": "Berlin", "Country": "Germany"},
-                    {"CustomerID": 2, "CustomerName": "Ana Trujillo Emparedados y helados", "ContactName": "Ana Trujillo", "City": "México D.F.", "Country": "Mexico"},
-                    {"CustomerID": 3, "CustomerName": "Antonio Moreno Taquería", "ContactName": "Antonio Moreno", "City": "México D.F.", "Country": "Mexico"},
-                    {"CustomerID": 4, "CustomerName": "Around the Horn", "ContactName": "Thomas Hardy", "City": "London", "Country": "UK"},
-                    {"CustomerID": 5, "CustomerName": "Berglunds snabbköp", "ContactName": "Christina Berglund", "City": "Luleå", "Country": "Sweden"}
-                ],
-                "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
-                "row_count": 5,
-                "error": None,
-                "answerable": True
-            }
-        elif "german" in q_lower or "germany" in q_lower:
+        if "german" in q_lower or "germany" in q_lower:
             return {
                 "sql": "SELECT CustomerName, City, Country FROM Customers WHERE Country = 'Germany';",
                 "rows": [
@@ -311,34 +371,65 @@ def query_data_mock(question: str) -> Dict[str, Any]:
                 "error": None,
                 "answerable": True
             }
-        else:
-            return {
-                "sql": "SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers LIMIT 5;",
-                "rows": [
-                    {"CustomerID": 1, "CustomerName": "Alfreds Futterkiste", "ContactName": "Maria Anders", "City": "Berlin", "Country": "Germany"},
-                    {"CustomerID": 2, "CustomerName": "Ana Trujillo Emparedados y helados", "ContactName": "Ana Trujillo", "City": "México D.F.", "Country": "Mexico"},
-                    {"CustomerID": 3, "CustomerName": "Antonio Moreno Taquería", "ContactName": "Antonio Moreno", "City": "México D.F.", "Country": "Mexico"},
-                    {"CustomerID": 4, "CustomerName": "Around the Horn", "ContactName": "Thomas Hardy", "City": "London", "Country": "UK"},
-                    {"CustomerID": 5, "CustomerName": "Berglunds snabbköp", "ContactName": "Christina Berglund", "City": "Luleå", "Country": "Sweden"}
-                ],
-                "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
-                "row_count": 5,
-                "error": None,
-                "answerable": True
-            }
-
-    if "supplier" in q_lower and "exotic" not in q_lower:
+        sql = f"SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers ORDER BY CustomerID {direction} LIMIT {limit};"
+        rows = query_sqlite(sql)
         return {
-            "sql": "SELECT SupplierID, SupplierName, ContactName, City, Country, Phone FROM Suppliers LIMIT 5;",
-            "rows": [
-                {"SupplierID": 1, "SupplierName": "Exotic Liquids", "ContactName": "Charlotte Cooper", "City": "London", "Country": "UK", "Phone": "(171) 555-2222"},
-                {"SupplierID": 2, "SupplierName": "New Orleans Cajun Delights", "ContactName": "Shelley Burke", "City": "New Orleans", "Country": "USA", "Phone": "(100) 555-4822"},
-                {"SupplierID": 3, "SupplierName": "Grandma Kelly's Homestead", "ContactName": "Regina Murphy", "City": "Ann Arbor", "Country": "USA", "Phone": "(313) 555-5735"},
-                {"SupplierID": 4, "SupplierName": "Tokyo Traders", "ContactName": "Yoshi Nagase", "City": "Tokyo", "Country": "Japan", "Phone": "(03) 3555-5011"},
-                {"SupplierID": 5, "SupplierName": "Cooperativa de Quesos Las Cabras", "ContactName": "Antonio del Valle", "City": "Oviedo", "Country": "Spain", "Phone": "(98) 598 76 54"}
-            ],
-            "columns": ["SupplierID", "SupplierName", "ContactName", "City", "Country", "Phone"],
-            "row_count": 5,
+            "sql": sql,
+            "rows": rows,
+            "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
+            "row_count": len(rows),
+            "error": None,
+            "answerable": True
+        }
+
+    # Dynamic Products table handling
+    if "product" in q_lower:
+        sql = f"SELECT ProductID, ProductName, Price FROM Products ORDER BY Price DESC LIMIT {limit};"
+        rows = query_sqlite(sql)
+        return {
+            "sql": sql,
+            "rows": rows,
+            "columns": ["ProductID", "ProductName", "Price"],
+            "row_count": len(rows),
+            "error": None,
+            "answerable": True
+        }
+
+    # Dynamic Orders table handling
+    if "order" in q_lower:
+        sql = f"SELECT OrderID, OrderDate, CustomerID, EmployeeID FROM Orders ORDER BY OrderDate DESC LIMIT {limit};"
+        rows = query_sqlite(sql)
+        return {
+            "sql": sql,
+            "rows": rows,
+            "columns": ["OrderID", "OrderDate", "CustomerID", "EmployeeID"],
+            "row_count": len(rows),
+            "error": None,
+            "answerable": True
+        }
+
+    # Dynamic Employees table handling
+    if "employee" in q_lower:
+        sql = f"SELECT EmployeeID, FirstName, LastName, Title FROM Employees LIMIT {limit};"
+        rows = query_sqlite(sql)
+        return {
+            "sql": sql,
+            "rows": rows,
+            "columns": ["EmployeeID", "FirstName", "LastName", "Title"],
+            "row_count": len(rows),
+            "error": None,
+            "answerable": True
+        }
+
+    # Dynamic Shippers table handling
+    if "shipper" in q_lower:
+        sql = f"SELECT ShipperID, ShipperName, Phone FROM Shippers LIMIT {limit};"
+        rows = query_sqlite(sql)
+        return {
+            "sql": sql,
+            "rows": rows,
+            "columns": ["ShipperID", "ShipperName", "Phone"],
+            "row_count": len(rows),
             "error": None,
             "answerable": True
         }
