@@ -424,6 +424,63 @@ NORTHWIND_TABLES_META = {
     }
 }
 
+NORTHWIND_JOINS = {
+    ("Products", "Suppliers"): {
+        "join_sql": "FROM Products p JOIN Suppliers s ON p.SupplierID = s.SupplierID",
+        "default_cols": [("p.ProductID", "ProductID"), ("p.ProductName", "ProductName"), ("p.Price", "Price"), ("s.SupplierName", "SupplierName"), ("s.Phone", "Phone"), ("s.Country", "Country")],
+        "tables": ["Products", "Suppliers"],
+        "alias_map": {"Products": "p", "Suppliers": "s"}
+    },
+    ("Products", "Categories"): {
+        "join_sql": "FROM Products p JOIN Categories c ON p.CategoryID = c.CategoryID",
+        "default_cols": [("p.ProductID", "ProductID"), ("p.ProductName", "ProductName"), ("p.Price", "Price"), ("c.CategoryName", "CategoryName"), ("c.Description", "Description")],
+        "tables": ["Products", "Categories"],
+        "alias_map": {"Products": "p", "Categories": "c"}
+    },
+    ("Orders", "Customers"): {
+        "join_sql": "FROM Orders o JOIN Customers c ON o.CustomerID = c.CustomerID",
+        "default_cols": [("o.OrderID", "OrderID"), ("o.OrderDate", "OrderDate"), ("c.CustomerName", "CustomerName"), ("c.City", "City"), ("c.Country", "Country")],
+        "tables": ["Orders", "Customers"],
+        "alias_map": {"Orders": "o", "Customers": "c"}
+    },
+    ("Orders", "Employees"): {
+        "join_sql": "FROM Orders o JOIN Employees e ON o.EmployeeID = e.EmployeeID",
+        "default_cols": [("o.OrderID", "OrderID"), ("o.OrderDate", "OrderDate"), ("e.FirstName", "FirstName"), ("e.LastName", "LastName"), ("e.Notes", "Notes")],
+        "tables": ["Orders", "Employees"],
+        "alias_map": {"Orders": "o", "Employees": "e"}
+    },
+    ("Orders", "Shippers"): {
+        "join_sql": "FROM Orders o JOIN Shippers s ON o.ShipperID = s.ShipperID",
+        "default_cols": [("o.OrderID", "OrderID"), ("o.OrderDate", "OrderDate"), ("s.ShipperName", "ShipperName"), ("s.Phone", "Phone")],
+        "tables": ["Orders", "Shippers"],
+        "alias_map": {"Orders": "o", "Shippers": "s"}
+    },
+    ("OrderDetails", "Products"): {
+        "join_sql": "FROM OrderDetails od JOIN Products p ON od.ProductID = p.ProductID",
+        "default_cols": [("od.OrderDetailID", "OrderDetailID"), ("od.OrderID", "OrderID"), ("p.ProductName", "ProductName"), ("od.Quantity", "Quantity"), ("p.Price", "Price")],
+        "tables": ["OrderDetails", "Products"],
+        "alias_map": {"OrderDetails": "od", "Products": "p"}
+    },
+    ("OrderDetails", "Orders"): {
+        "join_sql": "FROM OrderDetails od JOIN Orders o ON od.OrderID = o.OrderID",
+        "default_cols": [("od.OrderDetailID", "OrderDetailID"), ("od.OrderID", "OrderID"), ("o.OrderDate", "OrderDate"), ("od.ProductID", "ProductID"), ("od.Quantity", "Quantity")],
+        "tables": ["OrderDetails", "Orders"],
+        "alias_map": {"OrderDetails": "od", "Orders": "o"}
+    },
+    ("Products", "Categories", "Suppliers"): {
+        "join_sql": "FROM Products p JOIN Categories c ON p.CategoryID = c.CategoryID JOIN Suppliers s ON p.SupplierID = s.SupplierID",
+        "default_cols": [("p.ProductID", "ProductID"), ("p.ProductName", "ProductName"), ("p.Price", "Price"), ("c.CategoryName", "CategoryName"), ("s.SupplierName", "SupplierName"), ("s.Country", "Country")],
+        "tables": ["Products", "Categories", "Suppliers"],
+        "alias_map": {"Products": "p", "Categories": "c", "Suppliers": "s"}
+    },
+    ("Orders", "Customers", "Employees"): {
+        "join_sql": "FROM Orders o JOIN Customers c ON o.CustomerID = c.CustomerID JOIN Employees e ON o.EmployeeID = e.EmployeeID",
+        "default_cols": [("o.OrderID", "OrderID"), ("o.OrderDate", "OrderDate"), ("c.CustomerName", "CustomerName"), ("e.FirstName", "FirstName"), ("e.LastName", "LastName")],
+        "tables": ["Orders", "Customers", "Employees"],
+        "alias_map": {"Orders": "o", "Customers": "c", "Employees": "e"}
+    }
+}
+
 def query_data_mock(question: str) -> Dict[str, Any]:
     """
     Dynamic Text-to-SQL implementation of Interface 2 (POST /query).
@@ -473,7 +530,7 @@ def query_data_mock(question: str) -> Dict[str, Any]:
         rows = query_sqlite(sql)
         return {"sql": sql, "rows": rows, "columns": ["Country"], "row_count": len(rows), "error": None, "answerable": True}
 
-    if "category" in q_lower and "product" in q_lower:
+    if "category" in q_lower and "product" in q_lower and "supplier" not in q_lower:
         if "average" in q_lower or "avg" in q_lower:
             sql = "SELECT AVG(Price) AS average_price FROM Products WHERE CategoryID = 1;"
             rows = query_sqlite(sql)
@@ -518,7 +575,78 @@ def query_data_mock(question: str) -> Dict[str, Any]:
         rows = query_sqlite(sql)
         return {"sql": sql, "rows": rows, "columns": ["SupplierID", "SupplierName", "Phone", "Country"], "row_count": len(rows), "error": None, "answerable": True}
 
-    # 2. Identify Target Table
+    # 2. Check for Multi-Table JOINs
+    matched_tables = []
+    if any(alias in q_lower for alias in NORTHWIND_TABLES_META["OrderDetails"]["aliases"]):
+        matched_tables.append("OrderDetails")
+    for tbl, meta in NORTHWIND_TABLES_META.items():
+        if tbl == "OrderDetails":
+            continue
+        if any(re.search(r'\b' + re.escape(alias) + r'\b', q_lower) for alias in meta["aliases"]):
+            if tbl not in matched_tables:
+                matched_tables.append(tbl)
+
+    if len(matched_tables) >= 2:
+        join_info = None
+        sorted_joins = sorted(NORTHWIND_JOINS.items(), key=lambda x: len(x[0]), reverse=True)
+        for join_key, jinfo in sorted_joins:
+            if set(join_key) == set(matched_tables) or set(join_key).issubset(set(matched_tables)):
+                join_info = jinfo
+                break
+
+        if join_info:
+            selected_join_cols = []
+            selected_col_names = []
+            clean_q = q_lower.replace("unit price", "price").replace("unit prices", "price")
+
+            for tbl in join_info["tables"]:
+                alias_prefix = join_info["alias_map"][tbl]
+                tmeta = NORTHWIND_TABLES_META[tbl]
+                for calias, col_name in tmeta["col_aliases"].items():
+                    if re.search(r'\b' + re.escape(calias) + r'\b', clean_q):
+                        col_expr = f"{alias_prefix}.{col_name}"
+                        if col_name not in selected_col_names:
+                            selected_join_cols.append(col_expr)
+                            selected_col_names.append(col_name)
+
+            if not selected_join_cols:
+                selected_join_cols = [c[0] for c in join_info["default_cols"]]
+                selected_col_names = [c[1] for c in join_info["default_cols"]]
+            else:
+                main_tbl = join_info["tables"][0]
+                main_alias = join_info["alias_map"][main_tbl]
+                pk_name = NORTHWIND_TABLES_META[main_tbl]["pk"]
+                pk_expr = f"{main_alias}.{pk_name}"
+                if pk_name not in selected_col_names:
+                    selected_join_cols.insert(0, pk_expr)
+                    selected_col_names.insert(0, pk_name)
+
+            limit = extract_limit(q_lower, default=None)
+            limit_clause = f" LIMIT {limit}" if limit is not None else ""
+
+            order_clause = ""
+            if "price" in q_lower:
+                order_clause = " ORDER BY p.Price ASC" if any(k in q_lower for k in ["lowest", "cheap", "least", "asc"]) else " ORDER BY p.Price DESC"
+            elif "orderdate" in q_lower or "order date" in q_lower or "date" in q_lower:
+                order_clause = " ORDER BY o.OrderDate DESC"
+            elif "Orders" in join_info["tables"]:
+                order_clause = " ORDER BY o.OrderID ASC"
+            elif "Products" in join_info["tables"]:
+                order_clause = " ORDER BY p.ProductID ASC"
+
+            cols_str = ", ".join(selected_join_cols)
+            sql = f"SELECT {cols_str} {join_info['join_sql']}{order_clause}{limit_clause};"
+            rows = query_sqlite(sql)
+            return {
+                "sql": sql,
+                "rows": rows,
+                "columns": selected_col_names,
+                "row_count": len(rows),
+                "error": None,
+                "answerable": True
+            }
+
+    # 3. Identify Target Table for Single-Table Query
     target_table = None
     target_meta = None
     if any(alias in q_lower for alias in NORTHWIND_TABLES_META["OrderDetails"]["aliases"]):
