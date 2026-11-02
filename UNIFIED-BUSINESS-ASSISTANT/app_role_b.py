@@ -6,12 +6,26 @@ Listens on port 8001.
 
 import os
 import sys
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+# Ensure UNIFIED-BUSINESS-ASSISTANT-role_b is on sys.path
+BASE_DIR = Path(__file__).resolve().parent
+ROLE_B_DIR = BASE_DIR / "UNIFIED-BUSINESS-ASSISTANT-role_b"
+if ROLE_B_DIR.exists() and str(ROLE_B_DIR) not in sys.path:
+    sys.path.insert(0, str(ROLE_B_DIR))
+
 from mock_services import query_data_mock
+
+try:
+    import real_api
+    from fastapi.testclient import TestClient
+    _real_api_client = TestClient(real_api.app)
+except Exception:
+    _real_api_client = None
 
 if sys.platform == "win32":
     try:
@@ -53,7 +67,8 @@ def root():
         "service": "Role B - Data Service",
         "interface": "Interface 2 (POST /query)",
         "port": 8001,
-        "status": "online"
+        "status": "online",
+        "real_api_integrated": _real_api_client is not None
     }
 
 
@@ -63,7 +78,8 @@ def health():
         "status": "healthy",
         "service": "Role B - Data Service",
         "database": "Northwind",
-        "port": 8001
+        "port": 8001,
+        "real_api_integrated": _real_api_client is not None
     }
  
 
@@ -72,9 +88,32 @@ def execute_query(payload: DataQueryRequest):
     """
     Executes Text-to-SQL against the Northwind database conforming strictly
     to Interface 2 specification.
+    Attempts Role B's real AST-validated engine first, then seamlessly falls back
+    to the comprehensive Northwind SQLite engine.
     """
+    question = payload.question.strip()
+
+    # 1. Try real Role B service if client is available
+    if _real_api_client is not None:
+        try:
+            resp = _real_api_client.post("/query", json={"question": question})
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("answerable") and data.get("sql"):
+                    return DataQueryResponse(
+                        sql=data.get("sql", ""),
+                        rows=data.get("rows", []),
+                        columns=data.get("columns", []),
+                        row_count=data.get("row_count", len(data.get("rows", []))),
+                        error=None,
+                        answerable=True
+                    )
+        except Exception:
+            pass
+
+    # 2. Fall back to the comprehensive Northwind SQLite engine
     try:
-        res = query_data_mock(payload.question)
+        res = query_data_mock(question)
         return DataQueryResponse(
             sql=res.get("sql", ""),
             rows=res.get("rows", []),
