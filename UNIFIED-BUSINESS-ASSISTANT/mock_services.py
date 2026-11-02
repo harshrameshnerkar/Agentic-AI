@@ -311,6 +311,37 @@ def query_data_mock(question: str) -> Dict[str, Any]:
                 "error": None,
                 "answerable": True
             }
+        else:
+            return {
+                "sql": "SELECT CustomerID, CustomerName, ContactName, City, Country FROM Customers LIMIT 5;",
+                "rows": [
+                    {"CustomerID": 1, "CustomerName": "Alfreds Futterkiste", "ContactName": "Maria Anders", "City": "Berlin", "Country": "Germany"},
+                    {"CustomerID": 2, "CustomerName": "Ana Trujillo Emparedados y helados", "ContactName": "Ana Trujillo", "City": "México D.F.", "Country": "Mexico"},
+                    {"CustomerID": 3, "CustomerName": "Antonio Moreno Taquería", "ContactName": "Antonio Moreno", "City": "México D.F.", "Country": "Mexico"},
+                    {"CustomerID": 4, "CustomerName": "Around the Horn", "ContactName": "Thomas Hardy", "City": "London", "Country": "UK"},
+                    {"CustomerID": 5, "CustomerName": "Berglunds snabbköp", "ContactName": "Christina Berglund", "City": "Luleå", "Country": "Sweden"}
+                ],
+                "columns": ["CustomerID", "CustomerName", "ContactName", "City", "Country"],
+                "row_count": 5,
+                "error": None,
+                "answerable": True
+            }
+
+    if "supplier" in q_lower and "exotic" not in q_lower:
+        return {
+            "sql": "SELECT SupplierID, SupplierName, ContactName, City, Country, Phone FROM Suppliers LIMIT 5;",
+            "rows": [
+                {"SupplierID": 1, "SupplierName": "Exotic Liquids", "ContactName": "Charlotte Cooper", "City": "London", "Country": "UK", "Phone": "(171) 555-2222"},
+                {"SupplierID": 2, "SupplierName": "New Orleans Cajun Delights", "ContactName": "Shelley Burke", "City": "New Orleans", "Country": "USA", "Phone": "(100) 555-4822"},
+                {"SupplierID": 3, "SupplierName": "Grandma Kelly's Homestead", "ContactName": "Regina Murphy", "City": "Ann Arbor", "Country": "USA", "Phone": "(313) 555-5735"},
+                {"SupplierID": 4, "SupplierName": "Tokyo Traders", "ContactName": "Yoshi Nagase", "City": "Tokyo", "Country": "Japan", "Phone": "(03) 3555-5011"},
+                {"SupplierID": 5, "SupplierName": "Cooperativa de Quesos Las Cabras", "ContactName": "Antonio del Valle", "City": "Oviedo", "Country": "Spain", "Phone": "(98) 598 76 54"}
+            ],
+            "columns": ["SupplierID", "SupplierName", "ContactName", "City", "Country", "Phone"],
+            "row_count": 5,
+            "error": None,
+            "answerable": True
+        }
 
     # Match tables
     for table_key, table_data in MOCK_SQL_DATABASE.items():

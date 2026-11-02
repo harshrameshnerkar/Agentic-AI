@@ -1,22 +1,24 @@
 """
 Role C Orchestrator & Evaluation Dashboard Service
 Exposes:
-- POST /api/chat      : Full end-to-end orchestrated query execution
-- POST /api/route     : Interface 3 Routing decision inspection
-- GET  /api/contract  : Committed Day 1 contract & fixtures
-- GET  /api/metrics   : Latest evaluation benchmark metrics
-- GET  /api/documents : List of all 50 enterprise knowledge documents
-- GET  /api/schema    : Northwind Database schema metadata
-- GET  /api/health    : Health check probe
-- GET  /              : Interactive Web Dashboard
+- POST /api/chat                  : Full end-to-end orchestrated query execution
+- POST /api/route                 : Interface 3 Routing decision inspection
+- GET  /api/contract              : Committed Day 1 contract & fixtures
+- GET  /api/metrics               : Latest evaluation benchmark metrics
+- GET  /api/documents             : List of all 50 enterprise knowledge documents
+- GET  /api/document/view/{name}  : Serves PDF for popup viewer
+- GET  /api/schema                : Northwind Database schema metadata
+- GET  /api/health                : Health check probe
+- GET  /                          : Interactive Web Dashboard
 """
 
 import os
 import sys 
 import json
+import urllib.parse
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
@@ -111,6 +113,29 @@ def get_documents():
             return {"error": str(e), "documents": []}
     return {"total_documents": 0, "documents": []}
 
+@app.get("/api/document/view/{filename:path}")
+def view_document_pdf(filename: str):
+    """Serves raw PDF for popup reader in the frontend."""
+    decoded_name = urllib.parse.unquote(filename).strip()
+    docs_dir = os.path.join(os.path.dirname(__file__), "data", "documents")
+    target_path = os.path.join(docs_dir, decoded_name)
+    if os.path.exists(target_path):
+        return FileResponse(
+            target_path,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{os.path.basename(target_path)}"'}
+        )
+    # Case-insensitive or fallback search
+    if os.path.exists(docs_dir):
+        for f in os.listdir(docs_dir):
+            if f.lower() == decoded_name.lower() or f.lower() == (decoded_name + ".pdf").lower():
+                return FileResponse(
+                    os.path.join(docs_dir, f),
+                    media_type="application/pdf",
+                    headers={"Content-Disposition": f'inline; filename="{f}"'}
+                )
+    raise HTTPException(status_code=404, detail=f"Document '{decoded_name}' not found.")
+
 @app.get("/api/schema")
 def get_database_schema():
     """Returns Northwind database schema metadata for UI explorer."""
@@ -122,37 +147,37 @@ def get_database_schema():
                 "name": "Customers",
                 "description": "Customer accounts, company names, cities, and countries",
                 "columns": ["CustomerID", "CustomerName", "ContactName", "Address", "City", "PostalCode", "Country"],
-                "sample_query": "SELECT CustomerName, City, Country FROM Customers LIMIT 5;"
+                "sample_query": "Show records from Customers table"
             },
             {
                 "name": "Employees",
                 "description": "Internal staff, designations, roles, and birth dates",
                 "columns": ["EmployeeID", "LastName", "FirstName", "Title", "BirthDate", "Notes"],
-                "sample_query": "SELECT FirstName, LastName, Title FROM Employees;"
+                "sample_query": "Show records from Employees table"
             },
             {
                 "name": "Products",
                 "description": "Product catalog, supplier IDs, category IDs, units, and prices",
                 "columns": ["ProductID", "ProductName", "SupplierID", "CategoryID", "Unit", "Price"],
-                "sample_query": "SELECT ProductName, Price FROM Products ORDER BY Price DESC LIMIT 5;"
+                "sample_query": "Show records from Products table"
             },
             {
                 "name": "Orders",
                 "description": "Orders log, customer IDs, employee IDs, and order dates",
                 "columns": ["OrderID", "CustomerID", "EmployeeID", "OrderDate", "ShipperID"],
-                "sample_query": "SELECT OrderID, CustomerID, OrderDate FROM Orders LIMIT 5;"
+                "sample_query": "Show records from Orders table"
             },
             {
                 "name": "Suppliers",
                 "description": "External vendors, contact names, phone numbers, and countries",
                 "columns": ["SupplierID", "SupplierName", "ContactName", "City", "Country", "Phone"],
-                "sample_query": "SELECT SupplierName, Country, Phone FROM Suppliers LIMIT 5;"
+                "sample_query": "Show records from Suppliers table"
             },
             {
                 "name": "Shippers",
                 "description": "Logistics providers and shipping contact phones",
                 "columns": ["ShipperID", "ShipperName", "Phone"],
-                "sample_query": "SELECT * FROM Shippers;"
+                "sample_query": "Show records from Shippers table"
             }
         ]
     }
@@ -702,37 +727,9 @@ def serve_dashboard():
       font-family: var(--font-mono);
     }
 
-    /* Quick Prompts Chips */
-    .quick-prompts {
-      padding: 10px 24px;
-      background: rgba(10, 15, 28, 0.6);
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-    }
-    .prompt-chip {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.79rem;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-    .prompt-chip:hover {
-      background: rgba(0, 242, 254, 0.15);
-      border-color: var(--accent-cyan);
-      color: #ffffff;
-      transform: translateY(-1px);
-    }
-
-    /* Chat Input Area */
+    /* Chat Input Area (Direct at bottom, clean & spacious) */
     .chat-input-area {
-      padding: 16px 24px 20px;
+      padding: 16px 28px 20px;
       border-top: 1px solid var(--border-subtle);
       background: rgba(15, 23, 42, 0.95);
       display: flex;
@@ -851,7 +848,7 @@ def serve_dashboard():
     .sample-queries-section {
       padding: 16px 20px;
       border-bottom: 1px solid var(--border-subtle);
-      max-height: 240px;
+      max-height: 235px;
       display: flex;
       flex-direction: column;
     }
@@ -947,10 +944,58 @@ def serve_dashboard():
       padding-right: 4px;
     }
 
-    /* Document Search & List */
+    /* Clean Direct Item Cards (No extra clutter) */
+    .clean-item-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .clean-item-card:hover {
+      background: rgba(0, 242, 254, 0.09);
+      border-color: rgba(0, 242, 254, 0.35);
+      transform: translateY(-1px);
+    }
+    .clean-item-card .item-icon {
+      font-size: 1rem;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .clean-item-card .item-name {
+      font-size: 0.83rem;
+      font-weight: 500;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .clean-item-card .item-action-view {
+      font-size: 0.72rem;
+      color: var(--accent-cyan);
+      opacity: 0;
+      transition: opacity 0.2s;
+      margin-left: 8px;
+      flex-shrink: 0;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .clean-item-card:hover .item-action-view {
+      opacity: 1;
+    }
+
+    /* Search Box */
     .doc-search-box {
       margin-bottom: 10px;
-      position: relative;
     }
     .doc-search-input {
       width: 100%;
@@ -966,108 +1011,12 @@ def serve_dashboard():
     .doc-search-input:focus {
       border-color: var(--accent-cyan);
     }
-    .doc-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-bottom: 8px;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .doc-card:hover {
-      background: rgba(56, 189, 248, 0.08);
-      border-color: rgba(56, 189, 248, 0.3);
-    }
-    .doc-title {
-      font-size: 0.84rem;
-      font-weight: 600;
-      color: #ffffff;
-      line-height: 1.3;
-    }
-    .doc-filename {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .doc-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-    .doc-badge {
-      font-size: 0.67rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.06);
-      color: #94a3b8;
-    }
-    .doc-badge.company { background: rgba(56, 189, 248, 0.12); color: #38bdf8; }
-    .doc-badge.pages { background: rgba(16, 185, 129, 0.12); color: #10b981; }
 
-    /* Database Schema Cards */
-    .table-schema-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-bottom: 8px;
-    }
-    .table-schema-card:hover {
-      border-color: rgba(16, 185, 129, 0.35);
-    }
-    .table-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .table-name {
-      font-size: 0.86rem;
-      font-weight: 700;
-      color: #10b981;
-      font-family: var(--font-mono);
-    }
-    .btn-query-table {
-      font-size: 0.7rem;
-      background: rgba(16, 185, 129, 0.14);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #10b981;
-      padding: 2px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-query-table:hover {
-      background: rgba(16, 185, 129, 0.25);
-      color: #ffffff;
-    }
-    .table-columns-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 6px;
-    }
-    .col-pill {
-      font-size: 0.7rem;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: #cbd5e1;
-      font-family: var(--font-mono);
-    }
-
-    /* Logout Confirmation Modal */
+    /* Modals */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
@@ -1075,6 +1024,88 @@ def serve_dashboard():
       z-index: 1000;
       animation: fadeIn 0.2s ease;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* PDF Viewer Popup Modal */
+    .pdf-modal-container {
+      width: 92%;
+      max-width: 1060px;
+      height: 88vh;
+      background: #0b1120;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      animation: fadeIn 0.2s ease;
+    }
+    .pdf-modal-header {
+      padding: 14px 20px;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pdf-modal-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+      font-size: 0.92rem;
+      overflow: hidden;
+    }
+    .pdf-modal-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-external-pdf {
+      font-size: 0.76rem;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      background: rgba(0, 242, 254, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-external-pdf:hover {
+      background: rgba(0, 242, 254, 0.2);
+      color: #ffffff;
+    }
+    .btn-close-pdf {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-close-pdf:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .pdf-modal-body {
+      flex: 1;
+      background: #1e293b;
+      position: relative;
+    }
+    .pdf-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #0f172a;
+    }
+
+    /* Logout Confirmation Modal */
     .modal-card {
       background: #0f172a;
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1185,7 +1216,7 @@ def serve_dashboard():
       <!-- New Chat Button -->
       <button class="btn-new-chat" onclick="createNewChat()">
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        New Chat
+        + New Chat
       </button>
 
       <!-- Recent History Header -->
@@ -1232,15 +1263,7 @@ def serve_dashboard():
         <!-- Rendered dynamically -->
       </div>
 
-      <!-- Suggested Quick Prompt Chips -->
-      <div class="quick-prompts">
-        <div class="prompt-chip" data-prompt="Show all product names and their corresponding prices.">📊 Data: Product Prices</div>
-        <div class="prompt-chip" data-prompt="What is GitLab's Expense Policy for daily meal reimbursement?">📄 Knowledge: Meal Policy</div>
-        <div class="prompt-chip" data-prompt="Check our employee handbook to see if any customers from Germany are violating our gift and hospitality policies.">🔀 Hybrid: German Customers</div>
-        <div class="prompt-chip" data-prompt="What is the exact current real-time stock price of Jayaswal Neco on the NSE right now?">🛡️ Guardrail: Live Ticker</div>
-      </div>
-
-      <!-- Chat Input Area -->
+      <!-- Chat Input Area (Direct at bottom, clean & spacious) -->
       <div class="chat-input-area">
         <input type="text" id="userInput" class="chat-input" placeholder="Type a business question or click a query from the right sidebar..." onkeydown="if(event.key==='Enter') sendQuery()">
         <button class="send-btn" id="sendBtn" onclick="sendQuery()">
@@ -1308,25 +1331,41 @@ def serve_dashboard():
         <!-- Tab 1: Knowledge Documents -->
         <div class="explorer-content" id="tabContentDocs">
           <div class="doc-search-box">
-            <input type="text" id="docSearchInput" class="doc-search-input" placeholder="🔍 Search 50 documents..." oninput="filterDocuments()">
+            <input type="text" id="docSearchInput" class="doc-search-input" placeholder="🔍 Search documents..." oninput="filterDocuments()">
           </div>
           <div id="docsContainer">
-            <!-- Rendered dynamically -->
+            <!-- Rendered dynamically as direct PDF names -->
           </div>
         </div>
 
         <!-- Tab 2: Database Schema -->
         <div class="explorer-content" id="tabContentDb" style="display: none;">
-          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
-            Northwind SQLite database schema powering Role B text-to-SQL.
-          </div>
           <div id="schemaContainer">
-            <!-- Rendered dynamically -->
+            <!-- Rendered dynamically as direct table names -->
           </div>
         </div>
       </div>
     </aside>
 
+  </div>
+
+  <!-- PDF Reader Popup Modal -->
+  <div id="pdfModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) closePdfModal()">
+    <div class="pdf-modal-container">
+      <div class="pdf-modal-header">
+        <div class="pdf-modal-title">
+          <span style="font-size: 1.15rem;">📄</span>
+          <span id="pdfModalFilename" style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 650px;">Document Viewer</span>
+        </div>
+        <div class="pdf-modal-actions">
+          <a id="pdfOpenExternalBtn" href="#" target="_blank" class="btn-external-pdf" title="Open in new window">↗ New Tab</a>
+          <button class="btn-close-pdf" onclick="closePdfModal()" title="Close viewer">✕</button>
+        </div>
+      </div>
+      <div class="pdf-modal-body">
+        <iframe id="pdfIframe" src="about:blank" class="pdf-frame" title="PDF Document Viewer"></iframe>
+      </div>
+    </div>
   </div>
 
   <!-- Logout Confirmation Modal -->
@@ -1365,7 +1404,6 @@ def serve_dashboard():
       initSessions();
       loadDocuments();
       loadDatabaseSchema();
-      setupChipListeners();
     });
 
     // -------------------------------------------------------------
@@ -1497,7 +1535,7 @@ def serve_dashboard():
               • <strong>Role A (/search)</strong>: Corporate Policy RAG across 50 enterprise PDFs.<br>
               • <strong>Role B (/query)</strong>: Text-to-SQL data analytics on Northwind.<br>
               • <strong>Role C (/route & /chat)</strong>: Interface 3 multi-domain routing & cross-domain synthesis.<br><br>
-              Try asking a question below or click any sample query from the right panel!
+              Try asking a question below, click a sample query, or select any database table from the right panel!
             </div>
           </div>
         `;
@@ -1654,17 +1692,6 @@ def serve_dashboard():
       }
     }
 
-    function setupChipListeners() {
-      document.querySelectorAll('.prompt-chip').forEach(function(chip) {
-        chip.addEventListener('click', function() {
-          const text = this.getAttribute('data-prompt');
-          if (text) {
-            executeSample(text);
-          }
-        });
-      });
-    }
-
     // -------------------------------------------------------------
     // Right Sidebar: Documents & Schema
     // -------------------------------------------------------------
@@ -1700,6 +1727,7 @@ def serve_dashboard():
       if (badge) badge.innerText = allDocuments.length;
     }
 
+    // Direct clean PDF names (no clutter) with Popup Reader
     function renderDocuments(docs) {
       const container = document.getElementById('docsContainer');
       if (!container) return;
@@ -1711,16 +1739,12 @@ def serve_dashboard():
 
       let html = '';
       docs.forEach(d => {
-        const askQuery = 'What does ' + (d.company || 'the policy') + ' state regarding ' + (d.title || d.filename) + '?';
+        const fname = d.filename || d.title;
         html += `
-          <div class="doc-card" onclick="executeSample('${escapeHtml(askQuery).replace(/'/g, "\\'")}')" title="Click to ask about this document">
-            <div class="doc-title">${escapeHtml(d.title || d.filename)}</div>
-            <div class="doc-filename">${escapeHtml(d.filename)}</div>
-            <div class="doc-meta">
-              <span class="doc-badge company">${escapeHtml(d.company || 'Enterprise')}</span>
-              <span class="doc-badge pages">${d.pages || 1} pages</span>
-              <span class="doc-badge">${escapeHtml(d.category || 'Policy')}</span>
-            </div>
+          <div class="clean-item-card" onclick="openPdfModal('${escapeJs(fname)}')" title="Click to view and read PDF in popup">
+            <span class="item-icon">📄</span>
+            <span class="item-name">${escapeHtml(fname)}</span>
+            <span class="item-action-view">Read ↗</span>
           </div>
         `;
       });
@@ -1734,12 +1758,32 @@ def serve_dashboard():
         return;
       }
       const filtered = allDocuments.filter(d => {
-        return (d.title && d.title.toLowerCase().includes(query)) ||
-               (d.filename && d.filename.toLowerCase().includes(query)) ||
-               (d.company && d.company.toLowerCase().includes(query)) ||
-               (d.category && d.category.toLowerCase().includes(query));
+        return (d.filename && d.filename.toLowerCase().includes(query)) ||
+               (d.title && d.title.toLowerCase().includes(query));
       });
       renderDocuments(filtered);
+    }
+
+    // PDF Viewer Popup Modal Functions
+    function openPdfModal(filename) {
+      const modal = document.getElementById('pdfModal');
+      const frame = document.getElementById('pdfIframe');
+      const titleEl = document.getElementById('pdfModalFilename');
+      const externalBtn = document.getElementById('pdfOpenExternalBtn');
+      if (!modal || !frame) return;
+
+      const pdfUrl = '/api/document/view/' + encodeURIComponent(filename);
+      if (titleEl) titleEl.innerText = filename;
+      if (externalBtn) externalBtn.href = pdfUrl;
+      frame.src = pdfUrl;
+      modal.style.display = 'flex';
+    }
+
+    function closePdfModal() {
+      const modal = document.getElementById('pdfModal');
+      const frame = document.getElementById('pdfIframe');
+      if (frame) frame.src = 'about:blank';
+      if (modal) modal.style.display = 'none';
     }
 
     async function loadDatabaseSchema() {
@@ -1753,26 +1797,26 @@ def serve_dashboard():
       renderDatabaseSchema(databaseSchema);
     }
 
+    // Direct clean Database Table names (no clutter) with Chat Log Execution
     function renderDatabaseSchema(tables) {
       const container = document.getElementById('schemaContainer');
       if (!container) return;
 
       let html = '';
       tables.forEach(t => {
-        const sampleQ = 'Show top 5 records from ' + t.name + ' table';
-        const cols = (t.columns || []).map(c => `<span class="col-pill">${escapeHtml(c)}</span>`).join('');
         html += `
-          <div class="table-schema-card">
-            <div class="table-head">
-              <span class="table-name">📁 ${escapeHtml(t.name)}</span>
-              <button class="btn-query-table" onclick="executeSample('${escapeHtml(sampleQ)}')">Query</button>
-            </div>
-            <div style="font-size: 0.74rem; color: var(--text-muted);">${escapeHtml(t.description || '')}</div>
-            <div class="table-columns-pills">${cols}</div>
+          <div class="clean-item-card" onclick="queryTable('${escapeJs(t.name)}')" title="Click to read and display ${escapeHtml(t.name)} rows in chat log">
+            <span class="item-icon">📁</span>
+            <span class="item-name">${escapeHtml(t.name)}</span>
+            <span class="item-action-view">View Rows ↗</span>
           </div>
         `;
       });
       container.innerHTML = html;
+    }
+
+    function queryTable(tableName) {
+      executeSample('Show records from ' + tableName + ' table');
     }
 
     // -------------------------------------------------------------
@@ -1813,6 +1857,14 @@ def serve_dashboard():
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+    }
+
+    function escapeJs(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;');
     }
 
     function parseTables(text) {
