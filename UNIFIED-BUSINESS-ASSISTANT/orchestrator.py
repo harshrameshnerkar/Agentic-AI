@@ -7,11 +7,12 @@ Implements contract fallback handling, guardrails, and synthesized responses.
 
 from typing import Dict, Any, List, Optional
 import json
+import re
 import urllib.request
 import urllib.error 
 
 from router import QueryRouter, RouteType, RoutingDecision
-from mock_services import search_knowledge_mock, query_data_mock
+from mock_services import search_knowledge_mock, query_data_mock, query_sqlite
 
 class RoleCOrchestrator:
     def __init__(
@@ -148,6 +149,61 @@ class RoleCOrchestrator:
             response_payload["data_rows"] = rows
 
             # Format answer
+            tables_data = data_res.get("tables_data")
+            if not tables_data and sql and ";\n\n" in sql:
+                multi_sqls = [s.strip() for s in sql.split(";\n\n") if s.strip()]
+                if len(multi_sqls) >= 2:
+                    tables_data = []
+                    for s in multi_sqls:
+                        stmt = s if s.endswith(";") else s + ";"
+                        m = re.search(r'FROM\s+(\w+)', stmt, re.IGNORECASE)
+                        t_name = m.group(1) if m else "Table"
+                        t_rows = query_sqlite(stmt)
+                        t_cols = list(t_rows[0].keys()) if t_rows else []
+                        tables_data.append({
+                            "table": t_name,
+                            "sql": stmt,
+                            "columns": t_cols,
+                            "rows": t_rows,
+                            "row_count": len(t_rows)
+                        })
+            if not tables_data and sql and ";\n\n" in sql:
+                multi_sqls = [s.strip() for s in sql.split(";\n\n") if s.strip()]
+                if len(multi_sqls) >= 2:
+                    tables_data = []
+                    for s in multi_sqls:
+                        stmt = s if s.endswith(";") else s + ";"
+                        m = re.search(r'FROM\s+(\w+)', stmt, re.IGNORECASE)
+                        t_name = m.group(1) if m else "Table"
+                        t_rows = query_sqlite(stmt)
+                        t_cols = list(t_rows[0].keys()) if t_rows else []
+                        tables_data.append({
+                            "table": t_name,
+                            "sql": stmt,
+                            "columns": t_cols,
+                            "rows": t_rows,
+                            "row_count": len(t_rows)
+                        })
+                    row_count = sum(t["row_count"] for t in tables_data)
+
+            if tables_data and len(tables_data) >= 2:
+                answer_text = f"Executed independent structured queries for {len(tables_data)} unrelated tables (returned {row_count} total row(s)):\n\n"
+                for i, t_info in enumerate(tables_data, 1):
+                    t_name = t_info["table"]
+                    t_rows = t_info["rows"]
+                    t_cols = t_info["columns"]
+                    t_sql = t_info["sql"]
+                    answer_text += f"### {i}. Table: `{t_name}` ({len(t_rows)} row(s)):\n\n"
+                    if t_rows:
+                        answer_text += "| " + " | ".join(t_cols) + " |\n"
+                        answer_text += "| " + " | ".join(["---"] * len(t_cols)) + " |\n"
+                        for r in t_rows:
+                            answer_text += "| " + " | ".join(str(r.get(c, "")) for c in t_cols) + " |\n"
+                        answer_text += "\n"
+                    answer_text += f"```sql\n{t_sql}\n```\n\n"
+                response_payload["final_answer"] = answer_text
+                return response_payload
+
             answer_text = f"Executed structured query successfully (returned {row_count} row(s)):\n\n"
             if rows:
                 if len(rows) == 1 and len(rows[0]) == 1:
@@ -214,7 +270,40 @@ class RoleCOrchestrator:
             # Synthesize comparative answer
             combined_text = "### Cross-Domain Analysis (Database Entities + Corporate Policy):\n\n"
             
-            if data_res.get("answerable") and rows:
+            tables_data = data_res.get("tables_data")
+            if not tables_data and sql and ";\n\n" in sql:
+                multi_sqls = [s.strip() for s in sql.split(";\n\n") if s.strip()]
+                if len(multi_sqls) >= 2:
+                    tables_data = []
+                    for s in multi_sqls:
+                        stmt = s if s.endswith(";") else s + ";"
+                        m = re.search(r'FROM\s+(\w+)', stmt, re.IGNORECASE)
+                        t_name = m.group(1) if m else "Table"
+                        t_rows = query_sqlite(stmt)
+                        t_cols = list(t_rows[0].keys()) if t_rows else []
+                        tables_data.append({
+                            "table": t_name,
+                            "sql": stmt,
+                            "columns": t_cols,
+                            "rows": t_rows,
+                            "row_count": len(t_rows)
+                        })
+            if data_res.get("answerable") and tables_data and len(tables_data) >= 2:
+                combined_text += f"**1. Structured System Data**: Found {data_res.get('row_count', len(rows))} records across {len(tables_data)} independent tables:\n\n"
+                for i, t_info in enumerate(tables_data, 1):
+                    t_name = t_info["table"]
+                    t_rows = t_info["rows"]
+                    t_cols = t_info["columns"]
+                    t_sql = t_info["sql"]
+                    combined_text += f"#### {i}. Table: `{t_name}` ({len(t_rows)} row(s)):\n\n"
+                    if t_rows:
+                        combined_text += "| " + " | ".join(t_cols) + " |\n"
+                        combined_text += "| " + " | ".join(["---"] * len(t_cols)) + " |\n"
+                        for r in t_rows:
+                            combined_text += "| " + " | ".join(str(r.get(c, "")) for c in t_cols) + " |\n"
+                        combined_text += "\n"
+                    combined_text += f"```sql\n{t_sql}\n```\n\n"
+            elif data_res.get("answerable") and rows:
                 combined_text += f"**1. Structured System Data**: Found {len(rows)} record(s) matching query criteria in the database:\n\n"
                 if len(rows) == 1 and len(rows[0]) == 1:
                     key, val = list(rows[0].items())[0]

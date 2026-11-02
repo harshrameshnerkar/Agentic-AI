@@ -621,6 +621,9 @@ def query_data_mock(question: str) -> Dict[str, Any]:
                 if pk_name not in selected_col_names:
                     selected_join_cols.insert(0, pk_expr)
                     selected_col_names.insert(0, pk_name)
+                if main_tbl == "Products" and "ProductName" not in selected_col_names:
+                    selected_join_cols.insert(1, f"{main_alias}.ProductName")
+                    selected_col_names.insert(1, "ProductName")
 
             limit = extract_limit(q_lower, default=None)
             limit_clause = f" LIMIT {limit}" if limit is not None else ""
@@ -643,6 +646,49 @@ def query_data_mock(question: str) -> Dict[str, Any]:
                 "rows": rows,
                 "columns": selected_col_names,
                 "row_count": len(rows),
+                "error": None,
+                "answerable": True
+            }
+
+        elif len(matched_tables) >= 2 and not join_info:
+            # Multi-table query with NO direct foreign key relationship
+            # (e.g., Customers and Suppliers, Categories and Shippers, Employees and Suppliers)
+            # Query each table independently so they can be generated above and below each other
+            tables_data = []
+            combined_sqls = []
+            total_rows = 0
+            clean_q = q_lower.replace("unit price", "price").replace("unit prices", "price")
+
+            for t_name in matched_tables:
+                t_meta = NORTHWIND_TABLES_META[t_name]
+                t_cols = []
+                for calias, col_name in t_meta["col_aliases"].items():
+                    if re.search(r'\b' + re.escape(calias) + r'\b', clean_q):
+                        if col_name not in t_cols:
+                            t_cols.append(col_name)
+                if not t_cols:
+                    t_cols = t_meta["columns"]
+
+                limit = extract_limit(q_lower, default=None)
+                limit_clause = f" LIMIT {limit}" if limit is not None else ""
+                t_sql = f"SELECT {', '.join(t_cols)} FROM {t_name} ORDER BY {t_meta['pk']} ASC{limit_clause};"
+                t_rows = query_sqlite(t_sql)
+                combined_sqls.append(t_sql)
+                total_rows += len(t_rows)
+                tables_data.append({
+                    "table": t_name,
+                    "sql": t_sql,
+                    "columns": t_cols,
+                    "rows": t_rows,
+                    "row_count": len(t_rows)
+                })
+
+            return {
+                "sql": "\n\n".join(combined_sqls),
+                "rows": tables_data[0]["rows"],
+                "columns": tables_data[0]["columns"],
+                "row_count": total_rows,
+                "tables_data": tables_data,
                 "error": None,
                 "answerable": True
             }
