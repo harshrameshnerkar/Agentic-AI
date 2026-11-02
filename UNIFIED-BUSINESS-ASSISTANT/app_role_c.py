@@ -136,6 +136,30 @@ def view_document_pdf(filename: str):
                 )
     raise HTTPException(status_code=404, detail=f"Document '{decoded_name}' not found.")
 
+@app.get("/api/table/{table_name}")
+def get_table_data(table_name: str):
+    """Returns full columns and rows for a Northwind table for popup modal viewing."""
+    from mock_services import get_northwind_sqlite_conn
+    conn = get_northwind_sqlite_conn()
+    cursor = conn.cursor()
+    
+    valid_tables = ["Customers", "Employees", "Products", "Orders", "Suppliers", "Shippers", "Categories", "OrderDetails"]
+    matched = next((t for t in valid_tables if t.lower() == table_name.lower()), None)
+    if not matched:
+        raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found.")
+        
+    cursor.execute(f"PRAGMA table_info({matched})")
+    cols = [col[1] for col in cursor.fetchall()]
+    
+    cursor.execute(f"SELECT * FROM {matched} LIMIT 100")
+    rows = [dict(r) for r in cursor.fetchall()]
+    return {
+        "table": matched,
+        "columns": cols,
+        "rows": rows,
+        "total_rows": len(rows)
+    }
+
 @app.get("/api/schema")
 def get_database_schema():
     """Returns Northwind database schema metadata for UI explorer."""
@@ -976,22 +1000,6 @@ def serve_dashboard():
       text-overflow: ellipsis;
       flex: 1;
     }
-    .clean-item-card .item-action-view {
-      font-size: 0.72rem;
-      color: var(--accent-cyan);
-      opacity: 0;
-      transition: opacity 0.2s;
-      margin-left: 8px;
-      flex-shrink: 0;
-      background: rgba(0, 242, 254, 0.12);
-      border: 1px solid rgba(0, 242, 254, 0.25);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-    }
-    .clean-item-card:hover .item-action-view {
-      opacity: 1;
-    }
 
     /* Search Box */
     .doc-search-box {
@@ -1103,6 +1111,62 @@ def serve_dashboard():
       height: 100%;
       border: none;
       background: #0f172a;
+    }
+
+    /* Database Table Viewer Popup Modal */
+    .table-modal-container {
+      width: 92%;
+      max-width: 1120px;
+      height: 86vh;
+      background: #0b1120;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      animation: fadeIn 0.2s ease;
+    }
+    .table-modal-header {
+      padding: 14px 20px;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .table-modal-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+      font-size: 0.95rem;
+    }
+    .table-modal-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .table-search-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      color: #ffffff;
+      outline: none;
+      width: 220px;
+      font-family: inherit;
+    }
+    .table-search-input:focus {
+      border-color: var(--accent-cyan);
+    }
+    .table-modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 18px;
+      background: rgba(10, 15, 28, 0.85);
     }
 
     /* Logout Confirmation Modal */
@@ -1364,6 +1428,26 @@ def serve_dashboard():
       </div>
       <div class="pdf-modal-body">
         <iframe id="pdfIframe" src="about:blank" class="pdf-frame" title="PDF Document Viewer"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database Table Viewer Popup Modal -->
+  <div id="tableModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) closeTableModal()">
+    <div class="table-modal-container">
+      <div class="table-modal-header">
+        <div class="table-modal-title">
+          <span style="font-size: 1.15rem;">📁</span>
+          <span id="tableModalTitle" style="font-weight: 600; font-size: 0.95rem;">Database Table</span>
+          <span id="tableModalRowCount" style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">0 rows</span>
+        </div>
+        <div class="table-modal-actions">
+          <input type="text" id="tableRowSearch" class="table-search-input" placeholder="Search rows in table..." oninput="filterTableModalRows()">
+          <button class="btn-close-pdf" onclick="closeTableModal()" title="Close viewer">✕</button>
+        </div>
+      </div>
+      <div class="table-modal-body" id="tableModalContent">
+        <div style="padding: 24px; color: var(--text-muted); text-align: center;">Loading table data...</div>
       </div>
     </div>
   </div>
@@ -1741,10 +1825,9 @@ def serve_dashboard():
       docs.forEach(d => {
         const fname = d.filename || d.title;
         html += `
-          <div class="clean-item-card" onclick="openPdfModal('${escapeJs(fname)}')" title="Click to view and read PDF in popup">
+          <div class="clean-item-card" onclick="openPdfModal('${escapeJs(fname)}')" title="Click to view and read PDF">
             <span class="item-icon">📄</span>
             <span class="item-name">${escapeHtml(fname)}</span>
-            <span class="item-action-view">Read ↗</span>
           </div>
         `;
       });
@@ -1797,7 +1880,7 @@ def serve_dashboard():
       renderDatabaseSchema(databaseSchema);
     }
 
-    // Direct clean Database Table names (no clutter) with Chat Log Execution
+    // Direct clean Database Table names with Popup Table Inspector
     function renderDatabaseSchema(tables) {
       const container = document.getElementById('schemaContainer');
       if (!container) return;
@@ -1805,18 +1888,87 @@ def serve_dashboard():
       let html = '';
       tables.forEach(t => {
         html += `
-          <div class="clean-item-card" onclick="queryTable('${escapeJs(t.name)}')" title="Click to read and display ${escapeHtml(t.name)} rows in chat log">
+          <div class="clean-item-card" onclick="openTableModal('${escapeJs(t.name)}')" title="Click to view and inspect ${escapeHtml(t.name)} table">
             <span class="item-icon">📁</span>
             <span class="item-name">${escapeHtml(t.name)}</span>
-            <span class="item-action-view">View Rows ↗</span>
           </div>
         `;
       });
       container.innerHTML = html;
     }
 
-    function queryTable(tableName) {
-      executeSample('Show records from ' + tableName + ' table');
+    let currentModalTableData = null;
+
+    async function openTableModal(tableName) {
+      const modal = document.getElementById('tableModal');
+      const titleEl = document.getElementById('tableModalTitle');
+      const countEl = document.getElementById('tableModalRowCount');
+      const contentEl = document.getElementById('tableModalContent');
+      const searchInp = document.getElementById('tableRowSearch');
+      if (searchInp) searchInp.value = '';
+
+      if (titleEl) titleEl.innerText = tableName + ' Table';
+      if (countEl) countEl.innerText = 'Loading...';
+      if (contentEl) contentEl.innerHTML = '<div style="padding: 24px; color: var(--text-muted); text-align: center;">Loading ' + escapeHtml(tableName) + ' data...</div>';
+      if (modal) modal.style.display = 'flex';
+
+      try {
+        const res = await fetch('/api/table/' + encodeURIComponent(tableName));
+        const data = await res.json();
+        currentModalTableData = data;
+        renderTableModalContent(data.columns, data.rows);
+        if (countEl) countEl.innerText = (data.rows ? data.rows.length : 0) + ' rows';
+      } catch (err) {
+        if (contentEl) contentEl.innerHTML = '<div style="padding: 24px; color: var(--accent-red); text-align: center;">Error loading table: ' + escapeHtml(err.message) + '</div>';
+      }
+    }
+
+    function renderTableModalContent(columns, rows) {
+      const contentEl = document.getElementById('tableModalContent');
+      if (!contentEl) return;
+      if (!rows || rows.length === 0) {
+        contentEl.innerHTML = '<div style="padding: 24px; color: var(--text-muted); text-align: center;">No rows found in this table.</div>';
+        return;
+      }
+
+      let html = '<div class="table-container" style="margin: 0;"><table class="custom-table"><thead><tr>';
+      columns.forEach(c => {
+        html += '<th>' + escapeHtml(c) + '</th>';
+      });
+      html += '</tr></thead><tbody>';
+      rows.forEach(r => {
+        html += '<tr>';
+        columns.forEach(c => {
+          const val = r[c] !== undefined && r[c] !== null ? r[c] : '';
+          html += '<td>' + escapeHtml(String(val)) + '</td>';
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+      contentEl.innerHTML = html;
+    }
+
+    function filterTableModalRows() {
+      if (!currentModalTableData) return;
+      const q = (document.getElementById('tableRowSearch').value || '').toLowerCase().trim();
+      if (!q) {
+        renderTableModalContent(currentModalTableData.columns, currentModalTableData.rows);
+        const countEl = document.getElementById('tableModalRowCount');
+        if (countEl) countEl.innerText = currentModalTableData.rows.length + ' rows';
+        return;
+      }
+      const filtered = currentModalTableData.rows.filter(r => {
+        return Object.values(r).some(val => String(val).toLowerCase().includes(q));
+      });
+      renderTableModalContent(currentModalTableData.columns, filtered);
+      const countEl = document.getElementById('tableModalRowCount');
+      if (countEl) countEl.innerText = filtered.length + ' / ' + currentModalTableData.rows.length + ' rows';
+    }
+
+    function closeTableModal() {
+      const modal = document.getElementById('tableModal');
+      if (modal) modal.style.display = 'none';
+      currentModalTableData = null;
     }
 
     // -------------------------------------------------------------
