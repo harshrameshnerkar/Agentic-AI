@@ -33,8 +33,8 @@ def get_vector_store():
     if _CACHED_COLLECTION is not None:
         return _CACHED_COLLECTION, _CACHED_MODEL_NAME
 
-    curr_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(curr_dir, "db", "chroma_db")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, "db", "chroma_db")
     if not os.path.exists(db_path):
         raise FileNotFoundError(f"ChromaDB store not found at '{db_path}'. Run ingestion_pipeline.py first.")
 
@@ -46,22 +46,18 @@ def get_vector_store():
 
 def retrieve(question: str, top_k: int = 5, score_threshold: float = 0.4):
     collection, model_name = get_vector_store()
-    query_results = collection.query(
+    res = collection.query(
         query_texts=[question],
         n_results=top_k,
         include=["documents", "metadatas", "distances"],
     )
 
-    raw_docs = (query_results or {}).get("documents") or []
-    raw_metas = (query_results or {}).get("metadatas") or []
-    raw_dists = (query_results or {}).get("distances") or []
-
-    documents = raw_docs[0] if raw_docs and raw_docs[0] is not None else []
-    metadatas = raw_metas[0] if raw_metas and raw_metas[0] is not None else []
-    distances = raw_dists[0] if raw_dists and raw_dists[0] is not None else []
+    docs = (res.get("documents") or [[]])[0] or []
+    metas = (res.get("metadatas") or [[]])[0] or []
+    dists = (res.get("distances") or [[]])[0] or []
 
     results = []
-    for doc_text, meta, dist in zip(documents, metadatas, distances):
+    for doc_text, meta, dist in zip(docs, metas, dists):
         meta = meta or {}
         similarity = round(max(0.0, 1.0 - dist), 4) if dist is not None else 0.0
         if similarity >= score_threshold:
@@ -101,12 +97,12 @@ def print_retrieval_output(question: str, response: dict):
 
 def main():
     if len(sys.argv) > 1:
-        custom_question = " ".join(sys.argv[1:])
-        resp = retrieve(custom_question, top_k=5, score_threshold=0.35)
-        print_retrieval_output(custom_question, resp)
+        question = " ".join(sys.argv[1:])
+        resp = retrieve(question, top_k=5, score_threshold=0.35)
+        print_retrieval_output(question, resp)
         return
 
-    test_suite = [
+    sample_queries = [
         "What is the procedure for reporting sexual harassment under POSH?",
         "What are the maternity and parental leave entitlements?",
         "What are the CSR committee guidelines and project allocations?",
@@ -114,7 +110,7 @@ def main():
         "What are the whistleblower protection and vigil mechanism rules?",
     ]
 
-    for q in test_suite:
+    for q in sample_queries:
         resp = retrieve(q, top_k=3, score_threshold=0.35)
         print_retrieval_output(q, resp)
 
