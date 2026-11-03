@@ -78,18 +78,28 @@ class QueryRouter:
         r"\b(products?|prices?|orders?|customers?|suppliers?|employees?)\b.*\b(and|with|along\s+with)\b.*\b(products?|prices?|orders?|customers?|suppliers?|employees?|shippers?|categories)\b",
         r"\bjoin\s+\w+\s+(and|with)\s+\w+\b",
         r"\b(count|sum|total quantity|average price|avg|maximum price|max|minimum price|min)\b",
-        r"\b(categoryid|supplierid|employeeid|orderid|customerid|orderdetailid)\b",
+        r"\b(categoryid|supplierid|employeeid|orderid|customerid|orderdetailid|productid|shipperid)\b",
         r"\b(northwind|orderdetails|order\s+details)\b",
         r"\bselect\b.*\bfrom\b",
         r"\bdistinct\b",
         r"\bfirst name and last name\b",
-        r"\bunitprice|unit price|unitsinstock|units in stock\b",
-        r"\borderdate|shippeddate|freight\b",
+        r"\b(first\s*name|last\s*name|surname|contact\s*name|birth\s*date|hire\s*date|photo|notes|title\s*of\s*courtesy|reports?\s*to)\b",
+        r"\b(unitprice|unit price|unitsinstock|units in stock|unitsonorder|units on order|reorderlevel|quantityperunit|quantity per unit)\b",
+        r"\b(orderdate|order date|shippeddate|shipped date|requireddate|required date|freight|shipvia|shipname|shipaddress|shipcity|shipregion|shipcountry)\b",
+        r"\b(postalcode|postal code|zipcode|zip code|address|city|country|region|phone|fax)\b",
+        r"\b(quantity|discount|unit|price|prices)\b",
         r"\bcustomers who live in\b",
         r"\bcustomers registered from\b",
         r"\bproducts supplied by\b",
         r"\bproducts that have a price\b",
-        r"\borders sorted by\b"
+        r"\borders sorted by\b",
+        r"\bwhat\s+is\s+(?:the\s+)?(?:surname|lastname|last\s+name|firstname|first\s+name|unit\s*price|hire\s*date|birth\s*date)\b",
+        r"\b(details?\s+(?:of|for|about)\s+(?:every|each|all|the)?\s*(?:row|column|table|record|product|customer|employee|order|supplier))\b",
+        r"\b(andrew|nancy|janet|margaret|steven|michael|robert|laura|anne|fuller|davolio|leverling|peacock|buchanan|suyama|king|callahan|dodsworth)\b",
+        r"\b(chais|chang|aniseed\s+syrup|chef\s+anton|tofu|ikura|spegesild|geitost|guaran[aá]|gorgonzola)\b",
+        r"\b(exotic\s+liquid|tokyo\s+traders|mayumi|pavlova|bigfoot\s+breweries|plutzer)\b",
+        r"\b(what\s+tables|list\s+tables|show\s+tables|database\s+tables|available\s+tables|tables\s+in\s+the\s+database|tables\s+in\s+database|what\s+are\s+the\s+tables|what\s+tables\s+exist|database\s+schema|explain\s+the\s+database|schema\s+of|structure\s+of\s+the\s+database|neon\s+table|neon\s+database)\b",
+        r"\b(what\s+columns|list\s+columns|show\s+columns|column\s+names?|fields?\s+in\s+the\s+table)\b"
     ]
 
     # Knowledge Service Signals (Policies, Handbooks, Compliance, HR, Governance)
@@ -224,6 +234,23 @@ class QueryRouter:
                 fallback="If data returns answerable=false, try knowledge.",
                 confidence=0.70,
                 matched_signals=["numerical_aggregation_heuristic"]
+            )
+
+        # Step 6: Fact / Entity / Attribute inquiry heuristic (when no corporate policy signals are present)
+        if any(q_lower.startswith(prefix) for prefix in [
+            "what is", "what was", "what are", "what were",
+            "who is", "who was", "who are", "who were",
+            "where is", "where was", "where does", "where do",
+            "when was", "when were", "when is",
+            "which", "how many", "how much", "tell me", "give me", "find", "show"
+        ]):
+            return RoutingDecision(
+                question=q_norm,
+                route=RouteType.DATA,
+                routing_rule="Factual entity or relational attribute inquiry routes to Data Service.",
+                fallback="If Data Service returns answerable=false, try Knowledge Service as fallback.",
+                confidence=0.80,
+                matched_signals=["fact_entity_heuristic"]
             )
 
         # Default fallback to Knowledge Service with standard fallback rule

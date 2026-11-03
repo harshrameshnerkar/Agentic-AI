@@ -27,3 +27,4 @@ class FakeGenerator:
             sql="SELECT customername FROM customers",
             answerable=True
         )
+

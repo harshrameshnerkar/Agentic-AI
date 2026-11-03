@@ -111,7 +111,7 @@ def execute_query(payload: DataQueryRequest):
             resp = _real_api_client.post("/query", json={"question": question})
             if resp.status_code == 200:
                 data = resp.json()
-                if data.get("answerable") and data.get("sql"):
+                if data.get("answerable") and data.get("sql") and len(data.get("rows", [])) > 0:
                     return DataQueryResponse(
                         success=True,
                         sql=data.get("sql"),

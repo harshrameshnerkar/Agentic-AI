@@ -351,11 +351,12 @@ NORTHWIND_TABLES_META = {
     "Employees": {
         "pk": "EmployeeID",
         "columns": ["EmployeeID", "LastName", "FirstName", "BirthDate", "Photo", "Notes"],
-        "aliases": ["employee", "employees", "staff", "worker", "workers"],
+        "aliases": ["employee", "employees", "staff", "worker", "workers", "andrew", "nancy", "janet", "margaret", "steven", "michael", "robert", "laura", "anne", "fuller", "davolio", "leverling", "peacock", "buchanan", "suyama", "king", "callahan", "dodsworth"],
         "col_aliases": {
             "employeeid": "EmployeeID", "employee id": "EmployeeID", "employee ids": "EmployeeID",
             "firstname": "FirstName", "first name": "FirstName", "first names": "FirstName",
             "lastname": "LastName", "last name": "LastName", "last names": "LastName",
+            "surname": "LastName", "surnames": "LastName",
             "employee name": "LastName", "employee names": "LastName",
             "birthdate": "BirthDate", "birth date": "BirthDate", "birth dates": "BirthDate", "birthdays": "BirthDate",
             "photo": "Photo", "photos": "Photo",
@@ -725,11 +726,32 @@ def query_data_mock(question: str) -> Dict[str, Any]:
         elif any(w in q_lower for w in ["shipper", "shipping"]):
             target_table = "Shippers"
             target_meta = NORTHWIND_TABLES_META["Shippers"]
-        elif any(w in q_lower for w in ["customer", "client", "table", "database"]):
+        elif any(w in q_lower for w in ["customer", "client"]):
             target_table = "Customers"
             target_meta = NORTHWIND_TABLES_META["Customers"]
 
+    if any(phrase in q_lower for phrase in ["what tables", "list tables", "list all tables", "show tables", "database tables", "available tables", "tables in the database", "tables in database", "what are the tables", "what tables exist", "database schema", "explain database", "neon table", "neon database", "database structure"]):
+        rows = [
+            {"Table": "Categories", "RowCount": 8, "Description": "Product categories (Beverages, Condiments, Confections, Dairy, etc.)"},
+            {"Table": "Customers", "RowCount": 91, "Description": "Global customer directory with company, contact, city, and country"},
+            {"Table": "Employees", "RowCount": 10, "Description": "Staff records including names, titles, birth dates, and bios"},
+            {"Table": "Shippers", "RowCount": 3, "Description": "Shipping carriers (Speedy Express, United Package, Federal Shipping)"},
+            {"Table": "Suppliers", "RowCount": 29, "Description": "Product vendors and distributors across multiple countries"},
+            {"Table": "Products", "RowCount": 77, "Description": "Catalog of items, suppliers, categories, units, and unit prices"},
+            {"Table": "Orders", "RowCount": 196, "Description": "Customer order headers with dates, employees, and shipping methods"},
+            {"Table": "OrderDetails", "RowCount": 518, "Description": "Line items for orders linking products and order quantities"}
+        ]
+        return {
+            "sql": "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = 'public';",
+            "rows": rows,
+            "columns": ["Table", "RowCount", "Description"],
+            "row_count": len(rows),
+            "error": None,
+            "answerable": True
+        }
+
     if not target_table:
+
         # Check MOCK_SQL_DATABASE
         for table_key, table_data in MOCK_SQL_DATABASE.items():
             if table_key in q_lower:
@@ -835,6 +857,31 @@ def query_data_mock(question: str) -> Dict[str, Any]:
         where_clause = " WHERE Country = 'Germany'"
     elif "uk" in q_lower and "Country" in target_meta["columns"]:
         where_clause = " WHERE Country = 'UK'"
+    elif target_table == "Employees":
+        for emp_first in ["andrew", "nancy", "janet", "margaret", "steven", "michael", "robert", "laura", "anne", "adam"]:
+            if re.search(r'\b' + emp_first + r'\b', q_lower):
+                where_clause = f" WHERE LOWER(FirstName) = '{emp_first}'"
+                break
+        if not where_clause:
+            for emp_last in ["fuller", "davolio", "leverling", "peacock", "buchanan", "suyama", "king", "callahan", "dodsworth", "west"]:
+                if re.search(r'\b' + emp_last + r'\b', q_lower):
+                    where_clause = f" WHERE LOWER(LastName) = '{emp_last}'"
+                    break
+    elif target_table == "Products":
+        for prod in ["chais", "chang", "aniseed", "chef anton", "tofu", "ikura", "spegesild", "geitost", "guaran", "gorgonzola", "mascarpone", "alice mutton", "carnarvon", "boston crab"]:
+            if prod in q_lower:
+                where_clause = f" WHERE LOWER(ProductName) LIKE '%{prod}%'"
+                break
+    elif target_table == "Suppliers":
+        for sup in ["exotic liquid", "tokyo traders", "mayumi", "pavlova", "bigfoot", "plutzer"]:
+            if sup in q_lower:
+                where_clause = f" WHERE LOWER(SupplierName) LIKE '%{sup}%'"
+                break
+    elif target_table == "Customers":
+        for cust in ["around the horn", "alfreds", "ana trujillo", "antonio moreno", "berglunds"]:
+            if cust in q_lower:
+                where_clause = f" WHERE LOWER(CustomerName) LIKE '%{cust}%'"
+                break
 
     cols_str = ", ".join(selected_cols)
     limit_clause = f" LIMIT {limit}" if limit is not None else ""

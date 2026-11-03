@@ -225,6 +225,34 @@ class RoleCOrchestrator:
             knowledge_res = self.invoke_knowledge_service(question)
 
             if knowledge_res.get("no_match", False) or not knowledge_res.get("results"):
+                # Bidirectional fallback: Check if Data Service can answer this query
+                data_res = self.invoke_data_service(question)
+                if data_res.get("answerable") and data_res.get("rows"):
+                    response_payload["route"] = RouteType.DATA.value
+                    response_payload["fallback_triggered"] = True
+                    sql = data_res.get("sql", "")
+                    rows = data_res.get("rows", [])
+                    row_count = data_res.get("row_count", len(rows))
+                    response_payload["sql"] = sql
+                    response_payload["data_rows"] = rows
+
+                    answer_text = f"Executed structured query successfully (returned {row_count} row(s)):\n\n"
+                    if rows:
+                        if len(rows) == 1 and len(rows[0]) == 1:
+                            key, val = list(rows[0].items())[0]
+                            answer_text += f"**{key}**: `{val}`\n\n"
+                        else:
+                            columns = data_res.get("columns") or (list(rows[0].keys()) if rows else [])
+                            answer_text += "| " + " | ".join(columns) + " |\n"
+                            answer_text += "| " + " | ".join(["---"] * len(columns)) + " |\n"
+                            for r in rows:
+                                answer_text += "| " + " | ".join(str(r.get(c, "")) for c in columns) + " |\n"
+                            answer_text += "\n"
+                    if sql:
+                        answer_text += f"```sql\n{sql}\n```"
+                    response_payload["final_answer"] = answer_text
+                    return response_payload
+
                 response_payload["final_answer"] = (
                     "I do not have corporate policy documentation regarding this query."
                 )
